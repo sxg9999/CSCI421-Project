@@ -3,22 +3,27 @@
 
 
 typedef struct{
-    int num_of_pages;
-    char[] table_name;
-    union[] primary_key;
-    union*** table;
-    Hash_Table* hash_table;
 
+    int num_of_pages;
+    char table_name[255];
+    void *** table;
+    // Hash_Table* hash_table;
+    
 }Table;
 
 
-Table* Table_create(union*** table, int num_of_pages);
 
-union*** getTable();
+Table* Table_create(union record_item*** table);
 
-union*  getRecord_with_PrimaryKey(union[] primary_key)
+union record_item*** getTable();
 
-union* getRecord_with_ID(int id)
+
+/*
+Primary key = [union, union, union...]
+*/
+union record_item*  getRecord_with_PrimaryKey(union record_item* primary_key);
+
+union record_item* getRecord_with_ID(int id);
 
 
 
