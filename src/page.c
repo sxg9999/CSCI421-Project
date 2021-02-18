@@ -23,8 +23,8 @@ union record_item {
 
 //constructor
 
-void Page_init(Page* self, char* file_path, char* file_name, int page_id, int num_of_attributes,
-                                int max_records, int record_size){
+void Page_init(Page* self, char* file_path, char* file_name, int* column_attribute,
+                    int page_id, int num_of_attributes, int max_records, int record_size){
     
     // compute the amount of records a page could hold
     self->id = page_id;
@@ -35,19 +35,32 @@ void Page_init(Page* self, char* file_path, char* file_name, int page_id, int nu
     // allocate memory for 2d records
     allocate_memory_for_records(self);
 
+    // allocate memory for column_attributes and copy it
+    create_column_attribute_arr(self, column_attribute);
+
+    
     int page_exist = open_page(self, file_path, file_name);
+
+    if(page_exist == 0){
+        //if the page is an existing page
+        //read in the records and update the num_of_records
+
+    }else{
+        //if the page is an new page
+        self->num_of_records = 0;
+    }
 
 }
 
 
-Page* Page_create(char* file_path, char* file_name,int page_id,
-                int page_size, int record_item_size, int num_of_attributes){
+Page* Page_create(char* file_path, char* file_name, int* column_attribute, 
+            int page_id, int page_size, int record_item_size, int num_of_attributes){
     
 
     Page* page = (Page*)malloc(sizeof(Page));
     int max_records = get_max_records(page_size, record_item_size, num_of_attributes);
     int record_size = num_of_attributes*record_item_size;
-    Page_init(page, file_path, file_name, page_id, num_of_attributes, max_records, record_size);
+    Page_init(page, file_path, file_name, column_attribute, page_id, num_of_attributes, max_records, record_size);
     return page;
 }
 
@@ -65,13 +78,24 @@ int insert_record(union record_item* record){
 
 
 
-
-
 void Page_destroy(Page* page){
+
+
     if(page){
         free(page->fp);
         free(page->page_file_path);
+        free(page->column_attributes);
+
+        //free the records
+        int i;
+        int row = page->num_of_records;
+        for(i=0; i<row; i++){
+            free(page->records[i]);
+        }
+        free(page->records);
+
         free(page);
+
     }
 }
 
@@ -156,6 +180,24 @@ void allocate_memory_for_records(Page* self){
     
     for(i=0; i<row; i++){
         self->records[i] = (union record_item*)malloc(col*sizeof(union record_item));
+    }
+
+}
+
+/* Allocate memory to page.column_attribute and then
+ * copy the given column_attribute (an array of int) to page.column_attribute
+ * 
+*/
+void create_column_attribute_arr(Page* self, int* column_attribute){
+
+    int col = self->num_of_attributes;
+    //int* column_attributes = (int*)malloc(column*sizeof(int))
+    self->column_attributes = (int*)malloc(col*sizeof(int));
+
+    int i;
+
+    for(i=0; i<col; i++){
+        self->column_attributes[i] = column_attribute[i];
     }
 
 }

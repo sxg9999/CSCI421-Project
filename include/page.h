@@ -16,6 +16,7 @@ typedef struct{
     int max_num_of_records;
     int num_of_attributes;
     int record_size;                       //the size of a record (size of record_item * col)
+    int* column_attributes;                //a pointer to a array of column attribute values
     FILE* fp;                              //a pointer to the page file
     char* page_file_path;
     union record_item** records;           //the an array of records ([])
@@ -28,8 +29,8 @@ Create and return a pointer to a Page struct
 @param records - a array of records thats contains record_items
 @returns a pointer to a page struct
 */
-Page* Page_create(char file_path, char file_name, int page_id, int page_size, 
-                    int record_item_size, int num_of_attributes);
+Page* Page_create(char file_path, char file_name, int* column_attribute, 
+            int page_id, int page_size, int record_item_size, int num_of_attributes);
 
 /*
 Returns the records with the specified record_id in the table
