@@ -39,24 +39,24 @@ Returns the records with the specified record_id in the table
 @param record_id - the id of the record in the table
 @returns an pointer to a array of record_items
 */
-union record_item* get_record(int record_id);
+union record_item* Page_get_record(Page* self, int record_id);
 
 
 /*
 Inserts the provided record into the table witht he provided id.
 @param record - the record to be inserted to the page, an array of record_items
-@return 0 if record is successfully removed, -1 otherwise
+@return 0 if record is successfully inserted, -1 otherwise
 */
-int insert_record(union record_item* record);
+int Page_insert_record(Page* self, union record_item* record);
 
 
 /*
 Updates the provided record into the page with the provided page_id
 @param record_id
 @param record
-@return 0 if record is successfully removed, -1 otherwise
+@return 0 if record is successfully updated, -1 otherwise
 */
-int update_record(int record_id, union record_item* record);
+int Page_update_record(Page* self, int record_id, union record_item* record);
 
 
 
@@ -65,13 +65,13 @@ Removes the record specified by the key_values
 @param record_id
 @return 0 if record is successfully removed, -1 otherwise
 */
-int remove_record(int record_id);
+int Page_remove_record(Page* self, int record_id);
 
 
 /*
  * Write the page back to storage
  */ 
-int write(Page* page);
+int Page_write(Page* page);
 
 
 #endif

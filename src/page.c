@@ -70,9 +70,8 @@ Page* Page_create(PageMeta page_meta, RecordMeta record_meta){
  * assume the first column is the id 
  */
 
-int insert_record(union record_item* record){
-    int index = (*record).i;
-
+int Page_insert_record(Page* self, union record_item* record){
+    int current_index = 0;
 
 
 }
@@ -108,7 +107,7 @@ union record_item** read_all_records(FILE* fp, int* num_of_records, int record_s
 
 }
 
-int write(Page* page){
+int Page_write(Page* page){
     //Write all the records back to storage
 
     //close file
