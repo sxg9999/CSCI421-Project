@@ -14,6 +14,7 @@ typedef struct{
     int id;                                //the page_id
     int num_of_records;                    //the amount of record
     int max_num_of_records;
+    int num_of_attributes;
     int record_size;                       //the size of a record (size of record_item * col)
     FILE* fp;                              //a pointer to the page file
     char* page_file_path;

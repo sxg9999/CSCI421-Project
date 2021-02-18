@@ -30,6 +30,10 @@ void Page_init(Page* self, char* file_path, char* file_name, int page_id, int nu
     self->id = page_id;
     self->record_size = record_size;
     self->max_num_of_records = max_records;
+    self->num_of_attributes = num_of_attributes;
+
+    // allocate memory for 2d records
+    allocate_memory_for_records(self);
 
     int page_exist = open_page(self, file_path, file_name);
 
@@ -99,7 +103,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes){
     float est_max_record_items = (float)page_size/(float)record_item_size;
 
     //compute the estimated max # of records (array of unions) in a page
-    float est_max_records = est_max_record_items/(float)num_of_attributes;
+    float est_max_records = est_max_record_items/(float)num_of_attributes;      //or you can think of it as max rows of records
 
     //floor the est_max_records
     int max_records = floor(est_max_records);
@@ -139,5 +143,20 @@ int open_page(Page* self, char* file_path, char* file_name){
 
     return 1;
     
+}
+
+void allocate_memory_for_records(Page* self){
+
+    int row = self->max_num_of_records;
+    int col = self->num_of_attributes;
+
+    self->records = (union record_item**)malloc(row*sizeof(union record_item*));
+    
+    int i;
+    
+    for(i=0; i<row; i++){
+        self->records[i] = (union record_item*)malloc(col*sizeof(union record_item));
+    }
+
 }
 
