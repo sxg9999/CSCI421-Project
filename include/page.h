@@ -10,11 +10,14 @@
 
 
 typedef struct{
-    int id;
-    int num_of_records;
-    int max_size;
-    int current_size;
-    union record_item** records;
+
+    int id;                                //the page_id
+    int num_of_records;                    //the amount of record
+    int max_num_of_records;
+    int record_size;                       //the size of a record (size of record_item * col)
+    FILE* fp;                              //a pointer to the page file
+    char* page_file_path;
+    union record_item** records;           //the an array of records ([])
 
 }Page;
 
@@ -24,7 +27,8 @@ Create and return a pointer to a Page struct
 @param records - a array of records thats contains record_items
 @returns a pointer to a page struct
 */
-Page* Page_create(union record_item** records);
+Page* Page_create(char file_path, char file_name, int page_id, int page_size, 
+                    int record_item_size, int num_of_attributes);
 
 /*
 Returns the records with the specified record_id in the table
@@ -61,7 +65,10 @@ Removes the record specified by the key_values
 int remove_record(int record_id);
 
 
-
+/*
+ * Write the page back to storage
+ */ 
+int write(Page* page);
 
 
 #endif
