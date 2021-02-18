@@ -8,7 +8,8 @@
 #ifndef PAGE_H
 #define PAGE_H
 
-#include "meta_struct.h"
+#include "page_meta_data.h"
+#include "record_meta_data.h"
 
 typedef struct{
 
@@ -30,8 +31,7 @@ Create and return a pointer to a Page struct
 @param records - a array of records thats contains record_items
 @returns a pointer to a page struct
 */
-Page* Page_create(char* file_path, char* file_name, int* column_attributes, 
-            int page_id, int page_size, int record_item_size, int num_of_attributes);
+Page* Page_create(PageMeta page_meta, RecordMeta record_meta);
 
 /*
 Returns the records with the specified record_id in the table

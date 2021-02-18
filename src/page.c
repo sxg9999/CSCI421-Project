@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <math.h>
 
+
+
 union record_item {
 	int i;
 	double d;
@@ -23,23 +25,25 @@ union record_item {
 
 //constructor
 
-void Page_init(Page* self, char* file_path, char* file_name, int* column_attributes,
-                    int page_id, int num_of_attributes, int max_records, int record_size){
+void Page_init(Page* self, PageMeta page_meta, RecordMeta record_meta){
     
+    int max_records = get_max_records(page_meta.page_size, record_meta.record_item_size, record_meta.num_of_attributes);
+    int record_size = record_meta.num_of_attributes*record_meta.record_item_size;
+
     // compute the amount of records a page could hold
-    self->id = page_id;
+    self->id = page_meta.page_id;
     self->record_size = record_size;
     self->max_num_of_records = max_records;
-    self->num_of_attributes = num_of_attributes;
+    self->num_of_attributes = record_meta.num_of_attributes;
 
     // allocate memory for 2d records
     allocate_memory_for_records(self);
 
     // allocate memory for column_attributes and copy it
-    create_column_attribute_arr(self, column_attributes);
+    create_column_attribute_arr(self, record_meta.column_attributes);
 
     
-    int page_exist = open_page(self, file_path, file_name);
+    int page_exist = open_page(self, page_meta.db_dir_path, page_meta.page_file_name);
 
     if(page_exist == 0){
         //if the page is an existing page
@@ -54,14 +58,10 @@ void Page_init(Page* self, char* file_path, char* file_name, int* column_attribu
 }
 
 
-Page* Page_create(char* file_path, char* file_name, int* column_attributes, 
-            int page_id, int page_size, int record_item_size, int num_of_attributes){
+Page* Page_create(PageMeta page_meta, RecordMeta record_meta){
     
-
     Page* page = (Page*)malloc(sizeof(Page));
-    int max_records = get_max_records(page_size, record_item_size, num_of_attributes);
-    int record_size = num_of_attributes*record_item_size;
-    Page_init(page, file_path, file_name, column_attributes, page_id, num_of_attributes, max_records, record_size);
+    Page_init(page, page_meta, record_meta);
     return page;
 }
 
