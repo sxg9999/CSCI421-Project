@@ -17,7 +17,6 @@ Table* Table_create(union record_item*** table);
 
 union record_item*** getTable();
 
-
 /*
 Primary key = [union, union, union...]
 */

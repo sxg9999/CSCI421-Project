@@ -1,3 +1,10 @@
+/*
+ * Author: Steven Guan
+ * Header file for a Page class
+ */
+
+
+
 #ifndef PAGE_H
 #define PAGE_H
 
