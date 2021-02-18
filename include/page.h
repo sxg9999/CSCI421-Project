@@ -29,7 +29,7 @@ Create and return a pointer to a Page struct
 @param records - a array of records thats contains record_items
 @returns a pointer to a page struct
 */
-Page* Page_create(char file_path, char file_name, int* column_attribute, 
+Page* Page_create(char* file_path, char* file_name, int* column_attributes, 
             int page_id, int page_size, int record_item_size, int num_of_attributes);
 
 /*

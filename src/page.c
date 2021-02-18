@@ -23,7 +23,7 @@ union record_item {
 
 //constructor
 
-void Page_init(Page* self, char* file_path, char* file_name, int* column_attribute,
+void Page_init(Page* self, char* file_path, char* file_name, int* column_attributes,
                     int page_id, int num_of_attributes, int max_records, int record_size){
     
     // compute the amount of records a page could hold
@@ -36,7 +36,7 @@ void Page_init(Page* self, char* file_path, char* file_name, int* column_attribu
     allocate_memory_for_records(self);
 
     // allocate memory for column_attributes and copy it
-    create_column_attribute_arr(self, column_attribute);
+    create_column_attribute_arr(self, column_attributes);
 
     
     int page_exist = open_page(self, file_path, file_name);
@@ -47,20 +47,21 @@ void Page_init(Page* self, char* file_path, char* file_name, int* column_attribu
 
     }else{
         //if the page is an new page
+        //then num_of_records = 0 currently
         self->num_of_records = 0;
     }
 
 }
 
 
-Page* Page_create(char* file_path, char* file_name, int* column_attribute, 
+Page* Page_create(char* file_path, char* file_name, int* column_attributes, 
             int page_id, int page_size, int record_item_size, int num_of_attributes){
     
 
     Page* page = (Page*)malloc(sizeof(Page));
     int max_records = get_max_records(page_size, record_item_size, num_of_attributes);
     int record_size = num_of_attributes*record_item_size;
-    Page_init(page, file_path, file_name, column_attribute, page_id, num_of_attributes, max_records, record_size);
+    Page_init(page, file_path, file_name, column_attributes, page_id, num_of_attributes, max_records, record_size);
     return page;
 }
 
@@ -188,7 +189,7 @@ void allocate_memory_for_records(Page* self){
  * copy the given column_attribute (an array of int) to page.column_attribute
  * 
 */
-void create_column_attribute_arr(Page* self, int* column_attribute){
+void create_column_attribute_arr(Page* self, int* column_attributes){
 
     int col = self->num_of_attributes;
     //int* column_attributes = (int*)malloc(column*sizeof(int))
@@ -197,7 +198,7 @@ void create_column_attribute_arr(Page* self, int* column_attribute){
     int i;
 
     for(i=0; i<col; i++){
-        self->column_attributes[i] = column_attribute[i];
+        self->column_attributes[i] = column_attributes[i];
     }
 
 }
