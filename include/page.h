@@ -8,6 +8,7 @@
 #ifndef PAGE_H
 #define PAGE_H
 
+#include "meta_struct.h"
 
 typedef struct{
 
