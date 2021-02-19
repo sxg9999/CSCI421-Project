@@ -22,6 +22,12 @@ union record_item {
 };
 
 
+void create_column_attribute_arr(Page* self, int* column_attribute);
+void allocate_memory_for_records(Page* self);
+int open_page(Page* self, char* file_path, char* file_name);
+int get_max_records(int page_size, int record_item_size, int num_of_attributes);
+int Page_write(Page* self);
+int Page_load_records(Page* self);
 
 
 /*
@@ -151,20 +157,19 @@ void Page_destroy(Page* page){
 }
 
 /*
- * Read all the records from the file and return it as a 2d array, 
- * an array of record_item union.
+ * Read all the records from the file and add it to the Page
  */
-union record_item** read_all_records(FILE* fp, int* num_of_records, int record_size){
+int Page_load_records(Page* self){
 
 }
 
-int Page_write(Page* page){
+int Page_write(Page* self){
     //Write all the records back to storage
 
     //close file
 
     //free up memory
-    Page_destroy(page);
+    Page_destroy(self);
 }
 
 

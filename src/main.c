@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-
+#include "page.h"
 
 int main() {
 	printf("Hello world!\n");	

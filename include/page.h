@@ -10,6 +10,8 @@
 
 #include "page_meta_data.h"
 #include "record_meta_data.h"
+#include "stdio.h"
+
 
 typedef struct{
 
