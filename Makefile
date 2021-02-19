@@ -8,10 +8,10 @@ INCLUDE_DIR = include
 # first entry for make to envoke
 default: storage
 
-storage: $(SOURCE_FILES) $(HEADER_FILES) src/main.c
+storage: $(SOURCE_FILES) $(HEADER_FILES)
 	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES) $(HEADER_FILES) -I $(INCLUDE_DIR)
 
-run: src/main.c
+run: storage
 	./storage
 
 clean:

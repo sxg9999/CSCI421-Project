@@ -57,6 +57,7 @@ int Page_test(){
 	
 
 	printf("Page Test done\n");
+	
 
 
 	return 0;
@@ -65,7 +66,7 @@ int Page_test(){
 
 
 int main() {
-	
+	printf("test\n");
 	Page_test();
 	
 	return 0;
