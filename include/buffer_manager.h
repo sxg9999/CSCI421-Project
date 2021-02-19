@@ -24,7 +24,12 @@ typedef struct buffer_manager {
  */
 buffer_manager* BufferManager_new(int max_page_count);
 
-int LRU_page_id(buffer_manager* buff_man);
+/*
+ * sets id of page that was the least recently used in the buffer.
+ * @param buff_man - the buffer manager that contains the pages
+ * @return 0 if page was added successfully, otherwise -1
+ */
+int set_LRU_page_id(buffer_manager* buff_man);
 
 /*
  * Adds a page to the buffer to enable ease of use.
@@ -56,7 +61,7 @@ int remove_page(buffer_manager* buff_man, int page_index);
  * @param buff_man - the buffer manager to be free'd up
  * @return
  */ 
-void destroy(buffer_manager* buff_man);
+void destroy_buffer(buffer_manager* buff_man);
 
 
 #endif
