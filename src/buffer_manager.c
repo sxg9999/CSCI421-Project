@@ -11,13 +11,14 @@
 
 #include "../include/buffer_manager.h"
 #include "../include/storagemanager.h"
+#include "../include/page.h"
 
 buffer_manager* BufferManager_new(int max_page_count) {
     buffer_manager* new_buff_man = malloc( sizeof(struct buffer_manager) );
     new_buff_man->current_page_count = 0;
     new_buff_man->max_page_count = 0;
     new_buff_man->pages = malloc( max_page_count *
-         sizeof( Page )); //TODO SWITCH TO PAGES
+         sizeof( Page* ));
     new_buff_man->page_arr_with_count = malloc( 
         max_page_count * sizeof(int) );
     new_buff_man->min_page_id  = -1;
@@ -33,7 +34,7 @@ int add_page(buffer_manager* buff_man, Page* page) {
         // get LRU page id
         int LRU_page_id = buff_man->min_page_id;
         // write page out
-        // write_out_page(buff_man->pages[ LRU_page_id ]);
+        Page_write(buff_man->pages[LRU_page_id]);
         // remove page from buffer
         remove_page(buff_man, LRU_page_id);
     }
@@ -60,7 +61,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
-        malloc(sizeof( Page ));
+        malloc(sizeof( Page* ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
     for (int i = 0; i<buff_man->current_page_count-1; i++) {
@@ -77,7 +78,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
 }
 
 int get_buffer_page(buffer_manager* buff_man, int page_id, Page* page) {
-    page = &(buff_man->pages[page_id]);
+    page = buff_man->pages[page_id];
     buff_man->page_arr_with_count[page_id] += 1;
     set_LRU_page_id(buff_man);
 
@@ -99,6 +100,7 @@ int set_LRU_page_id(buffer_manager* buff_man) {
 }
 
 void destroy_buffer(buffer_manager* buff_man) {
+    // FREE ALL THE PAGES FIRST
     free(buff_man->pages);
     free(buff_man->page_arr_with_count);
 

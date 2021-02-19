@@ -15,7 +15,7 @@ typedef struct buffer_manager {
     int max_page_count;
     int min_page_id;
     int min_page_use_count;
-    Page* pages; // SWICH TO PAGES
+    Page** pages; // SWICH TO PAGES
     int* page_arr_with_count;
 }  buffer_manager;
 
