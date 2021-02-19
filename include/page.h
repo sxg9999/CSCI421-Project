@@ -8,8 +8,7 @@
 #ifndef PAGE_H
 #define PAGE_H
 
-#include "page_meta_data.h"
-#include "record_meta_data.h"
+#include "page_params.h"
 #include "stdio.h"
 
 
@@ -33,7 +32,7 @@ Create and return a pointer to a Page struct
 @param page_meta - informations about a page
 @returns a pointer to a page struct
 */
-Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta);
+Page* Page_create(const PageParams* page_params);
 
 /*
 Returns the records with the specified record_id in the table

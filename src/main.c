@@ -10,48 +10,49 @@
 
 #include <stdio.h>
 #include "page.h"
-#include "page_meta_data.h"
+#include "page_params.h"
 
 int Page_test(){
 
 	// Page meta information
-	PageMeta page_meta;
+	
 
 	char db_dir_path[] = "Test_DB_Loc/";
 	char page_file_name[] = "page_1";
 	int page_id = 1;
 	int page_size = 10000;
-
-	page_meta.db_dir_path = db_dir_path;
-	page_meta.page_file_name = page_file_name;
-	page_meta.page_id = page_id;
-	page_meta.page_size = page_size;
-
-
-	// Record meta information
-	RecordMeta record_meta;
-
 	int record_item_size = 255;
 	int num_of_attribute = 3;
 	int column_attributes[3] = {0,0,0};
 
+	PageParams page_params = {
+		.db_dir_path = db_dir_path,
+		.page_file_name = page_file_name,
+		.page_id = page_id,
+		.record_item_size = record_item_size,
+		.num_of_attributes = num_of_attribute,
+		.column_attributes = column_attributes
+	};
 
-	Page* page1 = Page_create(&page_meta, &record_meta);
 
-	printf("Page.page_file_path : %s\n", page1->page_file_path);
+	// Record meta information
+	
+
+	Page* page1 = Page_create(&page_params);
+
+	printf("Page.page_file_path : %s\n\n", page1->page_file_path);
 
 	int* attributes = page1->column_attributes;
 
 	int i;
 
-	// printf("[");
+	printf("[\n");
 	
-	// for(i=0; i<page1->num_of_attributes; i++){
-	// 	printf("%d ",attributes[i]);
-	// }
+	for(i=0; i<page1->num_of_attributes; i++){
+		printf("Attribute %d : %d\n", i, page1->column_attributes[i]);
+	}
 
-
-	// printf("]");
+	printf("]\n");
 
 	Page_destroy(page1);
 	

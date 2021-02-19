@@ -34,26 +34,26 @@ int Page_load_records(Page* self);
  * A initiation function that initiates all the required components of a page
  *
  */ 
-void Page_init(Page* self, PageMeta* page_meta, RecordMeta* record_meta){
+void Page_init(Page* self,const PageParams* page_params){
     
-    int max_records = get_max_records(page_meta->page_size, record_meta->record_item_size, record_meta->num_of_attributes);
-    int record_size = record_meta->num_of_attributes*record_meta->record_item_size;
+    int max_records = get_max_records(page_params->page_size, page_params->record_item_size, page_params->num_of_attributes);
+    int record_size = page_params->num_of_attributes*page_params->record_item_size;
 
     // compute the amount of records a page could hold
-    self->id = page_meta->page_id;
+    self->id = page_params->page_id;
     self->record_size = record_size;
     self->max_num_of_records = max_records;
-    self->num_of_attributes = record_meta->num_of_attributes;
+    self->num_of_attributes = page_params->num_of_attributes;
 
     // allocate memory for 2d records
     allocate_memory_for_records(self);
     
     // allocate memory for column_attributes and copy it
-    create_column_attribute_arr(self, record_meta->column_attributes);
+    create_column_attribute_arr(self, page_params->column_attributes);
     
     self->num_of_records = 0;
 
-    int page_exist = open_page(self, page_meta->db_dir_path, page_meta->page_file_name);
+    int page_exist = open_page(self, page_params->db_dir_path, page_params->page_file_name);
 
     // if(page_exist == 0){
     //     //if the page is an existing page
@@ -71,10 +71,10 @@ void Page_init(Page* self, PageMeta* page_meta, RecordMeta* record_meta){
  * The constructor for a page class
  * 
  */
-Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta){
+Page* Page_create(const PageParams* page_params){
     
     Page* page = (Page*)malloc(sizeof(Page));
-    Page_init(page, page_meta, record_meta);
+    Page_init(page, page_params);
 
 
     return page;
