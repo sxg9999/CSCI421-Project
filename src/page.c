@@ -47,13 +47,13 @@ void Page_init(Page* self, PageMeta* page_meta, RecordMeta* record_meta){
 
     // allocate memory for 2d records
     allocate_memory_for_records(self);
-
+    
     // allocate memory for column_attributes and copy it
     create_column_attribute_arr(self, record_meta->column_attributes);
-
+    
     self->num_of_records = 0;
 
-    // int page_exist = open_page(self, page_meta->db_dir_path, page_meta->page_file_name);
+    int page_exist = open_page(self, page_meta->db_dir_path, page_meta->page_file_name);
 
     // if(page_exist == 0){
     //     //if the page is an existing page
@@ -75,6 +75,8 @@ Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta){
     
     Page* page = (Page*)malloc(sizeof(Page));
     Page_init(page, page_meta, record_meta);
+
+
     return page;
 }
 
@@ -200,14 +202,19 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes){
 */
 int open_page(Page* self, char* file_path, char* file_name){
 
+    
     int file_path_size = strlen(file_path);
     int file_name_size = strlen(file_name);
+
+    
 
     self -> page_file_path = (char*)malloc(file_path_size+file_name_size);
     self -> page_file_path[0] = 0;
 
     strncat(self->page_file_path, file_path, file_path_size);
     strncat(self->page_file_path, file_name, file_name_size);
+
+
 
     struct stat buffer;
 
@@ -247,10 +254,12 @@ void allocate_memory_for_records(Page* self){
 */
 void create_column_attribute_arr(Page* self, int* column_attributes){
 
+    
     int col = self->num_of_attributes;
     //int* column_attributes = (int*)malloc(column*sizeof(int))
     self->column_attributes = (int*)malloc(col*sizeof(int));
-
+    
+    
     int i;
 
     for(i=0; i<col; i++){

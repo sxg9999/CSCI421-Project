@@ -30,7 +30,7 @@ typedef struct{
 
 /*
 Create and return a pointer to a Page struct
-@param records - a array of records thats contains record_items
+@param page_meta - informations about a page
 @returns a pointer to a page struct
 */
 Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta);
@@ -75,5 +75,7 @@ int Page_remove_record(Page* self, int record_id);
  */ 
 int Page_write(Page* page);
 
+
+void Page_destroy(Page* page);
 
 #endif
