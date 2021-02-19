@@ -68,12 +68,53 @@ Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta){
 
 /*
  * assume the first column is the id 
+ * @returns 0 if successful, 1 if page is full, -1 otherwise
  */
 
 int Page_insert_record(Page* self, union record_item* record){
-    int current_index = 0;
+
+    //check if page is full
+    if(self->num_of_records >= self->max_num_of_records){
+        return 1;
+    }
 
 
+    int index = self->num_of_records;           //num of records can be used as the index for the next record
+    
+    
+
+    int i;
+    int num_of_attributes = self->num_of_attributes;
+    int attribute_value;
+
+    for(i=0; i<num_of_attributes; i++){
+        attribute_value = self->column_attributes[i];
+
+        switch(attribute_value){
+            case 0:
+                //integer
+                self->records[index][i].i = record[i].i;
+                break;
+            case 1:
+                //Double
+                self->records[index][i].d = record[i].d;
+                break;
+            case 2:
+                //Boolean
+                self->records[index][i].b = record[i].b;
+                break;
+            case 3:
+                //Char
+                strncpy(self->records[index][i].c,record[i].c,strlen(record[i].c));
+                break;
+            case 4:
+                //Varchar
+                strncpy(self->records[index][i].v,record[i].v,strlen(record[i].v));
+                break;
+        }
+    }
+
+    return 0;
 }
 
 
@@ -201,4 +242,5 @@ void create_column_attribute_arr(Page* self, int* column_attributes){
     }
 
 }
+
 
