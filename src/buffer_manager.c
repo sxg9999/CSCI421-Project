@@ -17,15 +17,16 @@ buffer_manager* BufferManager_new(int max_page_count) {
     new_buff_man->current_page_count = 0;
     new_buff_man->max_page_count = 0;
     new_buff_man->pages = malloc( max_page_count *
-         sizeof( union record_item )); //TODO SWITCH TO PAGES
-    new_buff_man->page_arr_with_count = malloc( max_page_count * sizeof(int) );
+         sizeof( Page )); //TODO SWITCH TO PAGES
+    new_buff_man->page_arr_with_count = malloc( 
+        max_page_count * sizeof(int) );
     new_buff_man->min_page_id  = -1;
     new_buff_man->min_page_use_count = 0;
 
     return new_buff_man;
 }
 
-int add_page(buffer_manager* buff_man, union record_item*** page) {
+int add_page(buffer_manager* buff_man, Page* page) {
     if (buff_man->current_page_count >= buff_man->max_page_count) {
         // buffer is full
 
@@ -59,7 +60,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
-        malloc(sizeof( union record_item ));
+        malloc(sizeof( Page ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
     for (int i = 0; i<buff_man->current_page_count-1; i++) {
@@ -75,7 +76,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
     return 0;
 }
 
-int get_buffer_page(buffer_manager* buff_man, int page_id, union record_item*** page) {
+int get_buffer_page(buffer_manager* buff_man, int page_id, Page* page) {
     page = buff_man->pages[page_id];
     buff_man->page_arr_with_count[page_id] += 1;
     set_LRU_page_id(buff_man);

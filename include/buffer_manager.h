@@ -7,13 +7,15 @@
 #ifndef BUFFERMANAGER_H
 #define BUFFERMANAGER_H 
 
+#include "page.h"
+
 
 typedef struct buffer_manager {
     int current_page_count;
     int max_page_count;
     int min_page_id;
     int min_page_use_count;
-    union record_item**** pages; // SWICH TO PAGES
+    Page* pages; // SWICH TO PAGES
     int* page_arr_with_count;
 }  buffer_manager;
 
@@ -37,7 +39,7 @@ int set_LRU_page_id(buffer_manager* buff_man);
  * @param page - the page to be added to the buffer
  * @return 0 if the page was added successfully, otherwise -1;
  */
-int add_page(buffer_manager* buff_man, union record_item*** page);
+int add_page(buffer_manager* buff_man, Page* page);
 
 /*
  * Gets a page from the buffer manager
@@ -46,7 +48,7 @@ int add_page(buffer_manager* buff_man, union record_item*** page);
  * @param page - the page of interest
  * @return 0 if the page was added successfully, otherwise -1;
  */
- int get_buffer_page(buffer_manager* buff_man, int page_id, union record_item*** page);
+ int get_buffer_page(buffer_manager* buff_man, int page_id, Page* page);
 
 /*
  * Removes a page from the buffer.
