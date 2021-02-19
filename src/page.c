@@ -26,6 +26,8 @@ void create_column_attribute_arr(Page* self, int* column_attribute);
 void allocate_memory_for_records(Page* self);
 int open_page(Page* self, char* file_path, char* file_name);
 int get_max_records(int page_size, int record_item_size, int num_of_attributes);
+void clear_n_buffer(char* buffer, int end_of_buffer);
+void remove_trailing_zeros(char* src, int str_len);
 int Page_write(Page* self);
 int Page_load_records(Page* self);
 
@@ -54,6 +56,8 @@ void Page_init(Page* self,const PageParams* page_params){
     self->num_of_records = 0;
 
     int page_exist = open_page(self, page_params->db_dir_path, page_params->page_file_name);
+
+    
 
     // if(page_exist == 0){
     //     //if the page is an existing page
@@ -94,9 +98,9 @@ int Page_insert_record(Page* self, union record_item* record){
         return 1;
     }
 
-
     int index = self->num_of_records;           //num of records can be used as the index for the next record
-    
+    self->num_of_records++;                     //increment the total number of records
+
     int i;
     int num_of_attributes = self->num_of_attributes;
     int attribute_value;
@@ -168,9 +172,65 @@ int Page_load_records(Page* self){
 
 int Page_write(Page* self){
     //Write all the records back to storage
+    int num_of_records = self->num_of_records;
+    int num_of_attributes = self->num_of_attributes;
+
+
+    //set the file pointer back to the beginning of the file
+    FILE* fp = self->fp;
+    fseek(fp, 0, SEEK_SET);      //SEEK_SET points to the beginning of the file and 
+                                 //an offset of 0 from that position.
+
+    
+
+    
+    union record_item** records = self->records;
+    int* column_attributes = self->column_attributes;
+
+    char buffer[255];
+
+    int i;
+    int j;
+
+    for(i=0; i<num_of_records; i++){
+        printf("writing out record_%d\n",i);
+        for(j=0; j<num_of_attributes; j++){
+            switch(column_attributes[j]){
+				case 0:
+					//convert int to string
+                    sprintf(buffer, "%d", records[i][j].i);           
+					break;
+				case 1:
+                    //convert double to string
+					sprintf(buffer, "%f", records[i][j].d);
+                    
+                    //remove trailing zeros from the converted string
+                    remove_trailing_zeros(buffer, strlen(buffer));
+					break;
+				case 2:
+                    strncpy(buffer, records[i][j].b ? "true": "false", 6);
+					break;
+				case 3:
+                    strncpy(buffer, records[i][j].c, strlen(records[i][j].c));
+					break;
+				case 4:
+                    strncpy(buffer, records[i][j].v, strlen(records[i][j].v));
+					break;
+				default:
+					printf(" error ");
+					break;
+            }
+            //write the buffer to the file
+            fwrite(buffer, sizeof(char), 255, fp);
+            printf("\tBuffer content : %s\n", buffer);
+            //clear the buffer
+            // clear_n_buffer(buffer, strlen(buffer));
+            clear_n_buffer(buffer, 255);
+        }
+    }
 
     //close file
-
+    fclose(self->fp);
     //free up memory
     Page_destroy(self);
 }
@@ -227,7 +287,7 @@ int open_page(Page* self, char* file_path, char* file_name){
     }
 
     //file does not exist
-    self -> fp = fopen(self->page_file_path, "w+");
+    self->fp = fopen(self->page_file_path, "w+");
 
     return 1;
     
@@ -266,6 +326,29 @@ void create_column_attribute_arr(Page* self, int* column_attributes){
         self->column_attributes[i] = column_attributes[i];
     }
 
+}
+
+/*
+ * function for clearing a buffer
+ */
+
+void clear_n_buffer(char* buffer, int end_of_buffer){
+    int i;
+    for(i=0; i<end_of_buffer; i++){
+        buffer[i]=0;
+    }
+}
+
+/*
+ * function for remove the trailing zeros in a string
+ */
+void remove_trailing_zeros(char* str, int len){
+    int i;
+    for(i=0; i<len; i++){
+        if(str[i]=='0'){
+            str[i]=0;
+        }
+    }
 }
 
 
