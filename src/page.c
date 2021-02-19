@@ -29,7 +29,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes);
 void clear_n_buffer(char* buffer, int end_of_buffer);
 void remove_trailing_zeros(char* src, int str_len);
 int Page_write(Page* self);
-int Page_load_records(Page* self);
+int Page_read(Page* self);
 
 
 /*
@@ -166,7 +166,63 @@ void Page_destroy(Page* page){
 /*
  * Read all the records from the file and add it to the Page
  */
-int Page_load_records(Page* self){
+int Page_read(Page* self){
+    int num_of_records = self->num_of_records;
+    int num_of_attributes = self->num_of_attributes;
+
+    FILE* fp = self->fp;
+
+    union record_item** records = self->records;
+    int* column_attributes = self->column_attributes;
+
+    char buffer[255];
+    char *ptr;
+
+    int int_val;
+    double double_val;
+    char* str_val;
+
+    int i;
+    int j;
+
+    for(i=0; i<num_of_records; i++){
+        printf("reading in record_%d\n",i);
+
+        for(j=0; j<num_of_attributes; j++){
+            fread(buffer, sizeof(char), 255, fp);
+            switch(column_attributes[j]){
+                case 0:
+                    //an integer
+                    int_val = strtol(buffer, &ptr, 10);
+                    records[i][j].i = int_val;
+                    break;
+                case 1:
+                    //double
+                    double_val = strtod(buffer, &ptr);
+                    records[i][j].d = double_val;
+                    break;
+                case 2:
+                    //bool value
+                    int_val = strtol(buffer, &ptr, 10);
+                    if(int_val == 1){
+                        records[i][j].b = true;
+                    }else{
+                        records[i][j].b = false;
+                    }
+                    break;
+                case 3:
+                    //char value
+                    strncpy(records[i][j].c, buffer, strlen(buffer));
+                    break;
+                case 4:
+                    strncpy(records[i][j].v, buffer, strlen(buffer));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 
 }
 
@@ -210,7 +266,7 @@ int Page_write(Page* self){
                     break;
 
                 case 2:
-                    strncpy(buffer, records[i][j].b ? "true": "false", 6);
+                    strncpy(buffer, records[i][j].b ? "1": "0", 2);
                     break;
 
                 case 3:
