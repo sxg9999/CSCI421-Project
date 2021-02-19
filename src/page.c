@@ -195,6 +195,13 @@ int Page_write(Page* self){
     for(i=0; i<num_of_records; i++){
         printf("writing out record_%d\n",i);
         for(j=0; j<num_of_attributes; j++){
+
+            switch(column_attributes[j]){
+                case 0:
+                    sprintf("");
+            }
+
+
             switch(column_attributes[j]){
 				case 0:
                     //convert int to string
