@@ -197,23 +197,30 @@ int Page_write(Page* self){
         for(j=0; j<num_of_attributes; j++){
             switch(column_attributes[j]){
 				case 0:
-					//convert int to string
+                    //convert int to string
                     sprintf(buffer, "%d", records[i][j].i);           
 					break;
+
 				case 1:
                     //convert double to string
-					sprintf(buffer, "%f", records[i][j].d);
+                    sprintf(buffer, "%f", records[i][j].d);
                     
                     //remove trailing zeros from the converted string
                     remove_trailing_zeros(buffer, strlen(buffer));
 					break;
+
 				case 2:
+
                     strncpy(buffer, records[i][j].b ? "true": "false", 6);
 					break;
+
 				case 3:
+
                     strncpy(buffer, records[i][j].c, strlen(records[i][j].c));
 					break;
+
 				case 4:
+                
                     strncpy(buffer, records[i][j].v, strlen(records[i][j].v));
 					break;
 				default:
