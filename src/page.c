@@ -23,8 +23,11 @@ union record_item {
 
 
 
-//constructor
 
+/*
+ * A initiation function that initiates all the required components of a page
+ *
+ */ 
 void Page_init(Page* self, PageMeta* page_meta, RecordMeta* record_meta){
     
     int max_records = get_max_records(page_meta->page_size, record_meta->record_item_size, record_meta->num_of_attributes);
@@ -42,22 +45,26 @@ void Page_init(Page* self, PageMeta* page_meta, RecordMeta* record_meta){
     // allocate memory for column_attributes and copy it
     create_column_attribute_arr(self, record_meta->column_attributes);
 
-    
-    int page_exist = open_page(self, page_meta->db_dir_path, page_meta->page_file_name);
+    self->num_of_records = 0;
 
-    if(page_exist == 0){
-        //if the page is an existing page
-        //read in the records and update the num_of_records
+    // int page_exist = open_page(self, page_meta->db_dir_path, page_meta->page_file_name);
 
-    }else{
-        //if the page is an new page
-        //then num_of_records = 0 currently
-        self->num_of_records = 0;
-    }
+    // if(page_exist == 0){
+    //     //if the page is an existing page
+    //     //read in the records and update the num_of_records
+
+    // }else{
+    //     //if the page is an new page
+    //     //then num_of_records = 0 currently
+    //     self->num_of_records = 0;
+    // }
 
 }
 
-
+/*
+ * The constructor for a page class
+ * 
+ */
 Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta){
     
     Page* page = (Page*)malloc(sizeof(Page));
@@ -81,12 +88,12 @@ int Page_insert_record(Page* self, union record_item* record){
 
     int index = self->num_of_records;           //num of records can be used as the index for the next record
     
-    
-
     int i;
     int num_of_attributes = self->num_of_attributes;
     int attribute_value;
 
+    //loop through the attributes and insert the attribute
+    //in their respective location 
     for(i=0; i<num_of_attributes; i++){
         attribute_value = self->column_attributes[i];
 
@@ -117,7 +124,10 @@ int Page_insert_record(Page* self, union record_item* record){
     return 0;
 }
 
-
+/*
+ * A function responsible for freeing a page class from memory
+ * @page - a page class
+ */
 
 void Page_destroy(Page* page){
 
