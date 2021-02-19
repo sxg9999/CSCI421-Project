@@ -77,7 +77,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
 }
 
 int get_buffer_page(buffer_manager* buff_man, int page_id, Page* page) {
-    page = buff_man->pages[page_id];
+    page = &(buff_man->pages[page_id]);
     buff_man->page_arr_with_count[page_id] += 1;
     set_LRU_page_id(buff_man);
 
