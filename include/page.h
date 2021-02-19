@@ -31,7 +31,7 @@ Create and return a pointer to a Page struct
 @param records - a array of records thats contains record_items
 @returns a pointer to a page struct
 */
-Page* Page_create(PageMeta page_meta, RecordMeta record_meta);
+Page* Page_create(PageMeta* page_meta, RecordMeta* record_meta);
 
 /*
 Returns the records with the specified record_id in the table
