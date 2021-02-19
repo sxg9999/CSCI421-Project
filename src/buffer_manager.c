@@ -14,9 +14,9 @@
 #include "../include/page.h"
 
 buffer_manager* BufferManager_new(int max_page_count) {
-    buffer_manager* new_buff_man = malloc( sizeof(struct buffer_manager) );
+    buffer_manager* new_buff_man = malloc( sizeof(buffer_manager) );
     new_buff_man->current_page_count = 0;
-    new_buff_man->max_page_count = 0;
+    new_buff_man->max_page_count = max_page_count;
     new_buff_man->pages = malloc( max_page_count *
          sizeof( Page* ));
     new_buff_man->page_arr_with_count = malloc( 
@@ -90,7 +90,8 @@ int set_LRU_page_id(buffer_manager* buff_man) {
         return -1;
     }
     for (int i = 0; i< buff_man->current_page_count; i++) {
-        if ( buff_man->page_arr_with_count[i] < buff_man->min_page_use_count ) {
+        if ( buff_man->page_arr_with_count[i] < 
+            buff_man->min_page_use_count ) {
             buff_man->min_page_id = 1;
             buff_man->min_page_use_count = buff_man->page_arr_with_count[i];
         }
