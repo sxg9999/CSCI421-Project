@@ -42,7 +42,7 @@ int add_page(buffer_manager* buff_man, Page* page) {
     buff_man->pages[buff_man->current_page_count] = page;
     buff_man->page_arr_with_count[
         buff_man->current_page_count] = 0;
-    if ( buff_man->min_page_id = -1) {
+    if ( buff_man->min_page_id == -1) {
         buff_man->min_page_id = 0;
     }
     buff_man->current_page_count += 1;
@@ -68,8 +68,8 @@ int remove_page(buffer_manager* buff_man, int page_index) {
         buff_man->page_arr_with_count[i] = 
             buff_man->page_arr_with_count[i+1];
     }
-    buff_man->page_arr_with_count[ buff_man->current_page_count ] = 
-        malloc(sizeof( int ));
+    buff_man->page_arr_with_count[ 
+        buff_man->current_page_count ] = 0;
 
     buff_man->current_page_count -= 1;
     
@@ -77,8 +77,8 @@ int remove_page(buffer_manager* buff_man, int page_index) {
     return 0;
 }
 
-int get_buffer_page(buffer_manager* buff_man, int page_id, Page* page) {
-    page = buff_man->pages[page_id];
+int get_buffer_page(buffer_manager* buff_man, int page_id, Page* npage) {
+    npage = buff_man->pages[page_id];
     buff_man->page_arr_with_count[page_id] += 1;
     set_LRU_page_id(buff_man);
 
