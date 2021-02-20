@@ -59,15 +59,16 @@ void Page_init(Page* self,const PageParams* page_params){
 
     
 
-    // if(page_exist == 0){
-    //     //if the page is an existing page
-    //     //read in the records and update the num_of_records
+    if(page_exist == 0){
+        //if the page is an existing page
+        //read in the records and update the num_of_records
+        self->num_of_records = page_params->num_of_records;
 
-    // }else{
-    //     //if the page is an new page
-    //     //then num_of_records = 0 currently
-    //     self->num_of_records = 0;
-    // }
+    }else{
+        //if the page is an new page
+        //then num_of_records = 0 currently
+        self->num_of_records = 0;
+    }
 
 }
 
@@ -213,6 +214,7 @@ int Page_read(Page* self){
                 case 3:
                     //char value
                     strncpy(records[i][j].c, buffer, strlen(buffer));
+                    printf("length of the str : %d\n",strlen(records[i][j].c));
                     break;
                 case 4:
                     strncpy(records[i][j].v, buffer, strlen(buffer));
