@@ -259,11 +259,10 @@ int Page_write(Page* self){
                                  //an offset of 0 from that position.
 
     
-
-    
     union record_item** records = self->records;
     int* attr_data_types = self->attr_data_types;
 
+    //allocate enough memory to a buffer to read a records
     char buffer[256];
 
     int i;
