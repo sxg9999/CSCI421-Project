@@ -56,7 +56,7 @@ int Page_test_print_all_records(Page* page){
 		printf("record_%d : [ ",i);
 		for(j=0; j<page->num_of_attributes; j++){
 			// printf("string len: %d\n",strlen(records[i][j].c));
-			switch(page->column_attributes[j]){
+			switch(page->attr_data_types[j]){
 				case 0:
 					int_val = records[i][j].i;
 					printf(" %d", int_val);
@@ -99,14 +99,14 @@ int Page_test_print_fields(Page* page){
 	printf("\n");
 	
 
-	int* attributes = page->column_attributes;
+	int* attributes = page->attr_data_types;
 
 	int i;
 
 	printf("Column_Attributes : [");
 	
 	for(i=0; i<page->num_of_attributes; i++){
-		switch(page->column_attributes[i]){
+		switch(page->attr_data_types[i]){
 			case 0:
 				printf("<int>");
 				break;
@@ -180,7 +180,7 @@ int Page_insert_multiple_records(Page* page, int amount_of_records){
 		int page_insert_result = Page_insert_record(page, record);
 
 		if(page_insert_result==0){
-			printf("Insert was successful\n");
+			// printf("Insert was successful\n");
 			success_count++;
 		}else{
 			printf("Insert failed\n");
@@ -190,7 +190,7 @@ int Page_insert_multiple_records(Page* page, int amount_of_records){
 		
 	}
 	free(record);
-	printf("Succeed: %d, failed: %d\n\n", success_count, failed_count);
+	// printf("Succeed: %d, failed: %d\n\n", success_count, failed_count);
 	
 	return 0;
 }
@@ -246,9 +246,9 @@ int Page_test(){
 	char page_file_name[] = "page_1";
 	int page_id = 1;
 	int page_size = 10000;
-	int record_item_size = 256;
+	int record_item_size = sizeof(union record_item);
 	int num_of_attribute = 3;
-	int column_attributes[3] = {0,2,3};			//{int, bool, char}
+	int attr_data_type[3] = {0,2,3};			//{int, bool, char}
 
 	PageParams page_params = {
 		.db_dir_path = db_dir_path,
@@ -257,15 +257,19 @@ int Page_test(){
 		.page_size = page_size,
 		.record_item_size = record_item_size,
 		.num_of_attributes = num_of_attribute,
-		.column_attributes = column_attributes,
-		.num_of_records = 2
+		.attr_data_types = attr_data_type,
+		// .num_of_records = 3
 	};
 
 	Page* page1 = Page_create(&page_params);
 
-	Page_insert_multiple_records(page1, 1);
+	// printf("maximum num of records : %d\n", page1->max_num_of_records);
 
-	// Page_test_print_all_records(page1);
+	// Page_insert_multiple_records(page1, page1->max_num_of_records);
+
+	Page_insert_multiple_records(page1, 10);
+
+	Page_test_print_all_records(page1);
 	
 	Page_write(page1);
 	// Page_destroy(page1);
