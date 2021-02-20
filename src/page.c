@@ -63,6 +63,7 @@ void Page_init(Page* self,const PageParams* page_params){
         //if the page is an existing page
         //read in the records and update the num_of_records
         self->num_of_records = page_params->num_of_records;
+        Page_read(self);
 
     }else{
         //if the page is an new page
@@ -126,7 +127,7 @@ int Page_insert_record(Page* self, union record_item* record){
                 break;
             case 3:
                 //Char
-                strncpy(self->records[index][i].c,record[i].c,strlen(record[i].c));
+                strncpy(self->records[index][i].c,record[i].c,strlen(record[i].c)+1);
                 break;
             case 4:
                 //Varchar
@@ -176,7 +177,7 @@ int Page_read(Page* self){
     union record_item** records = self->records;
     int* column_attributes = self->column_attributes;
 
-    char buffer[255];
+    char buffer[256];
     char *ptr;
 
     int int_val;
@@ -190,7 +191,7 @@ int Page_read(Page* self){
         printf("reading in record_%d\n",i);
 
         for(j=0; j<num_of_attributes; j++){
-            fread(buffer, sizeof(char), 255, fp);
+            fread(buffer, sizeof(char), 256, fp);
             switch(column_attributes[j]){
                 case 0:
                     //an integer
@@ -213,11 +214,11 @@ int Page_read(Page* self){
                     break;
                 case 3:
                     //char value
-                    strncpy(records[i][j].c, buffer, strlen(buffer));
+                    strncpy(records[i][j].c, buffer, strlen(buffer)+1);
                     printf("length of the str : %d\n",strlen(records[i][j].c));
                     break;
                 case 4:
-                    strncpy(records[i][j].v, buffer, strlen(buffer));
+                    strncpy(records[i][j].v, buffer, strlen(buffer)+1);
                     break;
                 default:
                     break;
@@ -245,7 +246,7 @@ int Page_write(Page* self){
     union record_item** records = self->records;
     int* column_attributes = self->column_attributes;
 
-    char buffer[255];
+    char buffer[256];
 
     int i;
     int j;
@@ -272,11 +273,11 @@ int Page_write(Page* self){
                     break;
 
                 case 3:
-                    strncpy(buffer, records[i][j].c, strlen(records[i][j].c));
+                    strncpy(buffer, records[i][j].c, strlen(records[i][j].c)+1);
                     break;
 
                 case 4:
-                    strncpy(buffer, records[i][j].v, strlen(records[i][j].v));
+                    strncpy(buffer, records[i][j].v, strlen(records[i][j].v)+1);
                     break;
                 
                 default:
@@ -287,11 +288,12 @@ int Page_write(Page* self){
 
             
             //write the buffer to the file
-            fwrite(buffer, sizeof(char), 255, fp);
-            printf("\tBuffer content : %s\n", buffer);
+            fwrite(buffer, sizeof(char), 256, fp);
+            printf("\tBuffer content : %s, len: %d\n", buffer, strlen(buffer));
+
             //clear the buffer
             // clear_n_buffer(buffer, strlen(buffer));
-            clear_n_buffer(buffer, 255);
+            clear_n_buffer(buffer, 256);
         }
     }
 

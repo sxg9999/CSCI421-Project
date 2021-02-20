@@ -72,7 +72,7 @@ int Page_test_print_all_records(Page* page){
 				case 3:
 					char_val = records[i][j].c;
 					printf(" %s", char_val);
-					printf("length : %d",strlen(char_val));
+					
 					break;
 				case 4:
 					var_char_val = records[i][j].v;
@@ -246,7 +246,7 @@ int Page_test(){
 	char page_file_name[] = "page_1";
 	int page_id = 1;
 	int page_size = 10000;
-	int record_item_size = 255;
+	int record_item_size = 256;
 	int num_of_attribute = 3;
 	int column_attributes[3] = {0,2,3};			//{int, bool, char}
 
@@ -258,30 +258,17 @@ int Page_test(){
 		.record_item_size = record_item_size,
 		.num_of_attributes = num_of_attribute,
 		.column_attributes = column_attributes,
-		.num_of_records = 10
+		.num_of_records = 2
 	};
 
 	Page* page1 = Page_create(&page_params);
 
-	Page_test_print_fields(page1);
-	
-	
+	Page_insert_multiple_records(page1, 1);
 
-	// Page_insert_multiple_records(page1, 10);
-	char greet[] = "Morning";
-
-	printf("The size of greet: %d\n", greet);
-	Page_test_inserting_a_record(page1, 2,1, greet, strlen(greet)+1);
-	Page_test_inserting_a_record(page1, 2,1, greet, strlen(greet)+1);
-	// Page_read(page1);
-
-	Page_test_print_all_records(page1);
-	// Page_record_test(page1);
+	// Page_test_print_all_records(page1);
 	
-	
-	//write the page back to disk and destroy the page
-	// Page_write(page1);
-	Page_destroy(page1);
+	Page_write(page1);
+	// Page_destroy(page1);
 
 
 	printf("Page Test done\n");
@@ -295,8 +282,8 @@ int Page_test(){
 
 int main() {
 	printf("test\n");
-	// Page_test();
-	Page_test_char_record();
+	Page_test();
+	// Page_test_char_record();
 
 	
 	
