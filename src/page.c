@@ -149,7 +149,6 @@ int Page_insert_record(Page* self, union record_item* record){
 
 void Page_destroy(Page* page){
 
-
     if(page){
         free(page->fp);
         free(page->page_file_path);
@@ -175,22 +174,18 @@ void Page_destroy(Page* page){
  */
 
 int Page_read(Page* self){
-    
-    int num_of_attributes = self->num_of_attributes;
 
     FILE* fp = self->fp;
-
     union record_item** records = self->records;
-
     int* attr_data_types = self->attr_data_types;
+    int num_of_attributes = self->num_of_attributes;
+    
 
     char buffer[256];
-    char *ptr;
-
+    char* ptr;
     int int_val;
     double double_val;
-    char* str_val;
-
+    
     int row = 0;
     int col = 0; 
 
@@ -208,11 +203,11 @@ int Page_read(Page* self){
                 records[row][col].d = double_val;
                 break;
             case 2:
-                //bool value
+                //bool value : 1 = true, 2 = false
                 int_val = strtol(buffer, &ptr, 10);
                 if(int_val == 1){
                     records[row][col].b = true;
-                }else{
+                }else if(int_val == 2){
                     records[row][col].b = false;
                 }
                 break;
