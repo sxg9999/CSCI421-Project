@@ -11,5 +11,8 @@ default: storage
 storage: $(SOURCE_FILES) $(HEADER_FILES)
 	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES) $(HEADER_FILES) -I $(INCLUDE_DIR)
 
+run: storage
+	./storage
+
 clean:
-		rm -r storage *.o *.exe
+		rm *.o *.exe
