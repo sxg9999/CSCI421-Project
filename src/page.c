@@ -98,7 +98,7 @@ Page* Page_create(const PageParams* page_params){
 
 int Page_get_record(Page* self, int record_id, union record_item** data){
 
-    union record_item** record = self->records[record_id];
+    union record_item* record = self->records[record_id];
 
     int* attr_data_types = self->attr_data_types;
     int num_of_attributes = self->num_of_attributes;
@@ -108,23 +108,23 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
         switch(attr_data_types[i]){
             case 0:
                 //integer
-                data[0][i].i = record[0][i].i;
+                data[0][i].i = record[i].i;
                 break;
             case 1:
                 //Double
-                data[0][i].d = record[0][i].d;
+                data[0][i].d = record[i].d;
                 break;
             case 2:
                 //Boolean
-                data[0][i].b = record[0][i].b;
+                data[0][i].b = record[i].b;
                 break;
             case 3:
                 //Char
-                strncpy(data[0][i].c, record[0][i].c, strlen(record[0][i].c)+1);
+                strncpy(data[0][i].c, record[i].c, strlen(record[i].c)+1);
                 break;
             case 4:
                 //Varchar
-                strncpy(data[0][i].v, record[0][i].v, strlen(record[0][i].v)+1);
+                strncpy(data[0][i].v, record[i].v, strlen(record[i].v)+1);
                 break;
         }
     }
