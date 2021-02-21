@@ -20,11 +20,62 @@ int Hash_add_item(HashTable* self, int key, void* item) {
 
 
 void TM_write_meta(TableManager* self) {
+    FILE* fp;
 
+    fp = fopen(TABLE_META_DATA_FILENAME, "w");
+    // write out length of db_loc
+    fprintf(fp, strlen(self->db_loc));
+    // write out db_loc
+    fprintf(fp, self->db_loc);
+    // write out page_size
+    fprintf(fp, self->page_size);
+    // write out # of tables
+    fprintf(fp, (self->tables)->current_size);
+
+    // write out each table
+        // write table id
+        // write # of attributes
+        // write type of each attribute
+        // write # of attributes in primary key
+        // write type of each attributes of primary key
+        // write # of records in table
+        // write # of pages in table
+        // write each page # 
 }
 
-void TM_read_meta(char* tm_meta_path) {
+void TM_read_meta() {
+    FILE* fp;
 
+
+    fp = fopen(TABLE_META_DATA_FILENAME, "r");
+    // read length of db_loc
+    int db_loc_length; 
+    fscanf(fp, "%d", &db_loc_length);
+    
+    // read db_loc
+    char db_loc[db_loc_length];
+    fgets(db_loc, db_loc_length, fp);
+    
+    // read page_size
+    int page_size;
+    fscanf(fp, "%d", &page_size);
+
+    // create table manager
+    TableManager* tm = init_table_manager(db_loc, page_size);
+
+    // read # of tables
+    int table_count;
+    fscanf(fp, "%d", &table_count);
+
+    // read each table
+        // read table id
+        // read # of attributes
+        // read type of each attribute
+        // read # of attributes in primary key
+        // read type of each attributes of primary key
+        // read # of records in table
+        // read # of pages in table
+        // read each page # 
 }
 
 

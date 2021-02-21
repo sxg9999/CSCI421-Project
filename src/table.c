@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include "../include/table.h"
+#include "../include/page.h"
 
-private Page* new_page(Table* self);
-private Page* new_existing_page(Table* self, int page_id);
+Page* new_page(Table* self);
+Page* new_existing_page(Table* self, int page_id);
 
 
 void Table_init(Table* self, TableParams* params) {
@@ -81,7 +82,7 @@ void Table_destroy(Table* self) {
 }
 
 // returns the new page id
-private Page* new_page(Table* self) {
+Page* new_page(Table* self) {
     srand(time());
     int page_id = rand();
     Page* page = new_existing_page(self, page_id);
@@ -104,7 +105,7 @@ private Page* new_page(Table* self) {
     return page;
 }
 
-private Page* new_existing_page(Table* self, int page_id) {
+Page* new_existing_page(Table* self, int page_id) {
     srand(time(NULL));
     int page_id = rand();
 

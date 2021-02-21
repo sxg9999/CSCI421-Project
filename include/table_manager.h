@@ -12,20 +12,34 @@
 #include "table.h"
 
 
-// PLACEHOLDER
-typedef struct {
+#define TABLE_META_DATA_FILENAME "table_meta"
 
+// PLACEHOLDER
+typedef struct HashTable{
+    int current_size;
 } HashTable;
 
 typedef struct {
-    char* db_loc;
-    int* page_size;
+    const char* db_loc;
+    int page_size;
     HashTable* tables;
 } TableManager;
 
 int table_add(int* data_types, int* key_indices, int data_types_size, int key_indices_size);
 
 Table* getTables();
+
+/*
+ * Writes the meta data about each of the tables to a file. 
+ * @param self - the table manager to be written out to a file
+ */
+void TM_write_meta(TableManager* self);
+
+/*
+ * Reads and reconstructs the tables from the meta data file.
+ */
+void TM_read_meta();
+
 
 /*
  * Open (or create) TABLES_META_DATA, add newTable to it.
