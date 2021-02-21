@@ -1,4 +1,7 @@
- struct Hash_Table
+# include <stdio.h>
+# include <stdlib.h>
+
+struct Hash_Table
 {
 	int capacity; //2^(times increased+1)
 	int current_size;
@@ -29,9 +32,9 @@ struct Hash_Table * Hash_Table_Creator()
 
 	struct Hash_Table *table = malloc(sizeof(struct Hash_Table));
 
-	//table->capacity = 2;
-	//table->current_size = 0;
-	//load_factor-> = 2;
+	table->capacity = 2;
+	table->current_size = 0;
+	table->load_factor = 2;
 	
 	return table;
 };
@@ -58,9 +61,16 @@ int add(struct Node node)
 	//insert new entry into table
 };
 
-void resize(struct Hash_Table table)
+struct Hash_Table * resize(struct Hash_Table * table)
 {
 	//if size = max size, double capacity and reallocate
+    table = realloc(table, (sizeof(table)*2));
+    if(table == NULL)
+    {
+        //failed allocation
+    }
+    table->capacity = table->capacity * 2;
+    return table;
 };
 
 int compute_index(int key, int value)
@@ -68,7 +78,12 @@ int compute_index(int key, int value)
 	//What calc to use?
 };
 
-
+int main()
+{
+    struct Hash_Table * table = Hash_Table_Creator();
+    printf("Size of table is &lu", sizeof(struct Hash_Table));
+    struct Hash_Table * resizedT = resize(table);
+}
 
 
 
