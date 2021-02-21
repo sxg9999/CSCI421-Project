@@ -34,13 +34,6 @@ typedef struct{
  */
 Page* Page_create(const PageParams* page_params);
 
-/*
-Returns the records with the specified record_id in the table
-@param record_id - the id of the record in the page
-@returns an pointer to a array of record_items
-*/
-union record_item* Page_get_record(Page* self, int record_id);
-
 
 /*
 Inserts the provided record into the page
@@ -50,11 +43,15 @@ Inserts the provided record into the page
 int Page_insert_record(Page* self, union record_item* record);
 
 
-/* Creates a deep copy of a record
- * @param record - the record to be copied
- * @return A new record
+/* 
+ * Returns a record from the page with the provided id
+ * @param self - a page of record
+ * @param record_id - the index of the record in the page
+ * @param data - a pointer to an array of record_item values that represents,
+ *               the record that matches the record_id
+ * @returns 0 if successful, -1 otherwise
  */
-union record_item* copy_record(union record_item* record);
+int Page_get_record(Page* self, int record_id, union record_item** data);
 
 /*
 Updates the provided record into the page with the provided record_id
