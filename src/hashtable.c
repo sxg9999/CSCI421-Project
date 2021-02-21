@@ -12,9 +12,13 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	self->load_factor = load_factor;
 	self->len_of_data_types_arr = len_of_data_types_arr;
 	self->table = (Node*)malloc(sizeof(Node)*self->capacity);
+	self->attr_data_types = (int*)malloc(sizeof(int)*len_of_data_types_arr);
 
 	int i;
-	// for(i=0; i<len_of_data_types_arr)
+	for(i=0; i<len_of_data_types_arr; i++){
+		self->attr_data_types[i] = attr_data_types[i];
+	}
+
 
 }
 
