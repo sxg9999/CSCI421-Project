@@ -78,12 +78,6 @@ int compute_index(int key, int value)
 	//What calc to use?
 };
 
-int main()
-{
-    struct Hash_Table * table = Hash_Table_Creator();
-    printf("Size of table is &lu", sizeof(struct Hash_Table));
-    struct Hash_Table * resizedT = resize(table);
-}
 
 
 
