@@ -416,8 +416,6 @@ int Page_write(Page* self){
 
     //close file
     fclose(self->fp);
-    //free up memory
-    Page_destroy(self);
 }
 
 
