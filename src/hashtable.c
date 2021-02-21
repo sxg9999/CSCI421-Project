@@ -16,7 +16,7 @@ struct Node
 	Node* next_node;
 }
 
-*Hash_Table Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
+struct *Hash_Table Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
 {
 	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
 	//table->capacity = capacity;
@@ -26,7 +26,7 @@ struct Node
 	//addAll(arr);
 }
 
-*Hash_Table Hash_Table_Creator()
+struct *Hash_Table Hash_Table_Creator()
 {
 	//initialize empty instance
 
@@ -44,6 +44,11 @@ void Hash_Table_Destroy(Hash_Table table)
 	//if table not empty (!= NULL)
 	//for every item in the table
 	//if != NULL, free
+}
+
+int hashcode(struct *Hash_Table table, int key)
+{
+	return (key % &table->capacity);
 }
 
 int addAll(Node arr[])
