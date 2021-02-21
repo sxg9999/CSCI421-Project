@@ -7,7 +7,7 @@ HEADER_FILES = include/*.h
 default: storage
 
 storage: $(SOURCE_FILES) $(HEADER_FILES)
-	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES) $(HEADER_FILES)
+	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES)
 
 clean:
 		rm storage *.o
