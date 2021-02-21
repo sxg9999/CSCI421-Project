@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,6 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 
 	int i;
 	// for(i=0; i<len_of_data_types_arr)
-
 }
 
 
