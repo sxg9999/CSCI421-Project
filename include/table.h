@@ -15,35 +15,46 @@
 
 typedef struct{
     int table_id; // unique id
-    union record_item*** records; // pointer to list of all tuples
     int num_records; // number of tuples
     int* column_types; // data_types of attributes
     int* key_indices; // which columns are keys
     int num_columns;
     int num_keys;
     int num_pages;
+    int* page_ids;
 } Table;
 
-union record_item* row;
-union record_item** rows;
-union record_item*** pointer_to_all_rows;
+Page* new_page(Table* self);
+Page* new_existing_page(Table* self, int page_id);
 
-// typedef struct{
 
-//     int num_of_pages;
-//     char table_name[255];
-//     void *** table;
-//     // Hash_Table* hash_table;
-    
-// }Table;
+int Table_write_meta(Table* self, FILE* fp);
 
-void table_init();
+int Table_read_meta(Table* newTable, FILE* fp);
 
-Table* create_table(int table_id, int* data_types, int* key_indices, int num_cols, int num_keys);
 
-union record_item*** getTable(int table_id);
+void Table_init(Table* self, TableParams* params);
 
-union record_item*  getRecord_with_PrimaryKey(int table_id, union record_item* primary_key);
+Table* Table_create(TableParams* params);
+
+
+int Table_insert_record(Table* self, buffer_manager* bm, union record_item* record);
+
+int Table_update_record(Table* self, buffer_manager* bm, union record_item* record);
+
+
+
+/*
+ *
+ */
+void Table_clear(Table* self);
+
+void Table_destroy(Table* self);
+
+// returns the new page id
+Page* new_page(Table* self);
+
+Page* new_existing_page(Table* self, int page_id);
 
 
 #endif
