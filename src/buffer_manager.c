@@ -104,7 +104,7 @@ void destroy_buffer(buffer_manager* buff_man) {
     if (buff_man) {
         // Free each page
         for (int i = 0; i<buff_man->current_page_count; i++) {
-            Page_destory(buff_man->pages[i]);
+            Page_destroy(buff_man->pages[i]);
         }
         free(buff_man->page_arr_with_count);
 

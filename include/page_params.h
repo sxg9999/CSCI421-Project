@@ -7,7 +7,7 @@
  * 
  */
 typedef struct{
-    char* db_dir_path;             //path to the db location
+    char* table_dir;               //path to the table dir
     char* page_file_name;          //name of the page
     int page_id;                   //id of the page
     int page_size;                 //size of the page in bytes

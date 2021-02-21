@@ -57,7 +57,7 @@ void Page_init(Page* self,const PageParams* page_params){
     
     self->num_of_records = 0;
 
-    int page_exist = open_page(self, page_params->db_dir_path, page_params->page_file_name);
+    int page_exist = open_page(self, page_params->table_dir, page_params->page_file_name);
 
 
     if(page_exist == 0){
@@ -444,7 +444,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes){
  * Attempts to open the page file and returns whether
  * or not the page file existed before.
  * @param self - the current page
- * @param file_path - the database folder path
+ * @param file_path - the table dir path
  * @param file_name - the name of the page file
  * @return - 0 for exist and 1 for does not exist
 */
