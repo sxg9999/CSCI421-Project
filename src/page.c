@@ -470,12 +470,12 @@ int open_page(Page* self, char* file_path, char* file_name){
 
     if(exist == 0){
         //file exists
-        self -> fp = fopen(self->page_file_path, "r+");
+        self -> fp = fopen(self->page_file_path, "rb+");
         return 0;
     }
 
     //file does not exist
-    self->fp = fopen(self->page_file_path, "w+");
+    self->fp = fopen(self->page_file_path, "wb+");
 
     return 1;
     
