@@ -1,22 +1,19 @@
-#include<stdio.h>
-#include<stdlib.h>
- 
-struct Hash_Table
+ struct Hash_Table
 {
 	int capacity; //2^(times increased+1)
 	int current_size;
 	int load_factor;
-}
+};
 
 
 struct Node
 {
-	int key,
-	int value,
-	Node* next_node;
-}
+	int key;
+	int value;
+	struct Node *next_node;
+};
 
-struct *Hash_Table Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
+struct Hash_Table * Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
 {
 	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
 	//table->capacity = capacity;
@@ -24,47 +21,47 @@ struct *Hash_Table Hash_Table_Creator_With_Values(int capacity, int load_factor,
 	//load_factor-> = load_factor;
 	//fill with values
 	//addAll(arr);
-}
+};
 
-struct *Hash_Table Hash_Table_Creator()
+struct Hash_Table * Hash_Table_Creator()
 {
 	//initialize empty instance
 
-	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
+	struct Hash_Table *table = malloc(sizeof(struct Hash_Table));
 
 	//table->capacity = 2;
 	//table->current_size = 0;
 	//load_factor-> = 2;
 	
 	return table;
-}
+};
 
-void Hash_Table_Destroy(Hash_Table table)
+void Hash_Table_Destroy(struct Hash_Table table)
 {
 	//if table not empty (!= NULL)
 	//for every item in the table
 	//if != NULL, free
-}
+};
 
-int hashcode(struct *Hash_Table table, int key)
+int hashcode(struct Hash_Table *table, int key)
 {
-	return (key % &table->capacity);
-}
+	return (key % table->capacity);
+};
 
-int addAll(Node arr[])
+int addAll(struct Node arr[])
 {
 	//add a collection of pages to table
-}
+};
 
-int add(Node node)
+int add(struct Node node)
 {
 	//insert new entry into table
-}
+};
 
-void resize(Hash_Table table)
+void resize(struct Hash_Table table)
 {
 	//if size = max size, double capacity and reallocate
-}
+};
 
 int compute_index(int key, int value)
 {
