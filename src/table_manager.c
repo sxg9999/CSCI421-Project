@@ -1,11 +1,36 @@
 #include "../include/table_manager.h"
 
-#define PATH "../"
-
-// PLACEHOLDER
-int get_item(HashTable* self, int key, void* item) {
+///
+/// PLACEHOLDERS
+int Hash_get_item(HashTable* self, int key, void* item) {
     return 0;
 }
+
+int Hash_remove_item(HashTable* self, int key) {
+    return 0;
+}
+
+int Hash_add_item(HashTable* self, int key, void* item) {
+    return 0;
+}
+///
+///
+
+
+
+
+void TM_write_meta(TableManager* self) {
+
+}
+
+void TM_read_meta(char* tm_meta_path) {
+
+}
+
+
+
+
+
 
 TableManager* init_table_manager(char* db_loc, int page_size)
 {
@@ -25,7 +50,6 @@ int TM_get_table(TableManager* self, int table_id, Table* table) {
     
     return 0;
 }
-
 
 
 char* get_table_dir(int table_id, char* db_loc)
@@ -66,97 +90,72 @@ int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data
     }
 
     // add table id to list
-    int* new_ids, old_ids;
-
     self->num_tables += 1;
-    new_ids = malloc(self->num_tables * sizeof(int));
-    old_ids = self->table_ids;
-
-    // append new page_id
-    memcpy(new_ids, old_ids, (self->num_tables-1)*sizeof(int));
-    new_ids[self->num_tables-1] = table_id;
-
-    free(self->table_ids);
-    self->table_ids = new_ids;
+    Hash_add_item(self->tables, newTable->table_id, newTable);
 
     return table_id;
 }
 
 void TM_save_meta(TableManager* self) {
+    FILE* fp;
+    char filepath[255] = NULL;
+    strcpy(filepath, self->db_loc);
+    strcat(filepath, TM_META_FILE);
 
+    fp = fopen(filepath, "wb+");
+
+    fwrite(self, sizeof(TableManager), 1, fp);
+    fclose(fp);
+
+    TM_destroy(self);
 }
 
 void TM_save_tables(TableManager* self) {
+    Table** tables;
+    get_all_items(self->tables, tables);
     for(int t = 0; t < self->num_tables; t++) {
-        Table* table;
-        get_item(self->tables, self->table_ids[t], table);
-        Table_save(table);
+        Table* table = tables[t];
+        Table_save_meta(table);
     }
 
     TM_save_meta(self);
 }
 
-int table_clear(int table_id)
+void TM_destroy(TableManager* self) {
+    Hash_destroy(self->tables);
+    free(self);
+}
+
+int TM_clear_table(TableManager* self, int table_id)
 {
-    // char* table_meta_path, table_path;
-    // char filename[255];
-    // DIR *tableDir;
-    // struct dirent *page;
+    Table* table;
+    if(TM_get_table(self, table_id, table) == -1) {
+        return -1;
+    }
+    Table_clear(table);
 
-    // // go to table directory
-    // table_path = get_table_dir(table_id);
-    // tableDir = opendir(table_path);
-
-    
-    // if(tableDir == NULL) {
-    //     return -1; // error
-    // }
-
-    // // iterate through pages
-    // // delete all its pages
-    // while( page=readdir(tableDir) )
-    // {
-    //     // skip ".", "..", and table_meta_data.oo files
-    //     if(!strcmp(page->d_name, ".") || !strcmp(page->d_name, "..") || !strcmp(page->d_name, TABLE_META_DATA_FILE))
-    //     {
-    //         continue;
-    //     }
-    //     strcpy(filename, table_path);
-    //     strcat(filename, page->d_name);
-
-    //     // delete each one
-    //     if(remove(filename) == -1) {
-    //         return -1; // error
-    //     }
-    // }
-
-    // if(closedir(tableDir) == -1) {
-    //     return -1;
-    // }
     return 0;
 }
 
-int table_drop(int table_id)
+int TM_drop_table(TableManager* self, int table_id)
 {
-    // char* table_meta_path, table_path;
+    char* table_meta_path, table_path;
+    Table* table;
+    if(TM_get_table(self, table_id, table) == -1) {
+        return -1;
+    }
 
-    // // clear table
-    // table_clear(table_id);
+    // update list of tables
 
-    // // delete meta file
-    // table_path = get_table_dir(table_id);
+    Hash_remove_item(self->tables, table_id);
 
-    // strcpy(table_meta_path, table_path);
-    // strcat(table_meta_path, TABLE_META_DATA_FILE);
-    
-    // if(remove(table_meta_path) == -1) {
-    //     return -1;
-    // }
+    self->num_tables -= 1;
 
-    // // delete table directory
-    // if(rmdir(table_path) == -1) {
-    //     return -1;
-    // }
+    // destroy table and its folder
+    Table_destroy(table);
+
+    char* tableDir = get_table_dir(table_id, self->db_loc);
+    rmdir(tableDir);
 
     return 0;
 }

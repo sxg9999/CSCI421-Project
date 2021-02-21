@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "../include/table.h"
 
+private Page* new_page(Table* self);
+private Page* new_existing_page(Table* self, int page_id);
 
 
 void Table_init(Table* self, TableParams* params) {
@@ -63,6 +65,21 @@ int Table_update_record(Table* self, buffer_manager* bm, union record_item* reco
     return 0;
 }
 
+void Table_save_meta(Table* self) {
+
+}
+
+/*
+ *
+ */
+int Table_clear(Table* self) {
+
+}
+
+void Table_destroy(Table* self) {
+    
+}
+
 // returns the new page id
 private Page* new_page(Table* self) {
     srand(time());
@@ -107,9 +124,6 @@ private Page* new_existing_page(Table* self, int page_id) {
     return Page_create(pp);    
 }
 
-/*
- * Find out if record items are equal.
- */
 bool records_equal(union record_item* item1, union record_item* item2, int data_type)
 {
     switch (data_type)
