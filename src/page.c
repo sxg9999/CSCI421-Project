@@ -202,9 +202,9 @@ int get_record_id(Page* self, union record_item* record){
  * 
  * @returns 0 if successful, -1 otherwise
  */
-int Page_update_record(Page* self, union record_item* record_updated) {
+int Page_update_record(Page* self, union record_item* record_key, union record_item* record_updated) {
 
-    int record_id = get_record_id(self, record_updated);
+    int record_id = get_record_id(self, record_key);
 
     union record_item* rc_up = (union record_item*)malloc( 
         self->num_of_attributes * sizeof(union record_item));
@@ -243,8 +243,9 @@ int Page_update_record(Page* self, union record_item* record_updated) {
  *
  */
 
-int Page_remove_record(Page* self, int record_id){
+int Page_remove_record(Page* self, union record_item* record_key){
 
+    int record_id = get_record_id(self, record_key);
     //record_id is the index
     int i;
     self->num_of_records--;                 //decrement the number of records in the page
