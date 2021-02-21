@@ -10,9 +10,6 @@ Page* new_page(Table* self);
 Page* new_existing_page(Table* self, int page_id);
 
 
-<<<<<<< HEAD
-void Table_write_meta(Table* self, FILE* fp) {
-=======
 int Table_write_meta(Table* self, FILE* fp) {
     int rc;
     // write table id
@@ -24,7 +21,7 @@ int Table_write_meta(Table* self, FILE* fp) {
         rc = ce( fprintf(fp, self->column_types[a]) );
     }
     // write # of attributes in primary key
-    rc = ce( fprintf(fp, self->num_keys);
+    rc = ce( fprintf(fp, self->num_keys));
     // write each attribute of primary key
     for(int k = 0; k < self->num_keys; k++) {
         rc = ce( fprintf(fp, self->key_indices[a]) );
@@ -37,7 +34,6 @@ int Table_write_meta(Table* self, FILE* fp) {
     for(int p = 0; p < self->num_pages; p++) {
         rc = ce( fprintf(fp, self->page_ids[p]) );
     }
->>>>>>> 02af6f9e412bf84ab2b7eebdce4b9e9dfd26ff1b
 
     if (rc == -1) {
         frpintf(stderr, "Problem writing table data.");
@@ -45,10 +41,6 @@ int Table_write_meta(Table* self, FILE* fp) {
     return rc;
 }
 
-<<<<<<< HEAD
-void Table_read_meta(Table* new_table, FILE* fp) {
-    
-=======
 int Table_read_meta(Table* newTable, FILE* fp) {
     int rc;
 
@@ -62,16 +54,16 @@ int Table_read_meta(Table* newTable, FILE* fp) {
 
     // read type of each attribute
     int* column_types = malloc(num_columns * sizeof(int));
-    for(int a = 0; a < num_cols; a++) {
+    for(int a = 0; a < num_columns; a++) {
         rc = ce( fscanf(fp, column_types + a*sizeof(int)) );
     }
 
     // read # of attributes in primary key
     int num_keys;
-    rc = ce( fscanf(fp, &num_keys);
+    rc = ce( fscanf(fp, &num_keys));
 
     // read each attribute of primary key
-    int* key_indicess = malloc(num_keys * sizeof(int))
+    int* key_indicess = malloc(num_keys * sizeof(int));
     for(int k = 0; k < num_keys; k++) {
         rc = ce( fscanf(fp, key_indices + k*sizeof(int)) );
     }
@@ -85,7 +77,7 @@ int Table_read_meta(Table* newTable, FILE* fp) {
     rc = ce( fscanf(fp, &num_pages) );
 
     // read each page #
-    int* page_ids = malloc(num_pages * sizeof(int))
+    int* page_ids = malloc(num_pages * sizeof(int));
     for(int p = 0; p < &num_pages; p++) {
         rc = ce( fscanf(fp, page_ids + p*sizeof(int)) );
     }
@@ -103,7 +95,6 @@ int Table_read_meta(Table* newTable, FILE* fp) {
         frpintf(stderr, "Problem reading table data.");
     }
     return rc;
->>>>>>> 02af6f9e412bf84ab2b7eebdce4b9e9dfd26ff1b
 }
 
 

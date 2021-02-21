@@ -1,6 +1,6 @@
 # compiler flags for debugging and warnings
 CC = gcc
-CFLAGS = -g -Wall -Wextra
+CFLAGS = -g -Wall -Wextra -lm
 SOURCE_FILES = src/*.c
 HEADER_FILES = include/*.h
 # first entry for make to envoke
