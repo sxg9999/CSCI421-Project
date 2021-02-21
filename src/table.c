@@ -4,16 +4,106 @@
 #include "../include/table.h"
 #include "../include/page.h"
 
+#define ce(X) (((X) < 0) ? (X) : 0)
+
 Page* new_page(Table* self);
 Page* new_existing_page(Table* self, int page_id);
 
 
+<<<<<<< HEAD
 void Table_write_meta(Table* self, FILE* fp) {
+=======
+int Table_write_meta(Table* self, FILE* fp) {
+    int rc;
+    // write table id
+    rc = ce( fprintf(fp, self->table_id) );
+    // write # of attributes
+    rc = ce( fprintf(fp, self->num_columns) );
+    // write type of each attribute
+    for(int a = 0; a < self->num_columns; a++) {
+        rc = ce( fprintf(fp, self->column_types[a]) );
+    }
+    // write # of attributes in primary key
+    rc = ce( fprintf(fp, self->num_keys);
+    // write each attribute of primary key
+    for(int k = 0; k < self->num_keys; k++) {
+        rc = ce( fprintf(fp, self->key_indices[a]) );
+    }
+    // write # of records in table
+    rc = ce( fprintf(fp, self->num_records) );
+    // write # of pages in table
+    rc = ce( fprintf(fp, self->num_pages) );
+    // write each page #
+    for(int p = 0; p < self->num_pages; p++) {
+        rc = ce( fprintf(fp, self->page_ids[p]) );
+    }
+>>>>>>> 02af6f9e412bf84ab2b7eebdce4b9e9dfd26ff1b
 
+    if (rc == -1) {
+        frpintf(stderr, "Problem writing table data.");
+    }
+    return rc;
 }
 
+<<<<<<< HEAD
 void Table_read_meta(Table* new_table, FILE* fp) {
     
+=======
+int Table_read_meta(Table* newTable, FILE* fp) {
+    int rc;
+
+    // read table id
+    int table_id;
+    rc = ce( fscanf(fp, &table_id) );
+
+    // read # of attributes
+    int num_columns;
+    rc = ce( fscanf(fp, &num_columns) );
+
+    // read type of each attribute
+    int* column_types = malloc(num_columns * sizeof(int));
+    for(int a = 0; a < num_cols; a++) {
+        rc = ce( fscanf(fp, column_types + a*sizeof(int)) );
+    }
+
+    // read # of attributes in primary key
+    int num_keys;
+    rc = ce( fscanf(fp, &num_keys);
+
+    // read each attribute of primary key
+    int* key_indicess = malloc(num_keys * sizeof(int))
+    for(int k = 0; k < num_keys; k++) {
+        rc = ce( fscanf(fp, key_indices + k*sizeof(int)) );
+    }
+
+    // read # of records in table
+    int num_records;
+    rc = ce( fscanf(fp, &num_records) );
+
+    // read # of pages in table
+    int num_pages;
+    rc = ce( fscanf(fp, &num_pages) );
+
+    // read each page #
+    int* page_ids = malloc(num_pages * sizeof(int))
+    for(int p = 0; p < &num_pages; p++) {
+        rc = ce( fscanf(fp, page_ids + p*sizeof(int)) );
+    }
+
+    newTable->table_id = table_id;
+    newTable->num_columns = num_columns;
+    newTable->column_types = column_types;
+    newTable->num_keys = num_keys;
+    newTable->key_indices = key_indices;
+    newTable->num_records = num_records;
+    newTable->num_pages = num_pages;
+    newTable->page_ids = pages_ids;
+
+    if (rc == -1) {
+        frpintf(stderr, "Problem reading table data.");
+    }
+    return rc;
+>>>>>>> 02af6f9e412bf84ab2b7eebdce4b9e9dfd26ff1b
 }
 
 
@@ -154,59 +244,4 @@ Page* new_existing_page(Table* self, int page_id) {
                                     self->columns};
 
     return Page_create(pp);    
-}
-
-bool records_equal(union record_item* item1, union record_item* item2, int data_type)
-{
-    switch (data_type)
-    {
-    case 0:
-        return item1->i == item2->i;
-        break;
-    case 1:
-        return item1->d == item2->d;
-        break;
-    case 2:
-        return item1->b == item2->b;
-        break;
-    case 3:
-        return strcmp(item1->c, item2->c) == 0;
-        break;
-    case 4:
-        return strcmp(item1->v, item2->v) == 0;
-        break;
-    default:
-        return false;
-        break;
-    }
-}
-
-union record_item* getRecord_with_PrimaryKey(int table_id, union record_item* primary_key)
-{
-    Table* table = find_table(table_id);
-    union record_item*** records = table->records;
-
-    // very rudamentary search
-    for(int r = 0; r < table->num_records; r++) // iterate thru rows
-    {
-        union record_item* row = *records[r];
-        for(int k = 0; k < table->num_keys; k++) // iterate thru keys
-        {
-            int key_index = table->key_indices[k];
-            union record_item row_val = row[key_index];
-            union record_item key_val = primary_key[k];
-            int data_type = table->column_types[key_index];
-            if(records_equal( &row_val, &key_val, data_type) ) // check row against given key
-            {
-                if(k == table->num_keys - 1) {
-                    return row;
-                } else {
-                    continue;
-                }
-            } else {
-                break;
-            }
-        }
-
-    }
 }

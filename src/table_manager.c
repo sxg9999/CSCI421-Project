@@ -23,7 +23,7 @@ int Hash_add_item(HashTable* self, int key, void* item) {
 void TM_write_meta(TableManager* self) {
     FILE* fp;
 
-    fp = fopen(TABLE_META_DATA_FILENAME, "w");
+    fp = fopen(TABLE_META_DATA_FILENAME, "wb+");
     // write out length of db_loc
     fprintf(fp, strlen(self->db_loc));
     // write out db_loc
@@ -49,7 +49,7 @@ void TM_read_meta() {
     FILE* fp;
 
 
-    fp = fopen(TABLE_META_DATA_FILENAME, "r");
+    fp = fopen(TABLE_META_DATA_FILENAME, "rb+");
     // read length of db_loc
     int db_loc_length; 
     fscanf(fp, "%d", &db_loc_length);
@@ -126,13 +126,14 @@ int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data
 
     mkdir(table_dir, S_IRWXO);
 
-    TableParams params = (TableParams) {table_id,
-                                        self->page_size,
-                                        data_types,
-                                        key_indices,
-                                        data_types_size,
-                                        key_indices_size,
-                                        table_dir};
+    TableParams params;
+    params.table_id = table_id;
+    params.page_size = self->page_size;
+    params.data_types = data_types;
+    params.data_types_size = data_types_size;
+    params.key_indices = key_indices;
+    params.key_indices_size = key_indices_size;
+    params.loc = table_dir;
 
     Table* newTable = Table_create(&params);
 
@@ -172,6 +173,12 @@ void TM_save_tables(TableManager* self) {
 }
 
 void TM_destroy(TableManager* self) {
+    for(int i = 0; i < self->num_tables; i++) {
+        int id = self->table_ids[i];
+        Table* table;
+        Hash_get_item(self->tables, id, (void*) table);
+        Table_destroy(table);
+    }
     Hash_destroy(self->tables);
     free(self->db_loc);
     free(self->table_ids);
