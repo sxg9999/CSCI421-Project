@@ -244,6 +244,7 @@ int Page_update_record(Page* self, union record_item* record_updated) {
  */
 
 int Page_remove_record(Page* self, int record_id){
+
     //record_id is the index
     int i;
     self->num_of_records--;                 //decrement the number of records in the page
