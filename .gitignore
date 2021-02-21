@@ -9,3 +9,4 @@ include/generator
 include/test 
 src/generator
 src/test 
+src/main.c
