@@ -21,26 +21,28 @@ union record_item {
 
 typedef struct
 {
-	int capacity; //2^(times increased+1)
-	int current_size;
-	int load_factor;
-    int num_of_attr;
-    int* attr_data_types;
-    int** table;
-    
-}HashTable;
-
-typedef struct
-{
 	int key;
 	int value;
 	struct Node *next_node;
 }Node;
 
+typedef struct
+{
+	int capacity; //2^(times increased+1)
+	int current_size;
+	int load_factor;
+    int len_of_data_types_arr;
+    int* attr_data_types;
+    Node* table;
+    
+}HashTable;
 
-HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
 
-HashTable* HashTable_record_create();
+
+
+HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr);
+
+HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr);
 
 int put(HashTable* self, int key, int value);
 

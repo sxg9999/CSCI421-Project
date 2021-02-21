@@ -7,9 +7,36 @@
 
 
 
-HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
+void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+	self->capacity = capacity;
+	self->load_factor = load_factor;
+	self->len_of_data_types_arr = len_of_data_types_arr;
+	self->table = (Node*)malloc(sizeof(Node)*self->capacity);
 
-HashTable* HashTable_record_create();
+	int i;
+	// for(i=0; i<len_of_data_types_arr)
+
+}
+
+
+HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+	
+	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
+	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
+
+	return record_hash_table;
+}
+
+HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr){
+
+	int capacity = 12;
+	int load_factor = .75;
+	
+	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
+	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
+
+	return record_hash_table;
+}
 
 
 
@@ -52,7 +79,7 @@ void Ht_clear_n_buffer(char* buffer, int end_of_buffer){
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length){
 	
 	int* attr_data_types = self->attr_data_types;
-	int num_of_attr = self->num_of_attr;
+	
 	int hash_code = 0;
 
 	char buffer[100];
@@ -98,6 +125,8 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 	return hash_code;
 	
 }
+
+
 
 int compute_index(HashTable* self, int hash_code){
 	return hash_code % hash_code;
