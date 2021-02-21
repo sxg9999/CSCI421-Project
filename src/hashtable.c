@@ -7,17 +7,6 @@
 
 
 
-<<<<<<< HEAD
-HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
-
-HashTable* HashTable_record_create();
-
-int main()
-{
-    struct Hash_Table * table = Hash_Table_Creator();
-    printf("Size of table is &lu", sizeof(struct Hash_Table));
-    struct Hash_Table * resizedT = resize(table);
-=======
 void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
 	self->capacity = capacity;
 	self->load_factor = load_factor;
@@ -27,7 +16,6 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	int i;
 	// for(i=0; i<len_of_data_types_arr)
 
->>>>>>> ef95d2650c06674560aa6e5d3c02735daf12e441
 }
 
 
@@ -50,8 +38,6 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 	return record_hash_table;
 }
 
-<<<<<<< HEAD
-=======
 
 
 //tutorial table?
@@ -81,7 +67,6 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 
 // }
 
->>>>>>> ef95d2650c06674560aa6e5d3c02735daf12e441
 int get_record(HashTable* self, union record_item* key, int key_length){
 
 
