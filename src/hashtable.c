@@ -41,6 +41,13 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 }
 
 
+int put(HashTable* self, int key, int value);
+
+int put_record(HashTable* self, union record_item* key, int value, int record_length){
+	int threshold = ceil(self->capacity * self->load_factor);
+
+
+}
 
 int get_record(HashTable* self, union record_item* key, int key_length){
 
