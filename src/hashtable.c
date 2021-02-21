@@ -18,33 +18,48 @@ struct Node
 
 *Hash_Table Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
 {
-	//load with initial values
+	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
+	//table->capacity = capacity;
+	//table->current_size = 0;
+	//load_factor-> = load_factor;
+	//fill with values
+	//addAll(arr);
 }
 
 *Hash_Table Hash_Table_Creator()
 {
 	//initialize empty instance
+
+	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
+
+	//table->capacity = 2;
+	//table->current_size = 0;
+	//load_factor-> = 2;
+	
+	return table;
 }
 
-addAll()
+int addAll(Node arr[])
 {
 	//add a collection of pages to table
 }
 
-add()
+int add(Node node)
 {
 	//insert new entry into table
 }
 
-resize()
+void resize(Hash_Table table)
 {
 	//if size = max size, double capacity and reallocate
 }
 
-compute_index()
+int compute_index(int key, int value)
 {
 	//What calc to use?
 }
+
+
 
 
 
