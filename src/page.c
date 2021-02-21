@@ -86,6 +86,49 @@ Page* Page_create(const PageParams* page_params){
     return page;
 }
 
+/**
+ * Returns a record from the page with the provided id
+ * @param self - a page of record
+ * @param record_id - the index of the record in the page
+ * @param data - a pointer to an array of record_item values that represents,
+ *               the record that matches the record_id
+ * @returns 0 if successful, -1 otherwise
+ */
+
+int Page_get_record(Page* self, int record_id, union record_item** data){
+
+    union record_item** record = self->records[record_id];
+
+    int* attr_data_types = self->attr_data_types;
+    int num_of_attributes = self->num_of_attributes;
+
+    int i;
+    for(i=0; i<num_of_attributes; i++){
+        switch(attr_data_types[i]){
+            case 0:
+                //integer
+                data[0][i].i = record[0][i].i;
+                break;
+            case 1:
+                //Double
+                data[0][i].d = record[0][i].d;
+                break;
+            case 2:
+                //Boolean
+                data[0][i].b = record[0][i].b;
+                break;
+            case 3:
+                //Char
+                strncpy(data[0][i].c, record[0][i].c, strlen(record[0][i].c)+1);
+                break;
+            case 4:
+                //Varchar
+                strncpy(data[0][i].v, record[0][i].v, strlen(record[0][i].v)+1);
+                break;
+        }
+    }
+}
+
 
 
 /**
@@ -166,10 +209,10 @@ int Page_update_record(Page* self, int record_id, union record_item* record_upda
             rc_up[i].b = record_updated[i].b;
             break;
         case 3:
-            strncpy(rc_up[i].c, record_updated[i].c, strlen(record_updated[i].c));
+            strncpy(rc_up[i].c, record_updated[i].c, strlen(record_updated[i].c)+1);
             break;
         case 4:
-            strncpy(rc_up[i].v, record_updated[i].v, strlen(record_updated[i].v));
+            strncpy(rc_up[i].v, record_updated[i].v, strlen(record_updated[i].v)+1);
             break;
         default:
             break;
@@ -373,8 +416,6 @@ int Page_write(Page* self){
 
     //close file
     fclose(self->fp);
-    //free up memory
-    Page_destroy(self);
 }
 
 
