@@ -24,6 +24,16 @@ typedef struct{
     int* page_ids;
 } Table;
 
+typedef struct{
+    table_id;
+    page_size;
+    data_types_size;
+    key_indices_size;
+    data_types;
+    key_indices;
+    loc;
+} TableParams;
+
 Page* new_page(Table* self);
 Page* new_existing_page(Table* self, int page_id);
 
@@ -37,16 +47,11 @@ void Table_init(Table* self, TableParams* params);
 
 Table* Table_create(TableParams* params);
 
-
 int Table_insert_record(Table* self, buffer_manager* bm, union record_item* record);
 
 int Table_update_record(Table* self, buffer_manager* bm, union record_item* record);
 
 
-
-/*
- *
- */
 void Table_clear(Table* self);
 
 void Table_destroy(Table* self);
