@@ -45,6 +45,7 @@ int put(HashTable* self, int key, int value);
 
 int put_record(HashTable* self, union record_item* key, int value, int record_length){
 	int threshold = ceil(self->capacity * self->load_factor);
+	
 
 
 }
