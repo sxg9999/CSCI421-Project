@@ -184,6 +184,24 @@ int Page_update_record(Page* self, int record_id, union record_item* record_upda
 
 
 /**
+ * Removes a record given the record_id and update the indexs accordindly
+ *
+ */
+
+int Page_remove_record(Page* self, int record_id){
+    //record_id is the index
+    int i;
+    self->num_of_records--;                 //decrement the number of records in the page
+    union record_item** records = self->records;
+    for(i=record_id; i<self->num_of_records; i++){
+        records[i] = records[i+1];
+    }
+
+    return 0;
+}
+
+
+/**
  * A function responsible for freeing a page class from memory
  * @page - a page class to be destroyed
  */

@@ -5,3 +5,7 @@ TestCode
 Garbage
 backup
 archive
+include/generator
+include/test 
+src/generator
+src/test 
