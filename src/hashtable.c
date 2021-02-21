@@ -7,6 +7,7 @@
 
 
 
+<<<<<<< HEAD
 HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
 
 HashTable* HashTable_record_create();
@@ -16,23 +17,71 @@ int main()
     struct Hash_Table * table = Hash_Table_Creator();
     printf("Size of table is &lu", sizeof(struct Hash_Table));
     struct Hash_Table * resizedT = resize(table);
+=======
+void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+	self->capacity = capacity;
+	self->load_factor = load_factor;
+	self->len_of_data_types_arr = len_of_data_types_arr;
+	self->table = (Node*)malloc(sizeof(Node)*self->capacity);
+
+	int i;
+	// for(i=0; i<len_of_data_types_arr)
+
+>>>>>>> ef95d2650c06674560aa6e5d3c02735daf12e441
 }
 
 
-int put(HashTable* self, int key, int value){
+HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+	
+	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
+	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
 
+	return record_hash_table;
 }
 
-int put_record(HashTable* self, union record_item* key, int value, int record_length){
+HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr){
 
-	int threshold = ceil(self->capacity * self->load_factor);
+	int capacity = 12;
+	int load_factor = .75;
+	
+	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
+	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
 
-	if(self->current_size >= threshold){
-		// resize(self);
-	}
-
+	return record_hash_table;
 }
 
+<<<<<<< HEAD
+=======
+
+
+//tutorial table?
+// struct data 
+// {
+// 	int key;
+// 	int value;
+// };
+ 
+// struct data *array;
+// int capacity = 10;
+// int size = 0;
+ 
+// this function gives a unique hash code to the given key
+// int hashcode(int key)
+// {
+// 	return (key % capacity);
+// }
+ 
+//it returns prime number just greater than array capacity
+// int get_prime(int n)
+// {
+// 	if (n % 2 == 0) 
+//         {
+// 		n++;
+// 	}
+
+// }
+
+>>>>>>> ef95d2650c06674560aa6e5d3c02735daf12e441
 int get_record(HashTable* self, union record_item* key, int key_length){
 
 
@@ -58,7 +107,7 @@ void Ht_clear_n_buffer(char* buffer, int end_of_buffer){
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length){
 	
 	int* attr_data_types = self->attr_data_types;
-	int num_of_attr = self->num_of_attr;
+	
 	int hash_code = 0;
 
 	char buffer[100];
@@ -104,6 +153,8 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 	return hash_code;
 	
 }
+
+
 
 int compute_index(HashTable* self, int hash_code){
 	return hash_code % hash_code;
