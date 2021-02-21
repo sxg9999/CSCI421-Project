@@ -39,6 +39,13 @@ struct Node
 	return table;
 }
 
+void Hash_Table_Destroy(Hash_Table table)
+{
+	//if table not empty (!= NULL)
+	//for every item in the table
+	//if != NULL, free
+}
+
 int addAll(Node arr[])
 {
 	//add a collection of pages to table
