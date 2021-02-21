@@ -40,19 +40,32 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 
 
 
-int put(HashTable* self, int key, int value){
+//tutorial table?
+// struct data 
+// {
+// 	int key;
+// 	int value;
+// };
+ 
+// struct data *array;
+// int capacity = 10;
+// int size = 0;
+ 
+// this function gives a unique hash code to the given key
+// int hashcode(int key)
+// {
+// 	return (key % capacity);
+// }
+ 
+//it returns prime number just greater than array capacity
+// int get_prime(int n)
+// {
+// 	if (n % 2 == 0) 
+//         {
+// 		n++;
+// 	}
 
-}
-
-int put_record(HashTable* self, union record_item* key, int value, int record_length){
-
-	int threshold = ceil(self->capacity * self->load_factor);
-
-	if(self->current_size >= threshold){
-		// resize(self);
-	}
-
-}
+// }
 
 int get_record(HashTable* self, union record_item* key, int key_length){
 
