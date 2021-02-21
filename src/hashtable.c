@@ -25,11 +25,56 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 
 HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
 	
+<<<<<<< HEAD
 	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
 	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
 
 	return record_hash_table;
 }
+=======
+	return table;
+};
+
+void Hash_Table_Destroy(struct Hash_Table table)
+{
+	//if table not empty (!= NULL)
+	//for every item in the table
+	//if != NULL, free
+};
+
+int hashcode(struct Hash_Table *table, int key)
+{
+	return (key % table->capacity);
+};
+
+int addAll(struct Node arr[])
+{
+	//add a collection of pages to table
+};
+
+int add(struct Node node)
+{
+	//insert new entry into table
+};
+
+struct Hash_Table * resize(struct Hash_Table * table)
+{
+	//if size = max size, double capacity and reallocate
+    table = realloc(table, (sizeof(table)*2));
+    if(table == NULL)
+    {
+        //failed allocation
+    }
+    table->capacity = table->capacity * 2;
+    return table;
+};
+
+int compute_index(int key, int value)
+{
+	//What calc to use?
+};
+
+>>>>>>> hashtable
 
 HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr){
 
