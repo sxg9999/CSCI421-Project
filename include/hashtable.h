@@ -48,9 +48,9 @@ int put_record(HashTable* self, union record_item* key, int value, int record_le
 
 int get_record(HashTable* self, union record_item* key, int key_length);
 
-int compute_hash_code_record(HashTable* self, union record_item* key);
+int compute_hash_code_record(HashTable* self, union record_item* key, int record_length);
 
-int compute_index(int hash_code);
+int compute_index(HashTable* self, int hash_code);
 
 int resize(HashTable* table);
 

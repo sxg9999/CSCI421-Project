@@ -7,7 +7,7 @@
 
 
 
-HashTable* HashTable_record_create_param(int capacity, int load_factor);
+HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
 
 HashTable* HashTable_record_create();
 
@@ -22,7 +22,7 @@ int put_record(HashTable* self, union record_item* key, int value, int record_le
 	int threshold = ceil(self->capacity * self->load_factor);
 
 	if(self->current_size >= threshold){
-		resize(self);
+		// resize(self);
 	}
 
 }
@@ -42,7 +42,7 @@ int compute_dec_vals(char* str, int length){
 	return result;
 }
 
-void clear_n_buffer(char* buffer, int end_of_buffer){
+void Ht_clear_n_buffer(char* buffer, int end_of_buffer){
     int i;
     for(i=0; i<end_of_buffer; i++){
         buffer[i]=0;
@@ -82,22 +82,26 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 					}
 					break;
 				case 3:
+					hash_code += compute_dec_vals(key[i].c, strlen(key[i].c));
 					//char
 					break;
 				case 4:
 					//varchar
+					hash_code += compute_dec_vals(key[i].c, strlen(key[i].c));
 					break;
 				default:
 					break;
 		}
-		clear_n_buffer(buffer, strlen(buffer)+1);
-
+		Ht_clear_n_buffer(buffer, strlen(buffer)+1);
 	}
+
+	return hash_code;
 	
 }
 
-
-int compute_index(int hash_code);
+int compute_index(HashTable* self, int hash_code){
+	return hash_code % hash_code;
+}
 
 int resize(HashTable* table);
 
