@@ -1,4 +1,5 @@
 #include "../include/table_manager.h"
+#include "../include/table.h"
 
 ///
 /// PLACEHOLDERS
@@ -33,14 +34,15 @@ void TM_write_meta(TableManager* self) {
     fprintf(fp, (self->tables)->current_size);
 
     // write out each table
-        // write table id
-        // write # of attributes
-        // write type of each attribute
-        // write # of attributes in primary key
-        // write type of each attributes of primary key
-        // write # of records in table
-        // write # of pages in table
-        // write each page # 
+    for (int i = 0; i < self->num_tables; i++) {
+        int current_table_id = self->table_ids[i];
+        Table* current_table;
+        Hash_get_item(self->tables, current_table_id, current_table);
+        // write out current table to fp
+        Table_write_meta(current_table, fp);
+    }
+
+    fclose(fp);
 }
 
 void TM_read_meta() {
@@ -67,19 +69,17 @@ void TM_read_meta() {
     int table_count;
     fscanf(fp, "%d", &table_count);
 
-    // read each table
-        // read table id
-        // read # of attributes
-        // read type of each attribute
-        // read # of attributes in primary key
-        // read type of each attributes of primary key
-        // read # of records in table
-        // read # of pages in table
-        // read each page # 
+    // read in each table
+    for (int i = 0; i < tm->num_tables; i++) {
+        int current_table_id = tm->table_ids[i];
+        Table* current_table;
+        Hash_get_item(tm->tables, current_table_id, current_table);
+        // write out current table to fp
+        Table_write_meta(current_table, fp);
+    }
+
+    fclose(fp);
 }
-
-
-
 
 
 
@@ -147,18 +147,17 @@ int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data
     return table_id;
 }
 
-void TM_save_meta(TableManager* self) {
-    FILE* fp;
-    char filepath[255] = NULL;
-    strcpy(filepath, self->db_loc);
-    strcat(filepath, TM_META_FILE);
+int TM_add_old_table(TableManager* self, Table* old_table)
+{
+    char* table_dir = get_table_dir(old_table->table_id, self->db_loc);
 
-    fp = fopen(filepath, "wb+");
+    mkdir(table_dir, S_IRWXO);
 
-    fwrite(self, sizeof(TableManager), 1, fp);
-    fclose(fp);
+    // add table id to list
+    self->num_tables += 1;
+    Hash_add_item(self->tables, old_table->table_id, old_table);
 
-    TM_destroy(self);
+    return old_table->table_id;
 }
 
 void TM_save_tables(TableManager* self) {
@@ -174,6 +173,8 @@ void TM_save_tables(TableManager* self) {
 
 void TM_destroy(TableManager* self) {
     Hash_destroy(self->tables);
+    free(self->db_loc);
+    free(self->table_ids);
     free(self);
 }
 

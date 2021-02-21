@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
+
 #include "../include/table.h"
 #include "../include/page.h"
 
@@ -6,11 +8,11 @@ Page* new_page(Table* self);
 Page* new_existing_page(Table* self, int page_id);
 
 
-void Table_write_meta(Table* self) {
+void Table_write_meta(Table* self, FILE* fp) {
 
 }
 
-void Table_read_meta(char* table_meta_path) {
+void Table_read_meta(Table* new_table, FILE* fp) {
     
 }
 
@@ -58,7 +60,7 @@ int Table_update_record(Table* self, buffer_manager* bm, union record_item* reco
     Page* page;
     int last_page_id;
     if(self->num_pages == 0) { // no pages in table
-        page = new_page(self, page);
+        page = new_page(self);
         add_page(bm, page);
         
     } else if(get_buffer_page(bm, last_page_id = self->page_ids[self->num_pages - 1], page) != 0) { // page not in buffer

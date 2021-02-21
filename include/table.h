@@ -8,6 +8,7 @@
 #define TABLE_H
 
 #include <stdlib.h>
+
 #include "storagemanager.h"
 #include "table_meta_data.h"
 #include "page.h"
@@ -19,6 +20,7 @@ typedef struct{
     int num_records; // number of tuples
     int* column_types; // data_types of attributes
     int* key_indices; // which columns are keys
+    int* page_ids;
     int num_columns;
     int num_keys;
     int num_pages;
@@ -46,4 +48,4 @@ union record_item*** getTable(int table_id);
 union record_item*  getRecord_with_PrimaryKey(int table_id, union record_item* primary_key);
 
 
-#endif
+#endif 
