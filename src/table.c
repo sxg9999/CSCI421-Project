@@ -1,43 +1,116 @@
 #include <stdlib.h>
 #include "../include/table.h"
 
-/*
- * Filler function.
- */
-Table* find_table(int table_id)
-{
-    return NULL;
+
+
+void Table_init(Table* self, TableParams* params) {
+    self->table_id = params->table_id;
+    self->page_size = params->page_size;
+    self->num_pages = 0;
+    self->page_ids = NULL;
+    self->num_columns = params->data_types_size;
+    self->num_keys = params->key_indices_size;
+    self->columns = params->data_types;
+    self->primary_key = params->key_indices;
+    self->loc = params->loc;
 }
 
-Table* create_table(int table_id, int* data_types, int* key_indices, int num_cols, int num_keys)
-{
-    Table* newTable = malloc(sizeof(Table));
-    *newTable = (Table) {table_id,
-                        NULL,
-                        0,
-                        data_types,
-                        key_indices,
-                        num_cols,
-                        num_keys,
-                        0};
-
-    return newTable;
-
+Table* Table_create(TableParams* params) {
+    Table* table = malloc(sizeof(Table));
+    Table_init(table, params);
+    return table;
 }
 
-union record_item*** getTable(int table_id)
-{
-    return find_table(table_id)->records;
+
+int Table_insert_record(Table* self, buffer_manager* bm, union record_item* record) {
+    Page* page;
+    int last_page_id;
+    if(self->num_pages == 0) { // no pages in table
+        new_page(page);
+        add_page(bm, page);
+        
+    } else if(get_buffer_page(bm, last_page_id = self->page_ids[self->num_pages - 1], page) != 0) { // page not in buffer
+        new_existing_page(page, last_page_id);
+        add_page(bm, page);
+    }
+    // page now in buffer
+
+    if(Page_insert_record(page, record) == -1) {
+        return -1;
+    }
+
+    return 0;
 }
 
-/*
-Primary key = [union, union, union...]
-*/
+int Table_update_record(Table* self, buffer_manager* bm, union record_item* record) {
+    Page* page;
+    int last_page_id;
+    if(self->num_pages == 0) { // no pages in table
+        page = new_page(self, page);
+        add_page(bm, page);
+        
+    } else if(get_buffer_page(bm, last_page_id = self->page_ids[self->num_pages - 1], page) != 0) { // page not in buffer
+        page = new_existing_page(self, last_page_id);
+        add_page(bm, page);
+    }
+    // page now in buffer
+
+    /// RECORD_ID =?????
+    if(Page_update_record(page, 0, record) == -1) {
+        return -1;
+    }
+
+    return 0;
+}
+
+// returns the new page id
+private Page* new_page(Table* self) {
+    srand(time());
+    int page_id = rand();
+    Page* page = new_existing_page(self, page_id);
+
+    // add page id to list
+    int* new_ids, old_ids;
+
+    self->num_pages += 1;
+
+    new_ids = malloc(self->num_pages * sizeof(int));
+    old_ids = self->page_ids;
+
+    // append new page_id
+    memcpy(new_ids, old_ids, (self->num_pages-1)*sizeof(int));
+    new_ids[self->num_pages-1] = page_id;
+
+    free(self->page_ids);
+    self->page_ids = new_ids;
+
+    return page;
+}
+
+private Page* new_existing_page(Table* self, int page_id) {
+    srand(time(NULL));
+    int page_id = rand();
+
+    char page_file_name[255] = 'page_';
+    itoa(page_id, page_file_name+6, 10);
+    strcat(page_file_name, ".oo");
+
+    // create Page "object"
+    PageParams pp = (PageParams) {  self->loc,
+                                    page_file_name,
+                                    page_id,
+                                    self->page_size,
+                                    sizeof(record_item),
+                                    self->num_columns,
+                                    self->columns};
+
+    return Page_create(pp);    
+}
 
 /*
  * Find out if record items are equal.
  */
-int records_equal(union record_item* item1, union record_item* item2, int data_type)
+bool records_equal(union record_item* item1, union record_item* item2, int data_type)
 {
     switch (data_type)
     {

@@ -9,10 +9,13 @@
 
 #include <stdlib.h>
 #include "storagemanager.h"
+#include "table_meta_data.h"
+#include "page.h"
+#include "buffer_manager.h"
 
 typedef struct{
     int table_id; // unique id
-    union record_item*** records; // all tuples
+    union record_item*** records; // pointer to list of all tuples
     int num_records; // number of tuples
     int* column_types; // data_types of attributes
     int* key_indices; // which columns are keys
@@ -20,6 +23,10 @@ typedef struct{
     int num_keys;
     int num_pages;
 } Table;
+
+union record_item* row;
+union record_item** rows;
+union record_item*** pointer_to_all_rows;
 
 // typedef struct{
 
