@@ -143,6 +143,47 @@ int Page_insert_record(Page* self, union record_item* record){
 }
 
 /**
+ * Update a record in the page. Primary key of old record isn't altered.
+ * Find the record with the same primary key as `record` and replaces it with `record`
+ * @param self - the current page
+ * @param record - the updated version of the record
+ * 
+ * @returns 0 if successful, -1 otherwise
+ */
+int Page_update_record(Page* self, int record_id, union record_item* record_updated) {
+    union record_item* rc_up = (union record_item*)malloc( 
+        self->num_of_attributes * sizeof(union record_item));
+    for (int i = 0; i < self->num_of_attributes; i++) {
+        switch (self->attr_data_types[i])
+        {
+        case 0:
+            rc_up[i].i = record_updated[i].i;
+            break;
+        case 1:
+            rc_up[i].d = record_updated[i].d;
+            break;
+        case 2:
+            rc_up[i].b = record_updated[i].b;
+            break;
+        case 3:
+            strncpy(rc_up[i].c, record_updated[i].c, strlen(record_updated[i].c));
+            break;
+        case 4:
+            strncpy(rc_up[i].v, record_updated[i].v, strlen(record_updated[i].v));
+            break;
+        default:
+            break;
+        }
+    }
+
+    self->records[record_id] = rc_up;
+
+    return 0;
+}
+
+
+
+/**
  * A function responsible for freeing a page class from memory
  * @page - a page class to be destroyed
  */

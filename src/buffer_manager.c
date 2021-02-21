@@ -61,7 +61,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
-        (Page**)malloc(sizeof( Page* ));
+        (Page*)malloc(sizeof( Page ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
     for (int i = 0; i<buff_man->current_page_count-1; i++) {

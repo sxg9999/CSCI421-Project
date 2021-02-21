@@ -50,6 +50,12 @@ Inserts the provided record into the page
 int Page_insert_record(Page* self, union record_item* record);
 
 
+/* Creates a deep copy of a record
+ * @param record - the record to be copied
+ * @return A new record
+ */
+union record_item* copy_record(union record_item* record);
+
 /*
 Updates the provided record into the page with the provided record_id
 @param record_id
