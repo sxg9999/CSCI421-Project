@@ -166,10 +166,10 @@ int Page_update_record(Page* self, int record_id, union record_item* record_upda
             rc_up[i].b = record_updated[i].b;
             break;
         case 3:
-            strncpy(rc_up[i].c, record_updated[i].c, strlen(record_updated[i].c));
+            strncpy(rc_up[i].c, record_updated[i].c, strlen(record_updated[i].c)+1);
             break;
         case 4:
-            strncpy(rc_up[i].v, record_updated[i].v, strlen(record_updated[i].v));
+            strncpy(rc_up[i].v, record_updated[i].v, strlen(record_updated[i].v)+1);
             break;
         default:
             break;
