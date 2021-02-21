@@ -11,6 +11,8 @@
 #include <sys/stat.h>
 #include "table.h"
 
+#define TM_META_FILE "table_manager_meta_data.oo"
+
 
 // PLACEHOLDER
 typedef struct {
@@ -19,8 +21,10 @@ typedef struct {
 
 typedef struct {
     char* db_loc;
-    int* page_size;
+    int page_size;
+    int* table_ids;
     HashTable* tables;
+    int num_tables;
 } TableManager;
 
 int table_add(int* data_types, int* key_indices, int data_types_size, int key_indices_size);

@@ -93,11 +93,11 @@ int update_record(int table_id, union record_item* record) {
 }
 
 int drop_table(int table_id) {
-    return table_drop(table_id);
+    return TM_drop_table(tableManager, table_id);
 }
 
 int clear_table(int table_id) {
-    return table_clear(table_id);
+    return TM_clear_table(tableManager, table_id);
 }
 
 /* 

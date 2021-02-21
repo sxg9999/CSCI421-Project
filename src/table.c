@@ -5,6 +5,15 @@ private Page* new_page(Table* self);
 private Page* new_existing_page(Table* self, int page_id);
 
 
+void Table_write_meta(Table* self) {
+
+}
+
+void Table_read_meta(char* table_meta_path) {
+    
+}
+
+
 void Table_init(Table* self, TableParams* params) {
     self->table_id = params->table_id;
     self->page_size = params->page_size;
@@ -65,19 +74,39 @@ int Table_update_record(Table* self, buffer_manager* bm, union record_item* reco
     return 0;
 }
 
-void Table_save_meta(Table* self) {
 
-}
 
 /*
  *
  */
-int Table_clear(Table* self) {
+void Table_clear(Table* self) {
+    char page_file[255];
+    char* page_id_str;
 
+    // delete all page files
+    for(int p = 0; p < self->page_ids; p++) {
+        itoa(page_id_str, self->page_ids[p], 10);
+        strcpy(page_file, self->loc);
+        strcat(page_file, page_id_str);
+
+        remove(page_file);
+    }
+
+    self->num_pages = 0;
 }
 
 void Table_destroy(Table* self) {
-    
+    table_clear(self);
+
+    strcat(self->loc, TABLE_META);
+    remove(self->loc);
+
+    free(self->page_ids);
+    free(self->columns);
+    free(self->primary_key);
+    free(self->loc);
+
+    free(self);
 }
 
 // returns the new page id
