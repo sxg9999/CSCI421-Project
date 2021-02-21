@@ -11,9 +11,6 @@
 #include <sys/stat.h>
 #include "table.h"
 
-#define TM_META_FILE "table_manager_meta_data.oo"
-
-
 #define TABLE_META_DATA_FILENAME "table_meta"
 
 // PLACEHOLDER
