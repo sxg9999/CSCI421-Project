@@ -9,7 +9,10 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
+
 #include "table.h"
+
 
 #define TABLE_META_DATA_FILENAME "table_meta"
 
@@ -26,8 +29,6 @@ typedef struct {
     int num_tables;
 } TableManager;
 
-int table_add(int* data_types, int* key_indices, int data_types_size, int key_indices_size);
-
 Table* getTables();
 
 /*
@@ -41,21 +42,40 @@ void TM_write_meta(TableManager* self);
  */
 void TM_read_meta();
 
+/*
+ *
+ * 
+ */
+TableManager* init_table_manager(char* db_loc, int page_size);
 
 /*
- * Open (or create) TABLES_META_DATA, add newTable to it.
- * Create new dir for this table.
+ * Create a brand new
+ * 
  */
-int table_save(Table* newTable);
+int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data_types_size, int key_indices_size);
+
+/* 
+ * 
+ * 
+ */
+int TM_add_old_table(TableManager* self, Table* old_table);
+
 /*
- * Deletes data from table, but keeps the table meta data.
+ *
  */
-
-int table_clear(int table_id);
+void TM_save_tables(TableManager* self);
 
 /*
- * Deletes a table from existance.
+ *
+ * 
  */
-int table_drop(int table_id);
+int TM_drop_table(TableManager* self, int table_id);
 
-#endif TABLES_H
+
+/*
+ *
+ * 
+ */
+char* get_table_dir(int table_id, char* db_loc);
+
+#endif

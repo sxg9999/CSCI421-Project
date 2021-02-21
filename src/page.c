@@ -3,7 +3,7 @@
  * Implementation of functions related to the Page class
  */
 
-#include "page.h"
+#include "../include/page.h"
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -127,6 +127,8 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
                 break;
         }
     }
+
+    return 0;
 }
 
 
