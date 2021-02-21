@@ -27,6 +27,27 @@ int put_record(HashTable* self, union record_item* key, int value, int record_le
 
 }
 
+int get_record(HashTable* self, union record_item* key, int key_length){
+
+
+}
+int compute_dec_vals(char* str, int length){
+	int result = 0;
+	
+	int i;
+	for(i=0; i<length; i++){
+		result += (int)str[i];
+	}
+
+	return result;
+}
+
+void clear_n_buffer(char* buffer, int end_of_buffer){
+    int i;
+    for(i=0; i<end_of_buffer; i++){
+        buffer[i]=0;
+    }
+}
 
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length){
 	
@@ -34,23 +55,31 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 	int num_of_attr = self->num_of_attr;
 	int hash_code = 0;
 
-	// char key_str[]
+	char buffer[100];
 	//parse the key
 
 	int i;
 	int j;
 	for(i=0; i<record_length; i++){
-		for(j=0; j<num_of_attr; j++){
-			switch(attr_data_types[j]){
+
+		switch(attr_data_types[i]){
 				case 0:
 					//int
-
+					sprintf(buffer, "%d", key[i].i);
+					hash_code += compute_dec_vals(buffer, strlen(buffer));
 					break;
 				case 1:
 					//double
+					sprintf(buffer, "%d", (int)key[i].d);
+					hash_code += compute_dec_vals(buffer, strlen(buffer));
 					break;
 				case 2:
 					//bool
+					if(key[i].b==true){
+						hash_code += compute_dec_vals("true", 4);
+					}else{
+						hash_code += compute_dec_vals("false", 5);
+					}
 					break;
 				case 3:
 					//char
@@ -60,8 +89,9 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 					break;
 				default:
 					break;
-			}
 		}
+		clear_n_buffer(buffer, strlen(buffer)+1);
+
 	}
 	
 }

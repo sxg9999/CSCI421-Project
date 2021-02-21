@@ -26,6 +26,7 @@ typedef struct
 	int load_factor;
     int num_of_attr;
     int* attr_data_types;
+    int** table;
     
 }HashTable;
 
@@ -44,6 +45,8 @@ HashTable* HashTable_record_create();
 int put(HashTable* self, int key, int value);
 
 int put_record(HashTable* self, union record_item* key, int value, int record_length);
+
+int get_record(HashTable* self, union record_item* key, int key_length);
 
 int compute_hash_code_record(HashTable* self, union record_item* key);
 
