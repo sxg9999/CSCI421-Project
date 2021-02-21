@@ -30,7 +30,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes);
 void clear_n_buffer(char* buffer, int end_of_buffer);
 void remove_trailing_zeros(char* src, int str_len);
 int Page_write(Page* self);
-int Page_read(Page* self);
+int Page_read(Page* self, FILE* fp);
 
 
 /**
@@ -61,16 +61,16 @@ void Page_init(Page* self,const PageParams* page_params){
     int page_exist = open_page(self, page_params->table_dir, page_params->page_file_name);
 
 
-    if(page_exist == 0){
-        //if the page is an existing page
-        //read in the records and update the num_of_records
-        Page_read(self);
+    // if(page_exist == 0){
+    //     //if the page is an existing page
+    //     //read in the records and update the num_of_records
+    //     Page_read(self);
 
-    }else{
-        //if the page is an new page
-        //then num_of_records = 0 currently
-        self->num_of_records = 0;
-    }
+    // }else{
+    //     //if the page is an new page
+    //     //then num_of_records = 0 currently
+    //     self->num_of_records = 0;
+    // }
 
 }
 
@@ -287,9 +287,8 @@ void Page_destroy(Page* page){
  * @returns 0 if successful and -1 otherwise
  */
 
-int Page_read(Page* self){
+int Page_read(Page* self, FILE* fp){
 
-    FILE* fp = self->fp;
     union record_item** records = self->records;
     int* attr_data_types = self->attr_data_types;
     int num_of_attributes = self->num_of_attributes;
@@ -347,11 +346,11 @@ int Page_read(Page* self){
         }else{
             col++;
         }
-
     }
 
     self->num_of_records = row;
 
+    
     return 0;
 }
 
@@ -368,7 +367,11 @@ int Page_write(Page* self){
 
 
     //set the file pointer back to the beginning of the file
-    FILE* fp = self->fp;
+    // FILE* fp = self->fp;
+
+    //open
+    FILE* fp = fopen(self->page_file_path, "wb");
+
     fseek(fp, 0, SEEK_SET);      //SEEK_SET points to the beginning of the file and 
                                  //an offset of 0 from that position.
 
@@ -427,7 +430,7 @@ int Page_write(Page* self){
     }
 
     //close file
-    fclose(self->fp);
+    fclose(fp);
 }
 
 
@@ -475,6 +478,7 @@ int open_page(Page* self, char* file_path, char* file_name){
     strncat(self->page_file_path, file_name, file_name_size);
 
 
+    
 
     struct stat buffer;
 
@@ -482,12 +486,17 @@ int open_page(Page* self, char* file_path, char* file_name){
 
     if(exist == 0){
         //file exists
-        self -> fp = fopen(self->page_file_path, "rb+");
+        FILE* fp;
+        fp = fopen(self->page_file_path, "rb");
+        Page_read(self, fp);
+        fclose(fp);
         return 0;
     }
+    
+    self->num_of_records = 0;
 
     //file does not exist
-    self->fp = fopen(self->page_file_path, "wb+");
+    // self->fp = fopen(self->page_file_path, "wb");
 
     return 1;
     
