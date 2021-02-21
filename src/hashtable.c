@@ -8,9 +8,22 @@ HashTable* HashTable_create_param(int capacity, int load_factor);
 
 HashTable* HashTable_create();
 
-int put(union record_item** key, int value);
 
-int compute_hash_code(HashTable* table, int converted_str);
+
+int put(int key, int value){
+
+}
+
+int put_record(union record_item** key, int value){
+
+}
+
+
+int compute_hash_code(HashTable* table, int key_converted){
+
+}
+
+
 
 int compute_index(int hash_code);
 
