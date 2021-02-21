@@ -14,12 +14,12 @@
 #include "../include/page.h"
 
 buffer_manager* BufferManager_new(int max_page_count) {
-    buffer_manager* new_buff_man = malloc( sizeof(buffer_manager) );
+    buffer_manager* new_buff_man = (buffer_manager*)malloc( sizeof(buffer_manager) );
     new_buff_man->current_page_count = 0;
     new_buff_man->max_page_count = max_page_count;
-    new_buff_man->pages = malloc( max_page_count *
+    new_buff_man->pages = (Page**)malloc( max_page_count *
          sizeof( Page* ));
-    new_buff_man->page_arr_with_count = malloc( 
+    new_buff_man->page_arr_with_count = (int*)malloc( 
         max_page_count * sizeof(int) );
     new_buff_man->min_page_id  = -1;
     new_buff_man->min_page_use_count = 0;
@@ -61,7 +61,7 @@ int remove_page(buffer_manager* buff_man, int page_index) {
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
-        malloc(sizeof( Page* ));
+        (Page**)malloc(sizeof( Page* ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
     for (int i = 0; i<buff_man->current_page_count-1; i++) {
