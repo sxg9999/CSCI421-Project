@@ -101,9 +101,14 @@ int set_LRU_page_id(buffer_manager* buff_man) {
 }
 
 void destroy_buffer(buffer_manager* buff_man) {
-    // FREE ALL THE PAGES FIRST
-    free(buff_man->pages);
-    free(buff_man->page_arr_with_count);
+    if (buff_man) {
+        // Free each page
+        for (int i = 0; i<buff_man->current_page_count; i++) {
+            Page_destory(buff_man->pages[i]);
+        }
+        free(buff_man->page_arr_with_count);
 
-    free(buff_man);
+        free(buff_man);
+    }
+    
 }
