@@ -13,7 +13,7 @@ struct Node
 	struct Node *next_node;
 };
 
-struct Hash_Table * Hash_Table_Creator_With_Values(int capacity, int load_factor, Node arr[])
+struct Hash_Table * Hash_Table_Creator_With_Values(int capacity, int load_factor, struct Node arr[])
 {
 	struct Hash_Table* table = malloc(sizeof(struct Hash_Table));
 	//table->capacity = capacity;
