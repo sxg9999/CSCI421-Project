@@ -9,6 +9,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include <stdbool.h>
 
 union record_item {
 	int i;
