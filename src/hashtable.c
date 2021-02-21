@@ -11,6 +11,12 @@ HashTable* HashTable_record_create_param(int capacity, int load_factor, int* att
 
 HashTable* HashTable_record_create();
 
+int main()
+{
+    struct Hash_Table * table = Hash_Table_Creator();
+    printf("Size of table is &lu", sizeof(struct Hash_Table));
+    struct Hash_Table * resizedT = resize(table);
+}
 
 
 int put(HashTable* self, int key, int value){
