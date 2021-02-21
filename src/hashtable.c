@@ -66,7 +66,7 @@ void resize(struct Hash_Table table)
 int compute_index(int key, int value)
 {
 	//What calc to use?
-}
+};
 
 
 
