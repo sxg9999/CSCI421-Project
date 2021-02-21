@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -15,11 +14,10 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	self->attr_data_types = (int*)malloc(sizeof(int)*len_of_data_types_arr);
 
 	int i;
+
 	for(i=0; i<len_of_data_types_arr; i++){
 		self->attr_data_types[i] = attr_data_types[i];
 	}
-
-
 }
 
 
