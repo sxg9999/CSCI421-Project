@@ -8,14 +8,13 @@ HashTable* HashTable_create_param(int capacity, int load_factor);
 
 HashTable* HashTable_create();
 
-int add(Node node);
+int put(union record_item** key, int value);
 
 int compute_hash_code(HashTable* table, int converted_str);
 
 int compute_index(int hash_code);
 
 int resize(HashTable* table);
-
 
 void HashTable_destroy();
 
