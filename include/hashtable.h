@@ -24,6 +24,9 @@ typedef struct
 	int capacity; //2^(times increased+1)
 	int current_size;
 	int load_factor;
+    int num_of_attr;
+    int* attr_data_types;
+    
 }HashTable;
 
 typedef struct
@@ -34,15 +37,15 @@ typedef struct
 }Node;
 
 
-HashTable* HashTable_create_param(int capacity, int load_factor);
+HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types);
 
-HashTable* HashTable_create();
+HashTable* HashTable_record_create();
 
-int put(int key, int value);
+int put(HashTable* self, int key, int value);
 
-int put_record(union record_item** key, int value);
+int put_record(HashTable* self, union record_item* key, int value, int record_length);
 
-int compute_hash_code(HashTable* table, int key_converted);
+int compute_hash_code_record(HashTable* self, union record_item* key);
 
 int compute_index(int hash_code);
 

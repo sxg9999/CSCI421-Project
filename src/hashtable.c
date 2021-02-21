@@ -4,25 +4,67 @@
 #include <math.h>
 #include "hashtable.h"
 
-HashTable* HashTable_create_param(int capacity, int load_factor);
-
-HashTable* HashTable_create();
 
 
 
-int put(int key, int value){
+HashTable* HashTable_record_create_param(int capacity, int load_factor);
 
-}
-
-int put_record(union record_item** key, int value){
-
-}
+HashTable* HashTable_record_create();
 
 
-int compute_hash_code(HashTable* table, int key_converted){
+
+int put(HashTable* self, int key, int value){
 
 }
 
+int put_record(HashTable* self, union record_item* key, int value, int record_length){
+
+	int threshold = ceil(self->capacity * self->load_factor);
+
+	if(self->current_size >= threshold){
+		resize(self);
+	}
+
+}
+
+
+int compute_hash_code_record(HashTable* self, union record_item* key, int record_length){
+	
+	int* attr_data_types = self->attr_data_types;
+	int num_of_attr = self->num_of_attr;
+	int hash_code = 0;
+
+	// char key_str[]
+	//parse the key
+
+	int i;
+	int j;
+	for(i=0; i<record_length; i++){
+		for(j=0; j<num_of_attr; j++){
+			switch(attr_data_types[j]){
+				case 0:
+					//int
+
+					break;
+				case 1:
+					//double
+					break;
+				case 2:
+					//bool
+					break;
+				case 3:
+					//char
+					break;
+				case 4:
+					//varchar
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	
+}
 
 
 int compute_index(int hash_code);
