@@ -59,7 +59,7 @@ Updates the provided record into the page with the provided record_id
 @param record
 @return 0 if record is successfully updated, -1 otherwise
 */
-int Page_update_record(Page* self, int record_id, union record_item* record);
+int Page_update_record(Page* self, union record_item* record);
 
 
 

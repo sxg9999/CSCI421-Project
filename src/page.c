@@ -22,6 +22,7 @@ union record_item {
 };
 
 
+
 void create_attr_data_type_arr(Page* self, int* attr_data_types);
 void allocate_memory_for_records(Page* self);
 int open_page(Page* self, char* file_path, char* file_name);
@@ -131,6 +132,8 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
 
 
 
+
+
 /**
  * A function that trys to insert a record into the page
  * @param self - the current page
@@ -140,6 +143,7 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
  */
 
 int Page_insert_record(Page* self, union record_item* record){
+
 
     //check if page is full
     if(self->num_of_records >= self->max_num_of_records){
@@ -185,6 +189,11 @@ int Page_insert_record(Page* self, union record_item* record){
     return 0;
 }
 
+int get_record_id(Page* self, union record_item* record){
+    return 0;
+}
+
+
 /**
  * Update a record in the page. Primary key of old record isn't altered.
  * Find the record with the same primary key as `record` and replaces it with `record`
@@ -193,7 +202,10 @@ int Page_insert_record(Page* self, union record_item* record){
  * 
  * @returns 0 if successful, -1 otherwise
  */
-int Page_update_record(Page* self, int record_id, union record_item* record_updated) {
+int Page_update_record(Page* self, union record_item* record_updated) {
+
+    int record_id = get_record_id(self, record_updated);
+
     union record_item* rc_up = (union record_item*)malloc( 
         self->num_of_attributes * sizeof(union record_item));
     for (int i = 0; i < self->num_of_attributes; i++) {
