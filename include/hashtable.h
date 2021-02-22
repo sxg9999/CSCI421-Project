@@ -29,8 +29,9 @@ typedef struct
 typedef struct
 {
 	int capacity; //2^(times increased+1)
-	int current_size;
 	int load_factor;
+	int current_size;
+	int base_multiplier;
     int len_of_data_types_arr;
     int* attr_data_types;
     Node* table;
@@ -54,7 +55,7 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 
 int compute_index(HashTable* self, int hash_code);
 
-int resize(HashTable* table);
+int resize(HashTable* self);
 
 
 void HashTable_destroy();

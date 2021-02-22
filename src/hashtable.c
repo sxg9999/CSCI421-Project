@@ -9,6 +9,8 @@
 void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
 	self->capacity = capacity;
 	self->load_factor = load_factor;
+	self->current_size = 0;
+	self->base_multiplier = capacity;
 	self->len_of_data_types_arr = len_of_data_types_arr;
 	self->table = (Node*)malloc(sizeof(Node)*self->capacity);
 	self->attr_data_types = (int*)malloc(sizeof(int)*len_of_data_types_arr);
@@ -46,7 +48,9 @@ int put(HashTable* self, int key, int value);
 int put_record(HashTable* self, union record_item* key, int value, int record_length){
 	int threshold = ceil(self->capacity * self->load_factor);
 	
-
+	if(self->current_size >= threshold){
+		self.resize(self);
+	}
 
 }
 
@@ -128,7 +132,15 @@ int compute_index(HashTable* self, int hash_code){
 	return hash_code % hash_code;
 }
 
-int resize(HashTable* table);
+int resize(HashTable* self){
+
+	int current_size = self->current_size;
+	int new_size = current_size * self->base_multiplier;
+
+	if(self->table){
+		self->table = (Node*)realloc(self->table,sizeof(Node)*new_size);
+	}
+}
 
 void HashTable_destroy();
 
