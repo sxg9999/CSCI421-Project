@@ -254,7 +254,6 @@ int Page_remove_record(Page* self, int record_id){
 void Page_destroy(Page* page){
 
     if(page){
-        free(page->fp);
         free(page->page_file_path);
         free(page->attr_data_types);
 

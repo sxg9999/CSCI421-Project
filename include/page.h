@@ -20,7 +20,6 @@ typedef struct{
     int num_of_attributes;
     int record_size;                       //the size of a record (size of record_item * col)
     int* attr_data_types;                  //a pointer to a array of attribute data types values
-    FILE* fp;                              //a pointer to the page file
     char* page_file_path;
     union record_item** records;           //the an array of records ([])
 
