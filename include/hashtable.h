@@ -34,7 +34,7 @@ struct Node{
 typedef struct
 {
 	int capacity; //2^(times increased+1)
-	int load_factor;
+	double load_factor;
 	int current_size;
 	int base_multiplier;
     int len_of_data_types_arr;
@@ -46,13 +46,15 @@ typedef struct
 
 
 
-HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr);
+HashTable* HashTable_record_create_param(int capacity, double load_factor, int* attr_data_types, int len_of_data_types_arr);
 
 HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr);
 
 int put(HashTable* self, int key, int value);
 
 int put_record(HashTable* self, union record_item* key, int value, int record_length);
+
+int put_int(HashTable* self, int key, int value);
 
 int get_record(HashTable* self, union record_item* key, int key_length);
 
