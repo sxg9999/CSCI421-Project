@@ -23,7 +23,7 @@ struct Node;
 
 struct Node{
 	int key;
-	int value;
+	void* value;
 	struct Node* next_node;
 };
 
@@ -50,11 +50,16 @@ HashTable* HashTable_record_create_param(int capacity, double load_factor, int* 
 
 HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr);
 
-int put(HashTable* self, int key, int value);
+HashTable* HashTable_int_init(HashTable* self, int capacity, double load_factor);
 
-int put_record(HashTable* self, union record_item* key, int value, int record_length);
+HashTable* HashTable_int_create_param(int capacity, double load_factor);
 
-int put_int(HashTable* self, int key, int value);
+HashTable* HashTable_int_create();
+int put(HashTable* self, int key, void* value);
+
+int put_record(HashTable* self, union record_item* key, void* value, int record_length);
+
+int put_int(HashTable* self, int key, void* value);
 
 int get_record(HashTable* self, union record_item* key, int key_length);
 
