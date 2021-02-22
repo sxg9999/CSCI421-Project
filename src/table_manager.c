@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "../include/table_manager.h"
 
 int TM_write_meta(TableManager* self) {
@@ -39,9 +41,8 @@ int TM_write_meta(TableManager* self) {
     return rc;
 }
 
-buffer_manager* TM_read_meta(char* db_loc, TableManager* tm, int* ret) {
+buffer_manager* TM_read_meta(char* db_loc, TableManager* tm, int* rc) {
     FILE* fp;
-    int rc;
 
     char filename[255];
     strcpy(filename, db_loc);
@@ -62,7 +63,7 @@ buffer_manager* TM_read_meta(char* db_loc, TableManager* tm, int* ret) {
 
     // read buff size
     int buff_size;
-    *rc = ec( fread(&table_count, sizeof(int), 1, fp) );
+    *rc = ec( fread(&buff_size, sizeof(int), 1, fp) );
 
     // read in each table
     HashTable* tables = malloc(sizeof(HashTable));
