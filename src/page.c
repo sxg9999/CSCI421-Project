@@ -325,7 +325,7 @@ int Page_read(Page* self){
                 break;
             
             default:
-                printf("error");
+                fprintf(stderr,"error: failed to recognize the data type of the attribute\n");
                 break;
         }
         
@@ -357,10 +357,8 @@ int Page_write(Page* self){
 
 
     //set the file pointer back to the beginning of the file
-    FILE* fp = self->fp;
-    fseek(fp, 0, SEEK_SET);      //SEEK_SET points to the beginning of the file and 
-                                 //an offset of 0 from that position.
-
+    FILE* fp = fopen(self->page_file_path, "wb");
+   
     
     union record_item** records = self->records;
     int* attr_data_types = self->attr_data_types;
@@ -401,7 +399,7 @@ int Page_write(Page* self){
                     break;
                 
                 default:
-                    printf("error: failed to recognize the data type of the attribute\n");
+                    fprintf(stderr,"error: failed to recognize the data type of the attribute\n");
                     break;
             }
 
@@ -416,7 +414,7 @@ int Page_write(Page* self){
     }
 
     //close file
-    fclose(self->fp);
+    fclose(fp);
 }
 
 
@@ -475,10 +473,11 @@ int open_page(Page* self, char* file_path, char* file_name){
         //file exists
         fp = fopen(self->page_file_path, "rb");
         Page_read(self, fp);
+        fclose(fp);
         return 0;
     }
 
-    
+
     self -> num_of_records = 0;
     //file does not exist
     // self->fp = fopen(self->page_file_path, "w+");
