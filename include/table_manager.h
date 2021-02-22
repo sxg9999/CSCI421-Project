@@ -20,25 +20,15 @@ typedef struct HashTable{
 
 ///
 /// PLACEHOLDERS
-int Hash_get_item(HashTable* self, int key, void* item) {
-    return 0;
-}
+int Hash_get_item(HashTable* self, int key, void* item);
 
-int Hash_remove_item(HashTable* self, int key) {
-    return 0;
-}
+int Hash_remove_item(HashTable* self, int key);
 
-int Hash_add_item(HashTable* self, int key, void* item) {
-    return 0;
-}
+int Hash_add_item(HashTable* self, int key, void* item);
 
-int Hash_destroy(HashTable* self) {
-    return 0;
-}
+int Hash_destroy(HashTable* self);
 
-int Hash_put_int(HashTable* self, int key, void* item) {
-    return 0;
-}
+int Hash_put_int(HashTable* self, int key, void* item);
 ///
 ///
 
