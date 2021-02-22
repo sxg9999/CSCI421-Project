@@ -63,14 +63,16 @@ int remove_page(buffer_manager* buff_man, int page_index) {
     }
 
     // Remove page from page array
-    for (int i = 0; i<buff_man->current_page_count-1; i++) {
+    Page_destroy( buff_man->pages[page_index] );
+
+    for (int i = page_index; i<buff_man->current_page_count-1; i++) {
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
         (Page*)malloc(sizeof( Page ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
-    for (int i = 0; i<buff_man->current_page_count-1; i++) {
+    for (int i = page_index; i<buff_man->current_page_count-1; i++) {
         buff_man->page_arr_with_count[i] = 
             buff_man->page_arr_with_count[i+1];
     }
@@ -120,6 +122,15 @@ int set_LRU_page_id(buffer_manager* buff_man) {
     }
 
     return 0;
+}
+
+void purge_buffer(buffer_manager* buff_man) {
+    for (int i = 0; i < buff_man->current_page_count; i++) {
+        // write out page
+        Page_write(buff_man->pages[0]);
+        // destroy page
+        remove_page(buff_man, 0);
+    }
 }
 
 void destroy_buffer(buffer_manager* buff_man) {
