@@ -55,7 +55,7 @@ void Page_init(Page* self,const PageParams* page_params){
     // a record and copy the parameters attribute data type values
     create_attr_data_type_arr(self, page_params->attr_data_types);
     
-    self->num_of_records = 0;
+    // self->num_of_records = 0;
 
     int page_exist = open_page(self, page_params->db_dir_path, page_params->page_file_name);
 
@@ -470,13 +470,18 @@ int open_page(Page* self, char* file_path, char* file_name){
     int exist = stat(self->page_file_path, &buffer);
 
     if(exist == 0){
+
+        FILE* fp;
         //file exists
-        self -> fp = fopen(self->page_file_path, "r+");
+        fp = fopen(self->page_file_path, "rb");
+        Page_read(self, fp);
         return 0;
     }
 
+    
+    self -> num_of_records = 0;
     //file does not exist
-    self->fp = fopen(self->page_file_path, "w+");
+    // self->fp = fopen(self->page_file_path, "w+");
 
     return 1;
     
