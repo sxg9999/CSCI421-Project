@@ -4,7 +4,10 @@
 #include "hashtable.h"
 
 
-
+int compute_dec_vals(char* str, int length);
+void Ht_clear_n_buffer(char* buffer, int end_of_buffer);
+int compute_hash_code_record(HashTable* self, union record_item* key, int record_length);
+int compute_index(HashTable* self, int hash_code);
 
 void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
 	self->capacity = capacity;
@@ -12,7 +15,15 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	self->current_size = 0;
 	self->base_multiplier = capacity;
 	self->len_of_data_types_arr = len_of_data_types_arr;
-	self->table = (Node*)malloc(sizeof(Node)*self->capacity);
+
+	//allocate memory for hashtable
+	self->table = (Node**)malloc(sizeof(Node*)*self->capacity);
+	int i;
+	for(i=0;i<self->capacity;i++){
+		// self->table[i] = (Node*)malloc(sizeof(Node));
+		self->table[i] = NULL;
+	}
+
 	self->attr_data_types = (int*)malloc(sizeof(int)*len_of_data_types_arr);
 
 	int i;
@@ -43,14 +54,39 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 }
 
 
-int put(HashTable* self, int key, int value);
+int put(HashTable* self, int hash_code, int value){
 
-int put_record(HashTable* self, union record_item* key, int value, int record_length){
 	int threshold = ceil(self->capacity * self->load_factor);
 	
 	if(self->current_size >= threshold){
-		self.resize(self);
+		resize(self);
 	}
+	
+	//compute the index
+	int index = hash_code % self->capacity;
+	
+	//create the node and make it the head
+	if(self->table[index] == 0){
+		Node* head_node = (Node*)malloc(sizeof(Node));
+		head_node->key = hash_code;
+		head_node->value = value;
+		head_node->next_node = NULL;
+	}else{
+		Node* old_node = self->table[index];
+		Node* new_head_node = (Node*)malloc(sizeof(Node));
+		//replace the old_head with the new head
+		self->table[index] = new_head_node;
+	}
+	self->current_size++;
+}
+
+int put_record(HashTable* self, union record_item* key, int value, int record_length){
+	
+	//compute the hash code of the record_key
+	int hash_code = compute_hash_code_record(self, key, record_length);
+	put(self, hash_code, value);
+
+	return 0;
 
 }
 
@@ -134,12 +170,13 @@ int compute_index(HashTable* self, int hash_code){
 
 int resize(HashTable* self){
 
-	int current_size = self->current_size;
-	int new_size = current_size * self->base_multiplier;
+	int curr_capacity = self->capacity;
+	int new_capacity = curr_capacity * self->base_multiplier;
 
 	if(self->table){
-		self->table = (Node*)realloc(self->table,sizeof(Node)*new_size);
+		self->table = (Node*)realloc(self->table,sizeof(Node)*new_capacity);
 	}
+	self->capacity = new_capacity;
 }
 
 void HashTable_destroy();

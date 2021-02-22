@@ -23,7 +23,7 @@ typedef struct
 {
 	int key;
 	int value;
-	struct Node *next_node;
+	Node* next_node;
 }Node;
 
 typedef struct
@@ -34,7 +34,7 @@ typedef struct
 	int base_multiplier;
     int len_of_data_types_arr;
     int* attr_data_types;
-    Node* table;
+    Node** table;
     
 }HashTable;
 
