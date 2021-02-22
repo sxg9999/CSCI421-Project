@@ -29,8 +29,6 @@ struct Node{
 
 
 
-
-
 typedef struct
 {
 	int capacity; //2^(times increased+1)
@@ -42,8 +40,6 @@ typedef struct
     struct Node** table;
     
 }HashTable;
-
-
 
 
 HashTable* HashTable_record_create_param(int capacity, double load_factor, int* attr_data_types, int len_of_data_types_arr);

@@ -282,10 +282,17 @@ void HashTable_destroy(HashTable* hashtable){
 			if(hashtable->table[i]!=0){
 				struct Node* current_node = hashtable->table[i];
 				struct Node* prev_node;
+				struct Node* ptr;
 				while(current_node!=0){
 					prev_node = current_node;
+					ptr = current_node;
 					current_node = current_node->next_node;
 					free(prev_node);
+					if(ptr==0){
+						printf("it is freed");
+					}else{
+						printf("it is not freed");
+					}
 				}
 				free(hashtable->table[i]);
 			}
