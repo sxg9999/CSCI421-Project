@@ -114,6 +114,23 @@ int get_record(HashTable* self, union record_item* key, int key_length){
 	return -1;
 
 }
+
+int does_record_exist(HashTable* self, union record_item* key, int key_length){
+	int hash_code = compute_hash_code_record(self, key, key_length);
+
+	int index = hash_code % self->capacity;
+
+	struct Node* current_node = self->table[index];
+
+	//loop while current_node is not null
+	while(current_node!=0){
+		if(current_node->key = hash_code){
+			return 1;
+		}
+	}
+	return 0;
+}
+
 int compute_dec_vals(char* str, int length){
 	int result = 0;
 	
