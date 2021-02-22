@@ -50,16 +50,13 @@ int new_database(char* db_loc, int page_size, int buffer_size) {
 int get_records(int table_id, union record_item*** table) {
     int record_count = 0;
 
-    // "table" is location of 2d array
-    // put records from the table with id=table_id into "table"
+    Table *table_struct = NULL;
+    if(TM_get_table(tableManager, table_id, table) == -1) {
+        return -1;
+    }
 
-    // find the table
-    // get page_ids from the table
-    // get pages with those ids from buffermanager
-    // if buffermanager doesn't have them, add them
+    record_count = Table_records(table_struct, bufferManager, table);
     
-
-
     return record_count;
 }
 
