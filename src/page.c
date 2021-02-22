@@ -61,17 +61,6 @@ void Page_init(Page* self,const PageParams* page_params){
     int page_exist = open_page(self, page_params->table_dir, page_params->page_file_name);
 
 
-    // if(page_exist == 0){
-    //     //if the page is an existing page
-    //     //read in the records and update the num_of_records
-    //     Page_read(self);
-
-    // }else{
-    //     //if the page is an new page
-    //     //then num_of_records = 0 currently
-    //     self->num_of_records = 0;
-    // }
-
 }
 
 /**
@@ -98,7 +87,7 @@ Page* Page_create(const PageParams* page_params){
 
 int Page_get_record(Page* self, int record_id, union record_item** data){
 
-    union record_item* record = self->records[record_id];
+    union record_item* record =  self->records[record_id];
 
     int* attr_data_types = self->attr_data_types;
     int num_of_attributes = self->num_of_attributes;
