@@ -56,6 +56,18 @@ HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_a
 int put(HashTable* self, int hash_code, int value){
 
 	int threshold = ceil(self->capacity * self->load_factor);
+
+	int index = hash_code % self->capacity;
+
+	struct Node* current_node = self->table[index];
+
+	//loop while current_node is not null
+	while(current_node!=0){
+		if(current_node->key = hash_code){
+			return 1;
+		}
+	}
+	return 0;
 	
 	if(self->current_size >= threshold){
 		resize(self);
