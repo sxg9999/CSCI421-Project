@@ -9,10 +9,14 @@ INCLUDE_DIR = include
 default: storage
 
 storage: $(SOURCE_FILES) $(HEADER_FILES)
+<<<<<<< HEAD
 	$(CC) $(SOURCE_FILES) $(HEADER_FILES) -o storage $(CFLAGS) -I $(INCLUDE_DIR)
 
 run: storage
 	./storage
+=======
+	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES)
+>>>>>>> chaudron_table
 
 clean:
 		rm *.o *.exe storage

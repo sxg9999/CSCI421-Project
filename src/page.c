@@ -3,7 +3,11 @@
  * Implementation of functions related to the Page class
  */
 
+<<<<<<< HEAD
 #include "page.h"
+=======
+#include "../include/page.h"
+>>>>>>> chaudron_table
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -22,7 +26,10 @@ union record_item {
 };
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> chaudron_table
 void create_attr_data_type_arr(Page* self, int* attr_data_types);
 void allocate_memory_for_records(Page* self);
 int open_page(Page* self, char* file_path, char* file_name);
@@ -30,7 +37,11 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes);
 void clear_n_buffer(char* buffer, int end_of_buffer);
 void remove_trailing_zeros(char* src, int str_len);
 int Page_write(Page* self);
+<<<<<<< HEAD
 int Page_read(Page* self, FILE* fp);
+=======
+int Page_read(Page* self);
+>>>>>>> chaudron_table
 
 
 /**
@@ -58,8 +69,19 @@ void Page_init(Page* self,const PageParams* page_params){
     
     self->num_of_records = 0;
 
-    int page_exist = open_page(self, page_params->table_dir, page_params->page_file_name);
+    int page_exist = open_page(self, page_params->db_dir_path, page_params->page_file_name);
 
+
+    if(page_exist == 0){
+        //if the page is an existing page
+        //read in the records and update the num_of_records
+        Page_read(self);
+
+    }else{
+        //if the page is an new page
+        //then num_of_records = 0 currently
+        self->num_of_records = 0;
+    }
 
 }
 
@@ -87,7 +109,7 @@ Page* Page_create(const PageParams* page_params){
 
 int Page_get_record(Page* self, int record_id, union record_item** data){
 
-    union record_item* record =  self->records[record_id];
+    union record_item** record = self->records[record_id];
 
     int* attr_data_types = self->attr_data_types;
     int num_of_attributes = self->num_of_attributes;
@@ -97,29 +119,29 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
         switch(attr_data_types[i]){
             case 0:
                 //integer
-                data[0][i].i = record[i].i;
+                data[0][i].i = record[0][i].i;
                 break;
             case 1:
                 //Double
-                data[0][i].d = record[i].d;
+                data[0][i].d = record[0][i].d;
                 break;
             case 2:
                 //Boolean
-                data[0][i].b = record[i].b;
+                data[0][i].b = record[0][i].b;
                 break;
             case 3:
                 //Char
-                strncpy(data[0][i].c, record[i].c, strlen(record[i].c)+1);
+                strncpy(data[0][i].c, record[0][i].c, strlen(record[0][i].c)+1);
                 break;
             case 4:
                 //Varchar
-                strncpy(data[0][i].v, record[i].v, strlen(record[i].v)+1);
+                strncpy(data[0][i].v, record[0][i].v, strlen(record[0][i].v)+1);
                 break;
         }
     }
+
+    return 0;
 }
-
-
 
 
 
@@ -132,7 +154,6 @@ int Page_get_record(Page* self, int record_id, union record_item** data){
  */
 
 int Page_insert_record(Page* self, union record_item* record){
-
 
     //check if page is full
     if(self->num_of_records >= self->max_num_of_records){
@@ -178,11 +199,6 @@ int Page_insert_record(Page* self, union record_item* record){
     return 0;
 }
 
-int get_record_id(Page* self, union record_item* record){
-    return 0;
-}
-
-
 /**
  * Update a record in the page. Primary key of old record isn't altered.
  * Find the record with the same primary key as `record` and replaces it with `record`
@@ -191,10 +207,7 @@ int get_record_id(Page* self, union record_item* record){
  * 
  * @returns 0 if successful, -1 otherwise
  */
-int Page_update_record(Page* self, union record_item* record_key, union record_item* record_updated) {
-
-    int record_id = get_record_id(self, record_key);
-
+int Page_update_record(Page* self, int record_id, union record_item* record_updated) {
     union record_item* rc_up = (union record_item*)malloc( 
         self->num_of_attributes * sizeof(union record_item));
     for (int i = 0; i < self->num_of_attributes; i++) {
@@ -232,9 +245,7 @@ int Page_update_record(Page* self, union record_item* record_key, union record_i
  *
  */
 
-int Page_remove_record(Page* self, union record_item* record_key){
-
-    int record_id = get_record_id(self, record_key);
+int Page_remove_record(Page* self, int record_id){
     //record_id is the index
     int i;
     self->num_of_records--;                 //decrement the number of records in the page
@@ -278,8 +289,9 @@ void Page_destroy(Page* page){
  * @returns 0 if successful and -1 otherwise
  */
 
-int Page_read(Page* self, FILE* fp){
+int Page_read(Page* self){
 
+    FILE* fp = self->fp;
     union record_item** records = self->records;
     int* attr_data_types = self->attr_data_types;
     int num_of_attributes = self->num_of_attributes;
@@ -341,7 +353,6 @@ int Page_read(Page* self, FILE* fp){
 
     self->num_of_records = row;
 
-    
     return 0;
 }
 
@@ -358,11 +369,7 @@ int Page_write(Page* self){
 
 
     //set the file pointer back to the beginning of the file
-    // FILE* fp = self->fp;
-
-    //open
-    FILE* fp = fopen(self->page_file_path, "wb");
-
+    FILE* fp = self->fp;
     fseek(fp, 0, SEEK_SET);      //SEEK_SET points to the beginning of the file and 
                                  //an offset of 0 from that position.
 
@@ -421,7 +428,7 @@ int Page_write(Page* self){
     }
 
     //close file
-    fclose(fp);
+    fclose(self->fp);
 }
 
 
@@ -450,7 +457,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes){
  * Attempts to open the page file and returns whether
  * or not the page file existed before.
  * @param self - the current page
- * @param file_path - the table dir path
+ * @param file_path - the database folder path
  * @param file_name - the name of the page file
  * @return - 0 for exist and 1 for does not exist
 */
@@ -469,7 +476,6 @@ int open_page(Page* self, char* file_path, char* file_name){
     strncat(self->page_file_path, file_name, file_name_size);
 
 
-    
 
     struct stat buffer;
 
@@ -477,17 +483,12 @@ int open_page(Page* self, char* file_path, char* file_name){
 
     if(exist == 0){
         //file exists
-        FILE* fp;
-        fp = fopen(self->page_file_path, "rb");
-        Page_read(self, fp);
-        fclose(fp);
+        self -> fp = fopen(self->page_file_path, "r+");
         return 0;
     }
-    
-    self->num_of_records = 0;
 
     //file does not exist
-    // self->fp = fopen(self->page_file_path, "wb");
+    self->fp = fopen(self->page_file_path, "w+");
 
     return 1;
     
