@@ -8,6 +8,7 @@ int compute_dec_vals(char* str, int length);
 void Ht_clear_n_buffer(char* buffer, int end_of_buffer);
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length);
 int compute_index(HashTable* self, int hash_code);
+int compute_hash_code_int(HashTable* self, int key);
 
 void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
 	self->capacity = capacity;
