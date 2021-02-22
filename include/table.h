@@ -40,14 +40,10 @@ typedef struct{
     char* loc;
 } TableParams;
 
-Page* new_page(Table* self);
-Page* new_existing_page(Table* self, int page_id);
-
 
 int Table_write_meta(Table* self, FILE* fp);
 
 int Table_read_meta(Table* newTable, FILE* fp);
-
 
 void Table_init(Table* self, TableParams* params);
 
@@ -57,12 +53,10 @@ int Table_insert_record(Table* self, buffer_manager* bm, union record_item* reco
 
 int Table_update_record(Table* self, buffer_manager* bm, union record_item* record);
 
-
 void Table_clear(Table* self);
 
 void Table_destroy(Table* self);
 
-// returns the new page id
 Page* new_page(Table* self);
 
 Page* new_existing_page(Table* self, int page_id);

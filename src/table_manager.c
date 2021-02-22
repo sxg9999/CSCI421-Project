@@ -25,8 +25,6 @@ int Hash_put_int(HashTable* self, int key, void* item) {
 ///
 
 
-
-
 int TM_write_meta(TableManager* self) {
     FILE* fp;
     int rc;
@@ -49,7 +47,7 @@ int TM_write_meta(TableManager* self) {
     // write out each table
     for (int i = 0; i < self->num_tables; i++) {
         int current_table_id = self->table_ids[i];
-        Table* current_table;
+        Table* current_table = NULL;
         Hash_get_item(self->tables, current_table_id, current_table);
         // write out current table to fp
         Table_write_meta(current_table, fp);
@@ -125,7 +123,7 @@ TableManager* init_table_manager(char* db_loc, int page_size)
 
 int TM_get_table(TableManager* self, int table_id, Table* table) {
     if(Hash_get_item(self->tables, table_id, (void*)table) == -1) {
-        printf(stderr, "Table with ID %d does not exist.\n", table_id);
+        fprintf(stderr, "Table with ID %d does not exist.\n", table_id);
         return -1;
     }
     
@@ -133,17 +131,14 @@ int TM_get_table(TableManager* self, int table_id, Table* table) {
 }
 
 
-char* get_table_dir(int table_id, char* db_loc)
+void get_table_dir(int table_id, char* db_loc, char* dirStr)
 {
     char t[255] = "/Table";
-    char dirStr[255];
     strcpy(dirStr, db_loc);
 
     tostring(table_id, t+6);
     strcat(dirStr, t);
     strcat(dirStr, "/");
-
-    return dirStr;
 }
 
 int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data_types_size, int key_indices_size)
@@ -152,9 +147,11 @@ int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data
     srand(time(NULL));
     int table_id = rand();
 
-    char* table_dir = get_table_dir(table_id, self->db_loc);
+    char* table_dir = malloc(256*sizeof(char));
+    get_table_dir(table_id, self->db_loc, table_dir);
 
     mkdir(table_dir, S_IRWXO);
+    free(table_dir);
 
     TableParams params;
     params.table_id = table_id;
@@ -180,9 +177,11 @@ int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data
 
 int TM_add_old_table(TableManager* self, Table* old_table)
 {
-    char* table_dir = get_table_dir(old_table->table_id, self->db_loc);
+    char* table_dir = malloc(256*sizeof(char));
+    get_table_dir(old_table->table_id, self->db_loc, table_dir);
 
     mkdir(table_dir, S_IRWXO);
+    free(table_dir);
 
     // add table id to list
     self->num_tables += 1;
@@ -191,14 +190,14 @@ int TM_add_old_table(TableManager* self, Table* old_table)
     return old_table->table_id;
 }
 
-void TM_save(TableManager* self) {
-    TM_write_meta(self);
+int TM_save(TableManager* self) {
+    return TM_write_meta(self);
 }
 
 void TM_destroy(TableManager* self) {
     for(int i = 0; i < self->num_tables; i++) {
         int id = self->table_ids[i];
-        Table* table;
+        Table* table = NULL;
         Hash_get_item(self->tables, id, (void*) table);
         Table_destroy(table);
     }
@@ -210,7 +209,7 @@ void TM_destroy(TableManager* self) {
 
 int TM_clear_table(TableManager* self, int table_id)
 {
-    Table* table;
+    Table* table = NULL;
     if(TM_get_table(self, table_id, table) == -1) {
         return -1;
     }
@@ -221,8 +220,9 @@ int TM_clear_table(TableManager* self, int table_id)
 
 int TM_drop_table(TableManager* self, int table_id)
 {
-    char* table_meta_path, table_path;
-    Table* table;
+    Table* table = NULL;
+    char* table_dir = NULL;
+
     if(TM_get_table(self, table_id, table) == -1) {
         return -1;
     }
@@ -236,8 +236,10 @@ int TM_drop_table(TableManager* self, int table_id)
     // destroy table and its folder
     Table_destroy(table);
 
-    char* tableDir = get_table_dir(table_id, self->db_loc);
-    rmdir(tableDir);
+    table_dir = malloc(256*sizeof(char));
+    get_table_dir(table_id, self->db_loc, table_dir);
+    rmdir(table_dir);
+    free(table_dir);
 
     return 0;
 }

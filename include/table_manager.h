@@ -13,9 +13,6 @@
 
 #include "table.h"
 
-
-#define TABLE_META_DATA_FILENAME "table_meta"
-
 // PLACEHOLDER
 typedef struct HashTable{
     int current_size;
@@ -29,53 +26,26 @@ typedef struct {
     int num_tables;
 } TableManager;
 
-int TM_get_table(TableManager* self, int table_id, Table* table);
-
-/*
- * Writes the meta data about each of the tables to a file. 
- * @param self - the table manager to be written out to a file
- */
 int TM_write_meta(TableManager* self);
 
-/*
- * Reads and reconstructs the tables from the meta data file.
- */
-int TM_read_meta();
+int TM_read_meta(char* db_loc, TableManager* tm);
 
-/*
- *
- * 
- */
 TableManager* init_table_manager(char* db_loc, int page_size);
 
-/*
- * Create a brand new
- * 
- */
+int TM_get_table(TableManager* self, int table_id, Table* table);
+
+void get_table_dir(int table_id, char* db_loc, char* dirStr);
+
 int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data_types_size, int key_indices_size);
 
-/* 
- * 
- * 
- */
 int TM_add_old_table(TableManager* self, Table* old_table);
 
-/*
- *
- */
-void TM_save_tables(TableManager* self);
+int TM_save(TableManager* self);
 
-/*
- *
- * 
- */
+void TM_destroy(TableManager* self);
+
+int TM_clear_table(TableManager* self, int table_id);
+
 int TM_drop_table(TableManager* self, int table_id);
-
-
-/*
- *
- * 
- */
-char* get_table_dir(int table_id, char* db_loc);
 
 #endif

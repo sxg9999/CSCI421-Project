@@ -67,7 +67,7 @@ int get_page(int page_id, union record_item*** page) {
 }
 
 int insert_record(int table_id, union record_item* record) {
-    Table* table;
+    Table* table = NULL;
 
     if(TM_get_table(tableManager, table_id, table) == -1) {
         return -1;
@@ -81,7 +81,7 @@ int insert_record(int table_id, union record_item* record) {
 }
 
 int update_record(int table_id, union record_item* record) {
-    Table* table;
+    Table* table = NULL;
 
     if(TM_get_table(tableManager, table_id, table) == -1) {
         return -1;
@@ -95,11 +95,13 @@ int update_record(int table_id, union record_item* record) {
 }
 
 int drop_table(int table_id) {
-    return TM_drop_table(tableManager, table_id);
+    int ret = TM_drop_table(tableManager, table_id);
+    return ret;
 }
 
 int clear_table(int table_id) {
-    return TM_clear_table(tableManager, table_id);
+    int ret = TM_clear_table(tableManager, table_id);
+    return ret;
 }
 
 /* 
@@ -118,8 +120,8 @@ int purge_buffer() {
 }
 
 int terminate_database() {
-    TM_save(tableManager);
+    int saved = TM_save(tableManager);
 
     TM_destroy(tableManager);
-    return 0;
+    return saved;
 }

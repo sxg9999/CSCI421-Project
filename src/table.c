@@ -3,9 +3,6 @@
 
 #include "../include/table.h"
 
-Page* new_page(Table* self);
-Page* new_existing_page(Table* self, int page_id);
-
 
 int Table_write_meta(Table* self, FILE* fp) {
     int rc;
@@ -110,14 +107,14 @@ Table* Table_create(TableParams* params) {
 
 
 int Table_insert_record(Table* self, buffer_manager* bm, union record_item* record) {
-    Page* page;
+    Page* page = NULL;
     int last_page_id;
     if(self->num_pages == 0) { // no pages in table
-        new_page(page);
+        page = new_page(self);
         add_page(bm, page);
         
     } else if(get_buffer_page(bm, last_page_id = self->page_ids[self->num_pages - 1], page) != 0) { // page not in buffer
-        new_existing_page(page, last_page_id);
+        page = new_existing_page(self, last_page_id);
         add_page(bm, page);
     }
     // page now in buffer
@@ -130,7 +127,7 @@ int Table_insert_record(Table* self, buffer_manager* bm, union record_item* reco
 }
 
 int Table_update_record(Table* self, buffer_manager* bm, union record_item* record) {
-    Page* page;
+    Page* page = NULL;
     int last_page_id;
     if(self->num_pages == 0) { // no pages in table
         page = new_page(self);
@@ -157,10 +154,10 @@ int Table_update_record(Table* self, buffer_manager* bm, union record_item* reco
  */
 void Table_clear(Table* self) {
     char page_file[255];
-    char* page_id_str;
+    char* page_id_str = NULL;
 
     // delete all page files
-    for(int p = 0; p < self->page_ids; p++) {
+    for(int p = 0; p < self->num_pages; p++) {
         tostring(self->page_ids[p], page_id_str);
         strcpy(page_file, self->loc);
         strcat(page_file, page_id_str);
@@ -192,7 +189,7 @@ Page* new_page(Table* self) {
     Page* page = new_existing_page(self, page_id);
 
     // add page id to list
-    int* new_ids, old_ids;
+    int *new_ids, *old_ids;
 
     self->num_pages += 1;
 
@@ -225,6 +222,7 @@ Page* new_existing_page(Table* self, int page_id) {
 
     return Page_create(&pp);    
 }
+
 
 void tostring(int num, char str[]) {
     int i, rem, len = 0, n;
