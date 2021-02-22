@@ -2,6 +2,7 @@
 
 #include "../include/table_manager.h"
 
+#include "hashtable.h"
 int TM_write_meta(TableManager* self) {
     FILE* fp;
     int rc;
@@ -26,8 +27,8 @@ int TM_write_meta(TableManager* self) {
     // write out each table
     for (int i = 0; i < self->num_tables; i++) {
         int current_table_id = self->table_ids[i];
-        Table* current_table = NULL;
-        Hash_get_item(self->tables, current_table_id, current_table);
+        Table* current_table = get_void(self->tables, current_table_id);
+        
         // write out current table to fp
         Table_write_meta(current_table, fp);
     }
@@ -106,7 +107,7 @@ TableManager* init_table_manager(char* db_loc, int page_size, int buffer_size)
 }
 
 int TM_get_table(TableManager* self, int table_id, Table* table) {
-    if(Hash_get_item(self->tables, table_id, (void*)table) == -1) {
+    if(get_void(self->tables, table_id) == NULL) {
         fprintf(stderr, "Table with ID %d does not exist.\n", table_id);
         return -1;
     }
@@ -200,8 +201,7 @@ int TM_save(TableManager* self) {
 void TM_destroy(TableManager* self) {
     for(int i = 0; i < self->num_tables; i++) {
         int id = self->table_ids[i];
-        Table* table = NULL;
-        Hash_get_item(self->tables, id, (void*) table);
+        Table* table = get_void(self->tables, id);
         Table_destroy(table);
     }
     Hash_destroy(self->tables);

@@ -143,7 +143,7 @@ int put_int(HashTable* self, int key, void* value){
 	return 0;
 }
 
-int get_record(HashTable* self, union record_item* key, int key_length){
+void* get_record(HashTable* self, union record_item* key, int key_length){
 	//compute the hash_code
 	int hash_code = compute_hash_code_record(self, key, key_length);
 
@@ -157,9 +157,30 @@ int get_record(HashTable* self, union record_item* key, int key_length){
 			return current_node->value;
 		}
 	}
-	return -1;
+	
 
 }
+void* get_void(HashTable* self, int key){
+	int hash_code = compute_hash_code_int(self, key);
+
+	int index = hash_code % self->capacity;
+
+	struct Node* current_node = self->table[index];
+
+	//loop while current_node is not null
+	while(current_node!=0){
+		if(current_node->key = hash_code){
+			return current_node->value;
+		}
+	}
+	return NULL;
+
+}
+
+
+
+
+
 
 int does_record_exist(HashTable* self, union record_item* key, int key_length){
 	int hash_code = compute_hash_code_record(self, key, key_length);

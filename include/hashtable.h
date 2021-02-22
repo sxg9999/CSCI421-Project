@@ -57,7 +57,9 @@ int put_record(HashTable* self, union record_item* key, void* value, int record_
 
 int put_int(HashTable* self, int key, void* value);
 
-int get_record(HashTable* self, union record_item* key, int key_length);
+void* get_record(HashTable* self, union record_item* key, int key_length);
+
+void* get_void(HashTable* self, int key);
 
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length);
 
