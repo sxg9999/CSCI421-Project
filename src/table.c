@@ -3,6 +3,21 @@
 
 #include "../include/table.h"
 
+int Table_records(Table* self, buffer_manager* bm, union record_item*** records) {
+    union record_item*** location = records;
+    int total_records = 0;
+    for(int p = 0; p < self->num_pages; p++) {
+        Page* page = NULL;
+        if(get_buffer_page(bm, self->page_ids[p], page) == -1) {
+            return -1;
+        }
+
+        *location = page->records;
+        location += page->record_size * page->num_of_records;
+        total_records += page->num_of_records;
+    }
+    return total_records;
+}
 
 int Table_write_meta(Table* self, FILE* fp) {
     int rc;
