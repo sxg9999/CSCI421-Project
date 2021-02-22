@@ -3,11 +3,7 @@
  * Implementation of functions related to the Page class
  */
 
-<<<<<<< HEAD
-#include "page.h"
-=======
 #include "../include/page.h"
->>>>>>> chaudron_table
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -26,10 +22,6 @@ union record_item {
 };
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> chaudron_table
 void create_attr_data_type_arr(Page* self, int* attr_data_types);
 void allocate_memory_for_records(Page* self);
 int open_page(Page* self, char* file_path, char* file_name);
@@ -37,11 +29,7 @@ int get_max_records(int page_size, int record_item_size, int num_of_attributes);
 void clear_n_buffer(char* buffer, int end_of_buffer);
 void remove_trailing_zeros(char* src, int str_len);
 int Page_write(Page* self);
-<<<<<<< HEAD
-int Page_read(Page* self, FILE* fp);
-=======
 int Page_read(Page* self);
->>>>>>> chaudron_table
 
 
 /**

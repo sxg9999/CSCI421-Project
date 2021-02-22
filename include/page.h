@@ -59,11 +59,7 @@ Updates the provided record into the page with the provided record_id
 @param record
 @return 0 if record is successfully updated, -1 otherwise
 */
-<<<<<<< HEAD
-int Page_update_record(Page* self, union record_item* record_key, union record_item* record);
-=======
 int Page_update_record(Page* self, int record_id, union record_item* record);
->>>>>>> chaudron_table
 
 
 
@@ -72,11 +68,7 @@ Removes the record specified by the record_id
 @param record_id
 @return 0 if record is successfully removed, -1 otherwise
 */
-<<<<<<< HEAD
-int Page_remove_record(Page* self, union record_item* record_key);
-=======
 int Page_remove_record(Page* self, int record_id);
->>>>>>> chaudron_table
 
 
 /*

@@ -53,37 +53,18 @@ int add_page(buffer_manager* buff_man, Page* page) {
 int remove_page(buffer_manager* buff_man, int page_index) {
     if ( page_index > buff_man->current_page_count ) {
         // invalid page_index
-<<<<<<< HEAD
-        fprintf(stderr, "Error: %s Page with index %d is not in buffer. Currently %d pages in buffer", 
-                "Could not remove page from buffer.\n", 
-                page_index, 
-                buff_man->current_page_count
-        );
-
-=======
->>>>>>> chaudron_table
         return -1;
     }
 
     // Remove page from page array
-<<<<<<< HEAD
-    Page_destroy( buff_man->pages[page_index] );
-
-    for (int i = page_index; i<buff_man->current_page_count-1; i++) {
-=======
     for (int i = 0; i<buff_man->current_page_count-1; i++) {
->>>>>>> chaudron_table
         buff_man->pages[i] = buff_man->pages[i+1];
     }
     buff_man->pages[ buff_man->current_page_count ] = 
         (Page*)malloc(sizeof( Page ));
 
     // ALSO REMOVE FROM PAGE_ARR_WITH_COUNT
-<<<<<<< HEAD
-    for (int i = page_index; i<buff_man->current_page_count-1; i++) {
-=======
     for (int i = 0; i<buff_man->current_page_count-1; i++) {
->>>>>>> chaudron_table
         buff_man->page_arr_with_count[i] = 
             buff_man->page_arr_with_count[i+1];
     }
@@ -97,20 +78,6 @@ int remove_page(buffer_manager* buff_man, int page_index) {
 }
 
 int get_buffer_page(buffer_manager* buff_man, int page_id, Page* npage) {
-<<<<<<< HEAD
-    if ( page_id > buff_man->current_page_count ) {
-        // invalid page_index
-        fprintf(stderr, "Error: %s Page with index %d is not in buffer. Currently %d pages in buffer", 
-                "Could not get page",
-                page_id,
-                buff_man->current_page_count
-        );
-
-        return -1;
-    }
-
-=======
->>>>>>> chaudron_table
     npage = buff_man->pages[page_id];
     buff_man->page_arr_with_count[page_id] += 1;
     set_LRU_page_id(buff_man);
@@ -120,14 +87,6 @@ int get_buffer_page(buffer_manager* buff_man, int page_id, Page* npage) {
 
 int set_LRU_page_id(buffer_manager* buff_man) {
     if (buff_man->current_page_count == 0) {
-<<<<<<< HEAD
-        fprintf(stderr, "Error: %s Currently %d pages in buffer", 
-                "Can't set Least Recently Used ID.\n",
-                buff_man->current_page_count
-        );
-
-=======
->>>>>>> chaudron_table
         return -1;
     }
     for (int i = 0; i< buff_man->current_page_count; i++) {
@@ -141,33 +100,10 @@ int set_LRU_page_id(buffer_manager* buff_man) {
     return 0;
 }
 
-<<<<<<< HEAD
-void purge_buffer(buffer_manager* buff_man) {
-    for (int i = 0; i < buff_man->current_page_count; i++) {
-        // write out page
-        Page_write(buff_man->pages[0]);
-        // destroy page
-        remove_page(buff_man, 0);
-    }
-}
-
-void destroy_buffer(buffer_manager* buff_man) {
-    if (buff_man) {
-        // Free each page
-        for (int i = 0; i<buff_man->current_page_count; i++) {
-            Page_destroy(buff_man->pages[i]);
-        }
-        free(buff_man->page_arr_with_count);
-
-        free(buff_man);
-    }
-    
-=======
 void destroy_buffer(buffer_manager* buff_man) {
     // FREE ALL THE PAGES FIRST
     free(buff_man->pages);
     free(buff_man->page_arr_with_count);
 
     free(buff_man);
->>>>>>> chaudron_table
 }

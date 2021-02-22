@@ -7,11 +7,7 @@
  * 
  */
 typedef struct{
-<<<<<<< HEAD
-    char* table_dir;               //path to the table dir
-=======
     char* db_dir_path;             //path to the db location
->>>>>>> chaudron_table
     char* page_file_name;          //name of the page
     int page_id;                   //id of the page
     int page_size;                 //size of the page in bytes
