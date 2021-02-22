@@ -19,12 +19,17 @@ union record_item {
 	char v[255];
 };
 
-typedef struct
-{
+struct Node;
+
+struct Node{
 	int key;
 	int value;
-	Node* next_node;
-}Node;
+	struct Node* next_node;
+};
+
+
+
+
 
 typedef struct
 {
@@ -34,7 +39,7 @@ typedef struct
 	int base_multiplier;
     int len_of_data_types_arr;
     int* attr_data_types;
-    Node** table;
+    struct Node** table;
     
 }HashTable;
 
@@ -58,7 +63,7 @@ int compute_index(HashTable* self, int hash_code);
 int resize(HashTable* self);
 
 
-void HashTable_destroy();
+void HashTable_destroy(HashTable* hashtable);
 
 
 #endif

@@ -17,7 +17,7 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	self->len_of_data_types_arr = len_of_data_types_arr;
 
 	//allocate memory for hashtable
-	self->table = (Node**)malloc(sizeof(Node*)*self->capacity);
+	self->table = (struct Node**)malloc(sizeof(struct Node*)*self->capacity);
 	int i;
 	for(i=0;i<self->capacity;i++){
 		// self->table[i] = (Node*)malloc(sizeof(Node));
@@ -25,8 +25,6 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 	}
 
 	self->attr_data_types = (int*)malloc(sizeof(int)*len_of_data_types_arr);
-
-	int i;
 
 	for(i=0; i<len_of_data_types_arr; i++){
 		self->attr_data_types[i] = attr_data_types[i];
@@ -67,13 +65,13 @@ int put(HashTable* self, int hash_code, int value){
 	
 	//create the node and make it the head
 	if(self->table[index] == 0){
-		Node* head_node = (Node*)malloc(sizeof(Node));
+		struct Node* head_node = (struct Node*)malloc(sizeof(struct Node));
 		head_node->key = hash_code;
 		head_node->value = value;
 		head_node->next_node = NULL;
 	}else{
-		Node* old_node = self->table[index];
-		Node* new_head_node = (Node*)malloc(sizeof(Node));
+		struct Node* old_node = self->table[index];
+		struct Node* new_head_node = (struct Node*)malloc(sizeof(struct Node));
 		//replace the old_head with the new head
 		self->table[index] = new_head_node;
 	}
@@ -91,7 +89,20 @@ int put_record(HashTable* self, union record_item* key, int value, int record_le
 }
 
 int get_record(HashTable* self, union record_item* key, int key_length){
+	//compute the hash_code
+	int hash_code = compute_hash_code_record(self, key, key_length);
 
+	int index = hash_code % self->capacity;
+
+	struct Node* current_node = self->table[index];
+
+	//loop while current_node is not null
+	while(current_node!=0){
+		if(current_node->key = hash_code){
+			return current_node->value;
+		}
+	}
+	return -1;
 
 }
 int compute_dec_vals(char* str, int length){
@@ -174,12 +185,38 @@ int resize(HashTable* self){
 	int new_capacity = curr_capacity * self->base_multiplier;
 
 	if(self->table){
-		self->table = (Node*)realloc(self->table,sizeof(Node)*new_capacity);
+		self->table = (struct Node*)realloc(self->table,sizeof(struct Node)*new_capacity);
 	}
 	self->capacity = new_capacity;
 }
 
-void HashTable_destroy();
+void HashTable_destroy(HashTable* hashtable){
+
+	if(hashtable){
+		free(hashtable->attr_data_types);
+
+		int i;
+		for(i=0; i<hashtable->capacity; i++){
+			//if the head_node at index i of the table is
+			//not null, free it and its members
+			
+			if(hashtable->table[i]!=0){
+				struct Node* current_node = hashtable->table[i];
+				struct Node* prev_node;
+				while(current_node!=0){
+					prev_node = current_node;
+					current_node = current_node->next_node;
+					free(prev_node);
+				}
+				free(hashtable->table[i]);
+			}
+			
+		}
+		free(hashtable->table);
+
+		
+	}
+}
 
 
 
