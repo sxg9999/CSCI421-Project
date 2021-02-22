@@ -9,7 +9,7 @@ INCLUDE_DIR = include
 default: storage
 
 storage: $(SOURCE_FILES) $(HEADER_FILES)
-	$(CC) $(CFLAGS) -o storage $(SOURCE_FILES) -I $(INCLUDE_DIR)
+	$(CC) $(SOURCE_FILES) -o storage  $(CFLAGS) -I $(INCLUDE_DIR)
 
 clean:
 		rm *.o *.exe storage
