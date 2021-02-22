@@ -88,6 +88,14 @@ int put_record(HashTable* self, union record_item* key, int value, int record_le
 
 }
 
+int put_int(HashTable* self, int key, int value){
+	
+	int hash_code = compute_hash_code_int(self, key);
+	
+	put(self, hash_code, value);
+	return 0;
+}
+
 int get_record(HashTable* self, union record_item* key, int key_length){
 	//compute the hash_code
 	int hash_code = compute_hash_code_record(self, key, key_length);
@@ -121,6 +129,13 @@ void Ht_clear_n_buffer(char* buffer, int end_of_buffer){
     for(i=0; i<end_of_buffer; i++){
         buffer[i]=0;
     }
+}
+int compute_hash_code_int(HashTable* self, int key){
+	char buffer[100];
+	sprintf(buffer,"%d",key);
+	
+	int hash_code = compute_dec_vals(buffer,strlen(buffer));
+	return hash_code;
 }
 
 int compute_hash_code_record(HashTable* self, union record_item* key, int record_length){
