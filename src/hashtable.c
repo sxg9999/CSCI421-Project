@@ -10,7 +10,7 @@ int compute_hash_code_record(HashTable* self, union record_item* key, int record
 int compute_index(HashTable* self, int hash_code);
 int compute_hash_code_int(HashTable* self, int key);
 
-void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+void HashTable_record_init(HashTable* self, int capacity, double load_factor, int* attr_data_types, int len_of_data_types_arr){
 	self->capacity = capacity;
 	self->load_factor = load_factor;
 	self->current_size = 0;
@@ -33,10 +33,10 @@ void HashTable_record_int(HashTable* self, int capacity, int load_factor, int* a
 }
 
 
-HashTable* HashTable_record_create_param(int capacity, int load_factor, int* attr_data_types, int len_of_data_types_arr){
+HashTable* HashTable_record_create_param(int capacity, double load_factor, int* attr_data_types, int len_of_data_types_arr){
 	
 	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
-	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
+	HashTable_record_init(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
 
 	return record_hash_table;
 }
@@ -44,10 +44,10 @@ HashTable* HashTable_record_create_param(int capacity, int load_factor, int* att
 HashTable* HashTable_record_create(int* attr_data_types, int len_of_data_types_arr){
 
 	int capacity = 12;
-	int load_factor = .75;
+	double load_factor = .75;
 	
 	HashTable* record_hash_table = (HashTable*)malloc(sizeof(HashTable));
-	HashTable_record_int(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
+	HashTable_record_init(record_hash_table, capacity, load_factor, attr_data_types, len_of_data_types_arr);
 
 	return record_hash_table;
 }
@@ -70,6 +70,7 @@ int put(HashTable* self, int hash_code, int value){
 		head_node->key = hash_code;
 		head_node->value = value;
 		head_node->next_node = NULL;
+		self->table[index] = head_node;
 	}else{
 		struct Node* old_node = self->table[index];
 		struct Node* new_head_node = (struct Node*)malloc(sizeof(struct Node));
