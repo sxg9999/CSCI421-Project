@@ -1,30 +1,5 @@
 #include "../include/table_manager.h"
 
-///
-/// PLACEHOLDERS
-int Hash_get_item(HashTable* self, int key, void* item) {
-    return 0;
-}
-
-int Hash_remove_item(HashTable* self, int key) {
-    return 0;
-}
-
-int Hash_add_item(HashTable* self, int key, void* item) {
-    return 0;
-}
-
-int Hash_destroy(HashTable* self) {
-    return 0;
-}
-
-int Hash_put_int(HashTable* self, int key, void* item) {
-    return 0;
-}
-///
-///
-
-
 int TM_write_meta(TableManager* self) {
     FILE* fp;
     int rc;
@@ -43,6 +18,8 @@ int TM_write_meta(TableManager* self) {
     rc = ec( fwrite(&(self->page_size), sizeof(int), 1, fp) );
     // write out # of tables
     rc = ec( fwrite(&(self->num_tables), sizeof(int), 1, fp) );
+    // write out buff size
+    rc = ec( fwrite(&(self->buffer_size), sizeof(int), 1, fp));
 
     // write out each table
     for (int i = 0; i < self->num_tables; i++) {
@@ -62,7 +39,7 @@ int TM_write_meta(TableManager* self) {
     return rc;
 }
 
-int TM_read_meta(char* db_loc, TableManager* tm) {
+buffer_manager* TM_read_meta(char* db_loc, TableManager* tm, int* ret) {
     FILE* fp;
     int rc;
 
@@ -73,15 +50,19 @@ int TM_read_meta(char* db_loc, TableManager* tm) {
     fp = fopen(filename, "rb+");
     // read length of db_loc
     int db_loc_length; 
-    rc = ec( fread(&db_loc_length, sizeof(int), 1, fp) );
+    *rc = ec( fread(&db_loc_length, sizeof(int), 1, fp) );
     
     // read page_size
     int page_size;
-    rc = ec( fread(&page_size, sizeof(int), 1, fp) );
+    *rc = ec( fread(&page_size, sizeof(int), 1, fp) );
 
     // read # of tables
     int table_count;
-    rc = ec( fread(&table_count, sizeof(int), 1, fp) );
+    *rc = ec( fread(&table_count, sizeof(int), 1, fp) );
+
+    // read buff size
+    int buff_size;
+    *rc = ec( fread(&table_count, sizeof(int), 1, fp) );
 
     // read in each table
     HashTable* tables = malloc(sizeof(HashTable));
@@ -98,25 +79,27 @@ int TM_read_meta(char* db_loc, TableManager* tm) {
     tm->page_size = page_size;
     tm->num_tables = table_count;
     tm->table_ids = table_ids;
-    tm->tables = tables;    
+    tm->tables = tables;
+    tm->buffer_size = buff_size;
 
     fclose(fp);
 
-    if(rc == -1) {
+    if(*rc == -1) {
         fprintf(stderr, "Error reading tablemanager data.\n");
     }
 
-    return rc;
+    return BufferManager_new(buff_size);
 }
 
 
 
-TableManager* init_table_manager(char* db_loc, int page_size)
+TableManager* init_table_manager(char* db_loc, int page_size, int buffer_size)
 {
     TableManager* tm = (TableManager*) malloc(sizeof(TableManager));
     tm->db_loc = db_loc;
     tm->page_size = page_size;
     tm->tables = (HashTable*) malloc(sizeof(HashTable));
+    tm->buffer_size = buffer_size;
 
     return tm;
 }
@@ -141,11 +124,30 @@ void get_table_dir(int table_id, char* db_loc, char* dirStr)
     strcat(dirStr, "/");
 }
 
+
+/// A disgusting id generator.
+int get_rand_id(TableManager* self) {
+    srand(time(NULL));
+    int id;
+    bool loop = true;
+    while(loop) {
+        loop = false;
+        id = rand();
+
+        for(int i = 0; i < self->num_tables; i++) {
+            if(id == self->table_ids[i]) {
+                loop = true;
+                break;
+            }
+        }
+    }
+    return id;
+}
+
 int TM_add_table(TableManager* self, int* data_types, int* key_indices, int data_types_size, int key_indices_size)
 {
     // NOT GUARANTEED UNIQUE ID, just very unlikely to repeat
-    srand(time(NULL));
-    int table_id = rand();
+    int table_id = get_rand_id(self);
 
     char* table_dir = malloc(256*sizeof(char));
     get_table_dir(table_id, self->db_loc, table_dir);

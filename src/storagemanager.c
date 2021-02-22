@@ -15,14 +15,11 @@
 #include <errno.h>
 #include <math.h>
 
-char* DB_LOC;
 buffer_manager* bufferManager;
 TableManager* tableManager;
 
 int create_database(char* db_loc, int page_size, int buffer_size, bool restart) {
     int rc;
-
-    DB_LOC = db_loc;
     
     if (restart) {
         // simply restart an existing DB
@@ -37,12 +34,16 @@ int create_database(char* db_loc, int page_size, int buffer_size, bool restart) 
 int restart_database(char* db_loc) {
 
     tableManager = malloc(sizeof(TableManager));
-    return TM_read_meta(db_loc, tableManager);
+
+    int ret = 0;
+    bufferManager = TM_read_meta(db_loc, tableManager, &ret);
+
+    return ret;
 }
 
 int new_database(char* db_loc, int page_size, int buffer_size) {
-    bufferManager = BufferManager_new( floor(buffer_size / page_size) );
-    tableManager = init_table_manager(db_loc, page_size);
+    bufferManager = BufferManager_new(buffer_size);
+    tableManager = init_table_manager(db_loc, page_size, buffer_size);
     return 0;
 }
 

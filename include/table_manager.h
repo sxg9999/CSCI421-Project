@@ -18,19 +18,44 @@ typedef struct HashTable{
     int current_size;
 } HashTable;
 
+///
+/// PLACEHOLDERS
+int Hash_get_item(HashTable* self, int key, void* item) {
+    return 0;
+}
+
+int Hash_remove_item(HashTable* self, int key) {
+    return 0;
+}
+
+int Hash_add_item(HashTable* self, int key, void* item) {
+    return 0;
+}
+
+int Hash_destroy(HashTable* self) {
+    return 0;
+}
+
+int Hash_put_int(HashTable* self, int key, void* item) {
+    return 0;
+}
+///
+///
+
 typedef struct {
     char* db_loc;
     int page_size;
     int* table_ids;
     HashTable* tables;
     int num_tables;
+    int buffer_size;
 } TableManager;
 
 int TM_write_meta(TableManager* self);
 
-int TM_read_meta(char* db_loc, TableManager* tm);
+buffer_manager* TM_read_meta(char* db_loc, TableManager* , int* ret);
 
-TableManager* init_table_manager(char* db_loc, int page_size);
+TableManager* init_table_manager(char* db_loc, int page_size, int buffer_size);
 
 int TM_get_table(TableManager* self, int table_id, Table* table);
 

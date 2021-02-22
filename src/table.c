@@ -182,10 +182,29 @@ void Table_destroy(Table* self) {
     free(self);
 }
 
+
+/// A disgusting id generator.
+int get_rand_id(Table* self) {
+    srand(time(NULL));
+    int id;
+    bool loop = true;
+    while(loop) {
+        loop = false;
+        id = rand();
+
+        for(int i = 0; i < self->num_pages; i++) {
+            if(table_id == self->page_ids[i]) {
+                loop = true;
+                break;
+            }
+        }
+    }
+    return id;
+}
+
 // returns the new page id
 Page* new_page(Table* self) {
-    srand(time());
-    int page_id = rand();
+    int page_id = get_rand_id(self);
     Page* page = new_existing_page(self, page_id);
 
     // add page id to list
