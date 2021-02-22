@@ -2,9 +2,6 @@
 #include <string.h>
 
 #include "../include/table.h"
-#include "../include/page.h"
-
-#define ce(X) (((X) < 0) ? (X) : 0)
 
 Page* new_page(Table* self);
 Page* new_existing_page(Table* self, int page_id);
@@ -13,30 +10,31 @@ Page* new_existing_page(Table* self, int page_id);
 int Table_write_meta(Table* self, FILE* fp) {
     int rc;
     // write table id
-    rc = ce( fprintf(fp, self->table_id) );
+    rc = ec( fwrite(&(self->table_id), sizeof(int), 1, fp) );
+
     // write # of attributes
-    rc = ce( fprintf(fp, self->num_columns) );
+    rc = ec( fwrite(&(self->num_columns), sizeof(int), 1, fp) );
+
     // write type of each attribute
-    for(int a = 0; a < self->num_columns; a++) {
-        rc = ce( fprintf(fp, self->column_types[a]) );
-    }
+    rc = ec( fwrite(self->columns, sizeof(int), self->num_columns, fp) );
+
     // write # of attributes in primary key
-    rc = ce( fprintf(fp, self->num_keys));
+    rc = ec( fwrite(&(self->num_keys), sizeof(int), 1, fp));
+
     // write each attribute of primary key
-    for(int k = 0; k < self->num_keys; k++) {
-        rc = ce( fprintf(fp, self->key_indices[a]) );
-    }
+    rc = ec( fwrite(self->primary_key, sizeof(int), self->num_keys, fp) );
+
     // write # of records in table
-    rc = ce( fprintf(fp, self->num_records) );
+    rc = ec( fwrite(&(self->num_records), sizeof(int), 1, fp) );
+
     // write # of pages in table
-    rc = ce( fprintf(fp, self->num_pages) );
+    rc = ec( fwrite(&(self->num_pages), sizeof(int), 1, fp) );
+
     // write each page #
-    for(int p = 0; p < self->num_pages; p++) {
-        rc = ce( fprintf(fp, self->page_ids[p]) );
-    }
+    rc = ec( fwrite(self->page_ids, sizeof(int), self->num_pages, fp) );
 
     if (rc == -1) {
-        frpintf(stderr, "Problem writing table data.");
+        fprintf(stderr, "Problem writing table data.");
     }
     return rc;
 }
@@ -46,53 +44,47 @@ int Table_read_meta(Table* newTable, FILE* fp) {
 
     // read table id
     int table_id;
-    rc = ce( fscanf(fp, &table_id) );
+    rc = ec( fread(&table_id, sizeof(int), 1, fp) );
 
     // read # of attributes
     int num_columns;
-    rc = ce( fscanf(fp, &num_columns) );
+    rc = ec( fread(&num_columns, sizeof(int), 1, fp) );
 
     // read type of each attribute
     int* column_types = malloc(num_columns * sizeof(int));
-    for(int a = 0; a < num_columns; a++) {
-        rc = ce( fscanf(fp, column_types + a*sizeof(int)) );
-    }
+    rc = ec( fread(column_types, sizeof(int), num_columns, fp) );
 
     // read # of attributes in primary key
     int num_keys;
-    rc = ce( fscanf(fp, &num_keys));
+    rc = ec( fread(&num_keys, sizeof(int), 1, fp));
 
     // read each attribute of primary key
-    int* key_indicess = malloc(num_keys * sizeof(int));
-    for(int k = 0; k < num_keys; k++) {
-        rc = ce( fscanf(fp, key_indices + k*sizeof(int)) );
-    }
+    int* primary_key = malloc(num_keys * sizeof(int));
+    rc = ec( fread(primary_key, sizeof(int), num_keys, fp) );
 
     // read # of records in table
     int num_records;
-    rc = ce( fscanf(fp, &num_records) );
+    rc = ec( fread(&num_records, sizeof(int), 1, fp) );
 
     // read # of pages in table
     int num_pages;
-    rc = ce( fscanf(fp, &num_pages) );
+    rc = ec( fread(&num_pages, sizeof(int), 1, fp) );
 
     // read each page #
     int* page_ids = malloc(num_pages * sizeof(int));
-    for(int p = 0; p < &num_pages; p++) {
-        rc = ce( fscanf(fp, page_ids + p*sizeof(int)) );
-    }
+    rc = ec( fread(page_ids, sizeof(int), num_pages, fp) );
 
     newTable->table_id = table_id;
     newTable->num_columns = num_columns;
-    newTable->column_types = column_types;
+    newTable->columns = column_types;
     newTable->num_keys = num_keys;
-    newTable->key_indices = key_indices;
+    newTable->primary_key = primary_key;
     newTable->num_records = num_records;
     newTable->num_pages = num_pages;
-    newTable->page_ids = pages_ids;
+    newTable->page_ids = page_ids;
 
     if (rc == -1) {
-        frpintf(stderr, "Problem reading table data.");
+        fprintf(stderr, "Problem reading table data.");
     }
     return rc;
 }
@@ -169,7 +161,7 @@ void Table_clear(Table* self) {
 
     // delete all page files
     for(int p = 0; p < self->page_ids; p++) {
-        itoa(page_id_str, self->page_ids[p], 10);
+        tostring(self->page_ids[p], page_id_str);
         strcpy(page_file, self->loc);
         strcat(page_file, page_id_str);
 
@@ -180,9 +172,9 @@ void Table_clear(Table* self) {
 }
 
 void Table_destroy(Table* self) {
-    table_clear(self);
+    Table_clear(self);
 
-    strcat(self->loc, TABLE_META);
+    strcat(self->loc, TABLE_META_DATA_FILENAME);
     remove(self->loc);
 
     free(self->page_ids);
@@ -218,11 +210,8 @@ Page* new_page(Table* self) {
 }
 
 Page* new_existing_page(Table* self, int page_id) {
-    srand(time(NULL));
-    int page_id = rand();
-
-    char page_file_name[255] = 'page_';
-    itoa(page_id, page_file_name+6, 10);
+    char page_file_name[255] = "page_";
+    tostring(page_id, page_file_name+5);
     strcat(page_file_name, ".oo");
 
     // create Page "object"
@@ -230,9 +219,27 @@ Page* new_existing_page(Table* self, int page_id) {
                                     page_file_name,
                                     page_id,
                                     self->page_size,
-                                    sizeof(record_item),
+                                    sizeof(union record_item),
                                     self->num_columns,
                                     self->columns};
 
-    return Page_create(pp);    
+    return Page_create(&pp);    
+}
+
+void tostring(int num, char str[]) {
+    int i, rem, len = 0, n;
+ 
+    n = num;
+    while (n != 0)
+    {
+        len++;
+        n /= 10;
+    }
+    for (i = 0; i < len; i++)
+    {
+        rem = num % 10;
+        num = num / 10;
+        str[len - (i + 1)] = rem + '0';
+    }
+    str[len] = '\0';
 }

@@ -1,5 +1,4 @@
 #include "../include/table_manager.h"
-#include "../include/table.h"
 
 ///
 /// PLACEHOLDERS
@@ -14,24 +13,38 @@ int Hash_remove_item(HashTable* self, int key) {
 int Hash_add_item(HashTable* self, int key, void* item) {
     return 0;
 }
+
+int Hash_destroy(HashTable* self) {
+    return 0;
+}
+
+int Hash_put_int(HashTable* self, int key, void* item) {
+    return 0;
+}
 ///
 ///
 
 
 
 
-void TM_write_meta(TableManager* self) {
+int TM_write_meta(TableManager* self) {
     FILE* fp;
+    int rc;
 
-    fp = fopen(TABLE_META_DATA_FILENAME, "wb+");
+    char filename[255];
+    strcpy(filename, self->db_loc);
+    strcat(filename, TABLE_META_DATA_FILENAME);
+
+    fp = fopen(filename, "wb+");
     // write out length of db_loc
-    fprintf(fp, strlen(self->db_loc));
+    int len = strlen(self->db_loc);
+    rc = ec( fwrite(&len, sizeof(int), 1, fp) );
     // write out db_loc
-    fprintf(fp, self->db_loc);
+    rc = ec( fwrite(self->db_loc, len*sizeof(char), 1, fp) );
     // write out page_size
-    fprintf(fp, self->page_size);
+    rc = ec( fwrite(&(self->page_size), sizeof(int), 1, fp) );
     // write out # of tables
-    fprintf(fp, (self->tables)->current_size);
+    rc = ec( fwrite(&(self->num_tables), sizeof(int), 1, fp) );
 
     // write out each table
     for (int i = 0; i < self->num_tables; i++) {
@@ -43,42 +56,59 @@ void TM_write_meta(TableManager* self) {
     }
 
     fclose(fp);
+
+    if(rc == -1) {
+        fprintf(stderr, "Problem writing tablemanager data.\n");
+    }
+
+    return rc;
 }
 
-void TM_read_meta() {
+int TM_read_meta(char* db_loc, TableManager* tm) {
     FILE* fp;
+    int rc;
 
+    char filename[255];
+    strcpy(filename, db_loc);
+    strcat(filename, TABLE_META_DATA_FILENAME);
 
-    fp = fopen(TABLE_META_DATA_FILENAME, "rb+");
+    fp = fopen(filename, "rb+");
     // read length of db_loc
     int db_loc_length; 
-    fscanf(fp, "%d", &db_loc_length);
-    
-    // read db_loc
-    char db_loc[db_loc_length];
-    fgets(db_loc, db_loc_length, fp);
+    rc = ec( fread(&db_loc_length, sizeof(int), 1, fp) );
     
     // read page_size
     int page_size;
-    fscanf(fp, "%d", &page_size);
-
-    // create table manager
-    TableManager* tm = init_table_manager(db_loc, page_size);
+    rc = ec( fread(&page_size, sizeof(int), 1, fp) );
 
     // read # of tables
     int table_count;
-    fscanf(fp, "%d", &table_count);
+    rc = ec( fread(&table_count, sizeof(int), 1, fp) );
 
     // read in each table
-    for (int i = 0; i < tm->num_tables; i++) {
-        int current_table_id = tm->table_ids[i];
-        Table* current_table;
-        Hash_get_item(tm->tables, current_table_id, current_table);
+    HashTable* tables = malloc(sizeof(HashTable));
+    int* table_ids = malloc(table_count*sizeof(int));
+    for (int i = 0; i < table_count; i++) {
+        Table* current_table = malloc(sizeof(Table));
         // write out current table to fp
-        Table_write_meta(current_table, fp);
+        rc = ec( Table_read_meta(current_table, fp) );
+        Hash_put_int(tables, current_table->table_id, (void*) current_table);
+        table_ids[i] = current_table->table_id;
     }
 
+    tm->db_loc = db_loc;
+    tm->page_size = page_size;
+    tm->num_tables = table_count;
+    tm->table_ids = table_ids;
+    tm->tables = tables;    
+
     fclose(fp);
+
+    if(rc == -1) {
+        fprintf(stderr, "Error reading tablemanager data.\n");
+    }
+
+    return rc;
 }
 
 
@@ -94,7 +124,7 @@ TableManager* init_table_manager(char* db_loc, int page_size)
 }
 
 int TM_get_table(TableManager* self, int table_id, Table* table) {
-    if(get_item(self->tables, table_id, (void*)table) == -1) {
+    if(Hash_get_item(self->tables, table_id, (void*)table) == -1) {
         printf(stderr, "Table with ID %d does not exist.\n", table_id);
         return -1;
     }
@@ -109,7 +139,7 @@ char* get_table_dir(int table_id, char* db_loc)
     char dirStr[255];
     strcpy(dirStr, db_loc);
 
-    itoa(table_id, t+6, 10);
+    tostring(table_id, t+6);
     strcat(dirStr, t);
     strcat(dirStr, "/");
 
@@ -161,15 +191,8 @@ int TM_add_old_table(TableManager* self, Table* old_table)
     return old_table->table_id;
 }
 
-void TM_save_tables(TableManager* self) {
-    Table** tables;
-    get_all_items(self->tables, tables);
-    for(int t = 0; t < self->num_tables; t++) {
-        Table* table = tables[t];
-        Table_save_meta(table);
-    }
-
-    TM_save_meta(self);
+void TM_save(TableManager* self) {
+    TM_write_meta(self);
 }
 
 void TM_destroy(TableManager* self) {

@@ -13,6 +13,7 @@
 #include "../include/table_manager.h"
 #include "../include/buffer_manager.h"
 #include <errno.h>
+#include <math.h>
 
 char* DB_LOC;
 buffer_manager* bufferManager;
@@ -35,7 +36,8 @@ int create_database(char* db_loc, int page_size, int buffer_size, bool restart) 
 
 int restart_database(char* db_loc) {
 
-    return 0;
+    tableManager = malloc(sizeof(TableManager));
+    return TM_read_meta(db_loc, tableManager);
 }
 
 int new_database(char* db_loc, int page_size, int buffer_size) {
@@ -116,8 +118,8 @@ int purge_buffer() {
 }
 
 int terminate_database() {
-    TM_save_tables(tableManager);
+    TM_save(tableManager);
 
-    free(tableManager);
+    TM_destroy(tableManager);
     return 0;
 }

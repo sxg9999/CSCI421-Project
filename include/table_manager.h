@@ -29,18 +29,18 @@ typedef struct {
     int num_tables;
 } TableManager;
 
-Table* getTables();
+int TM_get_table(TableManager* self, int table_id, Table* table);
 
 /*
  * Writes the meta data about each of the tables to a file. 
  * @param self - the table manager to be written out to a file
  */
-void TM_write_meta(TableManager* self);
+int TM_write_meta(TableManager* self);
 
 /*
  * Reads and reconstructs the tables from the meta data file.
  */
-void TM_read_meta();
+int TM_read_meta();
 
 /*
  *

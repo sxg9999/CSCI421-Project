@@ -10,30 +10,34 @@
 #include <stdlib.h>
 
 #include "storagemanager.h"
-#include "table_meta_data.h"
 #include "page.h"
 #include "buffer_manager.h"
 
+#define ec(X) (((X) < 0) ? (X) : 0)
+#define TABLE_META_DATA_FILENAME "table_meta"
+
+
 typedef struct{
+    char* loc;
     int table_id; // unique id
     int num_records; // number of tuples
-    int* column_types; // data_types of attributes
-    int* key_indices; // which columns are keys
-    int* page_ids;
+    int* columns; // data_types of attributes
+    int* primary_key; // which columns are keys
     int num_columns;
     int num_keys;
     int num_pages;
     int* page_ids;
+    int page_size;
 } Table;
 
 typedef struct{
-    table_id;
-    page_size;
-    data_types_size;
-    key_indices_size;
-    data_types;
-    key_indices;
-    loc;
+    int table_id;
+    int page_size;
+    int data_types_size;
+    int key_indices_size;
+    int* data_types;
+    int* key_indices;
+    char* loc;
 } TableParams;
 
 Page* new_page(Table* self);
@@ -63,5 +67,6 @@ Page* new_page(Table* self);
 
 Page* new_existing_page(Table* self, int page_id);
 
+void tostring(int num, char str[]);
 
 #endif 
