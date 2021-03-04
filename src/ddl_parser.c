@@ -11,22 +11,19 @@
 #include "../include/ddl_parser_helper.h"
 #include "../include/ddl_parser.h"
 
-int parse_ddl_statement( char* statement ) {
+int parse_ddl_statement( char* input_statement ) {
+    char* statement = strdup(input_statement);
     enum statement_type stmt_type;
     char* token;
     const char delimiter[2] = " ";
-    char* str = statement;
-    char c = *(str++);
-    //const char* test = "test";
-    //const char* test2 = "tested"; 
     
     // get first word in statement
     token = strtok(statement, delimiter);
     if (token == NULL) {
-        fprintf(stderr, "%s: '%s'\n", "Invalid DDL statement", statement);
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
         return -1;
     }
-    printf("Old: %s\n", token);
     char* first_word = (char *)malloc(strlen(token));
     char a;
     // make the token all lowercase
@@ -34,46 +31,89 @@ int parse_ddl_statement( char* statement ) {
         a = tolower(token[i]);
         first_word[i] = a;
     }
-    printf("New: %s\n", first_word);
 
     // check for statement type 
     char* check_type;
     if (strlen(first_word) == DROP) {
         check_type = DROP_START;
+        stmt_type = DROP;
     } else if (strlen(first_word) == ALTER) {
         check_type = ALTER_START;
+        stmt_type = ALTER;
     } else if (strlen(first_word) == CREATE) {
         check_type = CREATE_START;
+        stmt_type = CREATE;
     } else {
-        fprintf(stderr, "%s: '%s'\n", "Invalid DDL statement", statement);
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
         return -1;
     }
     int valid_first = strncmp(first_word, check_type, strlen(first_word));
-    printf("valid: %d\n", valid_first==0);
-
-    
-    
+    if (valid_first != 0) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
+        return -1;
+    }
+    free(first_word);
+    //printf("valid first word: %s\n", token);
 
 
     // check for table second word
+    token = strtok(NULL, delimiter);
+    if ( strlen(token) != strlen(TABLE)) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
+        return -1;
+    }
+    // make second word all lower case
+    char* second_word = (char *)malloc(strlen(token));
+    char b;
+    for (int i = 0; token[i] != '\0'; i++) {
+        b = tolower(token[i]);
+        second_word[i] = b;
+    }
+    // check if second word=="table"
+    int valid_second = strncmp(second_word, TABLE, 
+        strlen(second_word));
+    if (valid_second != 0) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
+        return -1;
+    }
+    free(second_word);
+    //printf("valid second word: %s\n", token);
+    free(statement);
+    
     // call one of the other parse funcs
-
-
-    // int ret = strncmp(test, test2, strlen(test));
-    // printf("%d", ret);
-
-
-    return 0;
+    int result;
+    if (stmt_type == DROP) {
+        result = parse_drop_table_stmt(input_statement);
+    } else if (stmt_type == ALTER) {
+        result = parse_alter_table_stmt(input_statement);
+    } else if (stmt_type == CREATE) {
+        result = parse_create_table_stmt(input_statement);
+    } else {
+        printf("%s: %s\n", 
+            "Something went wrong. Check type", check_type);
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
+        return -1;
+    }
+    
+    return result;
 }
 
 int parse_create_table_stmt( char* statement ) {
+    printf("Create STMT: %s\n", statement);
     return 0;
 }
 
 int parse_drop_table_stmt( char* statement ) {
+    printf("Drop STMT: %s\n", statement);
     return 0;
 }
 
 int parse_alter_table_stmt( char* statement ) {
+    printf("Alter STMT: %s\n", statement);
     return 0;
 }
