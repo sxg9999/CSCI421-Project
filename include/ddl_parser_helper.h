@@ -7,9 +7,16 @@
 #ifndef DDL_PARSER_HELPER_H
 #define DDL_PARSER_HELPER_H
 
-#define CREATE_START "create table"
-#define DROP_START "drop table"
-#define ALTER_START "alter table"
+#define CREATE_START "create"
+#define DROP_START "drop"
+#define ALTER_START "alter"
+#define TABLE "table"
+
+enum statement_type {
+    DROP = 4,
+    ALTER = 5,
+    CREATE = 6,
+};
 
 /*
   * This function handles the parsing of create table statments
