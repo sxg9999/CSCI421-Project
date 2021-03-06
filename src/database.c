@@ -20,11 +20,12 @@ int process_statement(char* statement){
  */
 int database_clean_up(){
     free_input();
+    return 0;
 }
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
-
 int main(int argc, char* argv[] ) {
     char* db_loc = argv[1];
     char* ptr;
@@ -37,13 +38,13 @@ int main(int argc, char* argv[] ) {
     if(stat(db_loc, &s) == 0 && (s.st_mode & S_IFDIR)?true:false){
         exist = true;
     }
+
     create_database(db_loc, page_size, buffer_size, exist);
 
-    /*initiates structs and fields that are neccessary for handling multiline user
-    inputs*/
-
-    create_multiline_input();
-    char* statement;
+    
+    create_multiline_input();                       //initiates the structs and fields neccessary for 
+                                                    //handling multiline user inputs
+    char* statement;                                
     int result;                                     // the result of processing the statement (parsing, execution, etc)
     while(true){
         statement = get_input();
@@ -53,8 +54,9 @@ int main(int argc, char* argv[] ) {
         }
         printf("%s\n", statement);
         
+        /*process the statement and state if the statement
+        was parsed and executed successful or not*/
         result = process_statement(statement);     //parse and execute the statement
-        
         if(result == 0){
             printf("SUCCESS\n");
         }else{

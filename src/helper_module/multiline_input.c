@@ -27,6 +27,7 @@ int create_multiline_input(){
     input->base_multiplier = 2;
     input->count = 0;
     input->buffer = (char**)malloc(sizeof(char*)*input->buffer_depth);
+    
     for(int i = 0; i < 10; i++){
         input->buffer[i] = (char*)malloc(sizeof(char)*input->buffer_size);
         input->buffer[i][0] = 0;
