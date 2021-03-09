@@ -6,6 +6,15 @@
 #include "../include/database.h"
 #include "helper_module/multiline_input.h"
 
+
+
+//struct to hold metadata about tables
+// struct tables_data{
+
+// };
+
+
+
 /**
  * All parsing, executing related task goes here
  */
