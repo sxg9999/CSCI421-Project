@@ -6,7 +6,7 @@ HEADER_FILES = include/*.h
 INCLUDE_DIR = include
 
 # first entry for make to envoke
-default: database
+database: database
 
 database: $(SOURCE_FILES) $(HEADER_FILES)
 	$(CC) $(SOURCE_FILES) -o database  $(CFLAGS) -I $(INCLUDE_DIR)

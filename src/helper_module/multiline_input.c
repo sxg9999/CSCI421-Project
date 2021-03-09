@@ -17,8 +17,9 @@ typedef struct{
 
 
 static Input* input = NULL; 
-
+int multiline_build_str(char** ptr, char* result_str, int line_count);
 int multiline_input_resize();
+int line_is_empty(char* ptr, int str_length);
 
 int create_multiline_input(){
     input = (Input*)malloc(sizeof(Input));
@@ -53,14 +54,21 @@ char* get_input(){
 
     int input_len = 0;
     while(true){
-        printf("> ");
+        printf(">");
         fgets(*(input->ptr), input->buffer_size, stdin);
-        input_len = strlen(*(input->ptr));    
-        count++;
-        if(*(*(input->ptr)+(input_len-2))==59){
-            break;
+        input_len = strlen(*(input->ptr));
+
+        if(line_is_empty(*(input->ptr), input_len) == 0){
+            //if the line is empty skip it
+            continue;
+        }else{
+            count++;
+            if(*(*(input->ptr)+(input_len-2))==59){
+                break;
+            }
+            input->ptr++;
         }
-        input->ptr++;
+ 
     }
 
     //concatenate all the lines into one string and return it
@@ -68,8 +76,21 @@ char* get_input(){
     multiline_build_str(input->buffer, input->result_str, count);
 
     return input->result_str;
+}
 
-
+/**
+ * checks if a line of string is empty (contains only spaces, tabs, and new line)
+ * and returns 0 if empty and 1 if it is not empty;
+ */
+int line_is_empty(char* str, int str_length){
+    char c;
+    for(int i = 0; i < str_length; i++){
+        c = str[i];
+        if(c != ' ' && c != '\t' && c != '\n'){
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int multiline_build_str(char** ptr, char* result_str, int line_count){
@@ -86,8 +107,16 @@ int multiline_build_str(char** ptr, char* result_str, int line_count){
             result_str_index++;
         }
     }
-    result_str[result_str_index] = 0;
-    return 0;
+
+    //check if there is a space before the semicolon and 
+    //if there is then move the semicolon to the left
+    if(result_str[result_str_index-3]==' '){
+        result_str[result_str_index-3] = ';';
+        result_str[result_str_index-2] = 0;
+    }else{
+        result_str[result_str_index-1] = 0;
+    }
+    
 }
 
 
