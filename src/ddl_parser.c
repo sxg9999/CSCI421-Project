@@ -86,6 +86,12 @@ int parse_ddl_statement( char* input_statement ) {
     
     // call one of the other parse funcs
     int result;
+
+    printf("TYPE: %s\n", check_type);
+    // "DROP/ALTER/CREATE TABLE <NAME>"
+    // move input string pointer to skip beginning
+    input_statement += strlen(check_type) + 1 +
+                        strlen(TABLE) + 1;
     if (stmt_type == DROP) {
         result = parse_drop_table_stmt(input_statement);
     } else if (stmt_type == ALTER) {
@@ -99,7 +105,6 @@ int parse_ddl_statement( char* input_statement ) {
             "Invalid DDL statement", input_statement);
         return -1;
     }
-    
     return result;
 }
 
