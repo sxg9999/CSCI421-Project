@@ -8,8 +8,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../include/ddl_parser_helper.h"
 #include "../include/ddl_parser.h"
+#include "../include/ddl_parser_helper.h"
 
 int parse_ddl_statement( char* input_statement ) {
     char* statement = strdup(input_statement);
@@ -87,11 +87,6 @@ int parse_ddl_statement( char* input_statement ) {
     // call one of the other parse funcs
     int result;
 
-    printf("TYPE: %s\n", check_type);
-    // "DROP/ALTER/CREATE TABLE <NAME>"
-    // move input string pointer to skip beginning
-    input_statement += strlen(check_type) + 1 +
-                        strlen(TABLE) + 1;
     if (stmt_type == DROP) {
         result = parse_drop_table_stmt(input_statement);
     } else if (stmt_type == ALTER) {
@@ -99,11 +94,15 @@ int parse_ddl_statement( char* input_statement ) {
     } else if (stmt_type == CREATE) {
         result = parse_create_table_stmt(input_statement);
     } else {
-        printf("%s: %s\n", 
-            "Something went wrong. Check type", check_type);
+        // printf("%s: %s\n", 
+        //    "Something went wrong. Check type", check_type);
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid DDL statement", input_statement);
         return -1;
+    }
+    if (result < 0) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
     }
     return result;
 }
@@ -113,8 +112,27 @@ int parse_create_table_stmt( char* statement ) {
     return 0;
 }
 
-int parse_drop_table_stmt( char* statement ) {
-    printf("Drop STMT: %s\n", statement);
+int parse_drop_table_stmt( char* input_statement ) {
+    char* statement = strdup(input_statement);
+    // "DROP/ALTER/CREATE TABLE <NAME>"
+    // move input string pointer to skip beginning
+    statement += strlen(DROP_START) + 1 +
+                        strlen(TABLE) + 1;
+
+    // printf("Drop STMT: %s\n", statement);
+    const char delimiter[2] = " ";
+    char* table_name;
+    table_name = strtok(statement, delimiter);
+    // printf("Table name: %s\n", table_name);
+
+
+    char* check_rest = strtok(NULL, delimiter);
+    if (check_rest != NULL) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid drop table name", input_statement);
+        return -1;
+    }
+
     return 0;
 }
 
