@@ -7,14 +7,76 @@
 #include "../include/database.h"
 #include "helper_module/multiline_input.h"
 #include "catalog.h"
+#include "ddl_parser.h"
 
 
+
+int get_query_type(char* key_word){
+    return 0;
+}
+
+int execute_drop_table(char* statement){
+    char* table_name;
+    int table_num = catalog.get_table_num(table_name);
+    drop_table(table_num);
+    catalog.remove_table(table_name);
+    return 0;
+}
+
+int execute_non_query(char * statement){
+    int result = parse_ddl_statement(statement);
+    if(result==0){
+        char* key_word;
+        int query_type = get_query_type(key_word);
+
+        switch(query_type){
+            case 0:
+                //assuming case 0 is drop table
+                execute_drop_table(statement);
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            default:
+                break;
+        }
+        return 0;
+    }
+    return -1;
+
+}
+
+int execute_query(char * query, union record_item *** result){
+    return 0;
+}
+
+
+
+/**
+ * checks if the statement is a query
+ * @param statement
+ * @return 0 if not and 1 if it is
+ */
+int is_query(char* statement){
+    return 0;
+}
 /**
  * All parsing, executing related task goes here
  */
 int process_statement(char* statement){
     //To be done
-    return 0;
+
+    int result = -1;
+    //determine whether its a non_query or a query
+    if(is_query(statement)){
+        union record_item*** table;
+        result = execute_query(statement, table);
+    }else{
+        result = execute_non_query(statement);
+    }
+
+    return result;
 }
 
 
@@ -66,8 +128,6 @@ int main(int argc, char* argv[] ) {
 
     create_database(db_loc_path, page_size, buffer_size, exist);
     init_catalog(db_loc_path);                      //initates the catalog
-    catalog.add_table("bob",123);
-    catalog.print_table_map();
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
     char* statement;                                

@@ -10,6 +10,7 @@
 
 #include "../include/ddl_parser_helper.h"
 #include "../include/ddl_parser.h"
+#include "catalog.h"
 
 int parse_ddl_statement( char* input_statement ) {
     char* statement = strdup(input_statement);
@@ -108,12 +109,36 @@ int parse_create_table_stmt( char* statement ) {
     return 0;
 }
 
-int parse_drop_table_stmt( char* statement ) {
-    printf("Drop STMT: %s\n", statement);
+int parse_drop_table_stmt( char* input_statement ) {
+    char* statement = strdup(input_statement);
+    // "DROP/ALTER/CREATE TABLE <NAME>"
+    // move input string pointer to skip beginning
+    statement += strlen(DROP_START) + 1 +
+                 strlen(TABLE) + 1;
+
+    // printf("Drop STMT: %s\n", statement);
+    const char delimiter[2] = " ";
+    char* table_name;
+    table_name = strtok(statement, delimiter);
+    // printf("Table name: %s\n", table_name);
+
+
+    char* check_rest = strtok(NULL, delimiter);
+    if (check_rest != NULL) {
+        fprintf(stderr, "%s: '%s'\n",
+                "Invalid drop table name", input_statement);
+        return -1;
+    }
+    //
+
     return 0;
 }
 
 int parse_alter_table_stmt( char* statement ) {
     printf("Alter STMT: %s\n", statement);
     return 0;
+}
+
+void ddl_parser_drop_table(char* table_name){
+
 }
