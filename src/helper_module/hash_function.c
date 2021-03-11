@@ -1,9 +1,10 @@
 #include "helper_module/hash_function.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-const long long int FNV_OFFSET_BASIS = 14695981039346656037;
-const long long int FNV_PRIME_VALUE  = 1099511628211;
+const long long unsigned FNV_OFFSET_BASIS = 14695981039346656037;
+const long long unsigned FNV_PRIME_VALUE  = 1099511628211;
 
 long long unsigned FNV_1A_Hash_Algorithm(char* string_to_be_hashed){
 
@@ -15,7 +16,7 @@ long long unsigned FNV_1A_Hash_Algorithm(char* string_to_be_hashed){
         hash_code = hash_code * FNV_PRIME_VALUE;
     }
 
-    printf("The hash code is : %llu\n", hash_code);
+    // printf("The hash code is : %llu\n", hash_code);
     return hash_code;
 }
 
@@ -31,16 +32,21 @@ int hash_compute_index(char* hash_code_str, int mod_num){
 }
 
 char* hash_str(char* str_val){
-    long long unsigned hash_code = FNV_1A_Hash_Algorithm(str_val);
-    char hash_code_str[22];
-    sprintf(hash_code_str, "%llu", hash_code);
-
+    // long long unsigned hash_code = FNV_1A_Hash_Algorithm(str_val);
+    // char* hash_code_str = (char*)malloc(sizeof(char)*24);
+    // printf("in hash_str\n");
+    // hash_code_str[0] = 0;
+    // snprintf(hash_code_str,23, "%llu", hash_code);
+    
+    // return hash_code_str;
+    char* hash_code_str = (char*)malloc(22);
+    snprintf(hash_code_str, 22, "%s", "123456789");
     return hash_code_str;
 }
 
 char* hash_int(int int_val){
     char* str_val = (char*)malloc(sizeof(char)*int_val+2);
-    spritnf(str_val, "%d", int_val);
+    sprintf(str_val, "%d", int_val);
     
     return hash_str(str_val);
 }

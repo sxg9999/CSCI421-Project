@@ -5,14 +5,7 @@
 #include <stdbool.h>
 #include "../include/database.h"
 #include "helper_module/multiline_input.h"
-
-
-
-//struct to hold metadata about tables
-// struct tables_data{
-
-// };
-
+#include "catalog.h"
 
 
 /**
@@ -32,10 +25,39 @@ int database_clean_up(){
     return 0;
 }
 
+
+int test_catalog(){
+    printf("Catalog Test\n");
+    catalog.test_print();
+    catalog.print_table_info();
+
+    char db_loc[] = "./db/";
+    init_catalog(db_loc);
+
+    catalog.print_table_map();
+
+    printf("\n\n");
+    printf("Adding...\n");
+    catalog.add_table("apples", 1);
+    catalog.add_table("trees", 2);
+    catalog.add_table("pear", 3);
+    catalog.add_table("apples1", 1);
+
+    printf("Adding up to here without problem...\n");
+    // catalog.add_table("trees2", 2);
+    catalog.add_table("bob", 2);
+    catalog.add_table("sam", 3);
+    catalog.add_table("another", 4);
+
+}
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
+
 int main(int argc, char* argv[] ) {
+
+    test_catalog();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);

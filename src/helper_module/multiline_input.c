@@ -116,6 +116,7 @@ int multiline_build_str(char** ptr, char* result_str, int line_count){
     }else{
         result_str[result_str_index-1] = 0;
     }
+    return 0;
     
 }
 
