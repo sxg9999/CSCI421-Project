@@ -34,7 +34,6 @@ int database_clean_up(){
  */
 
 int main(int argc, char* argv[] ) {
-    test_catalog();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
@@ -52,8 +51,17 @@ int main(int argc, char* argv[] ) {
     if(stat(db_loc, &s) == 0 && (s.st_mode & S_IFDIR)?true:false){
         exist = true;
     }
-    create_database(db_loc, page_size, buffer_size, exist);
 
+    char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
+    strncpy(db_loc_path, db_loc, strlen(db_loc)+1);
+
+    if(db_loc_path[strlen(db_loc_path)-1] != '/'){
+        db_loc_path[strlen(db_loc_path)] = '/';
+    }
+
+    create_database(db_loc_path, page_size, buffer_size, exist);
+    init_catalog(db_loc_path);                                 //initates the catalog
+    catalog.print_table_map();
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
     char* statement;                                
