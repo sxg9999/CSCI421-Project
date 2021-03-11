@@ -17,6 +17,7 @@ int init_catalog();
 int catalog_get_table_num(char* table_name);
 int catalog_table_mapping_add(char* table_name, int num);
 int catalog_table_mapping_remove(char* table_name);
+int catalog_table_mapping_contains(char* table_name);
 int catalog_close();
 void catalog_test_print();
 void catalog_print_table_map_info();
@@ -27,7 +28,8 @@ struct catalog_func{
     int (*add_table)(char*, int);
     int (*remove_table)(char*);
     int (*get_table_num)(char*);
-    int (*close)(char*);
+    int (*table_contains)(char*);
+    int (*close)();
     void (*test_print)();
     void (*print_table_info)();
     void (*print_table_map)();
@@ -37,6 +39,7 @@ static struct catalog_func catalog = {
     .add_table = catalog_table_mapping_add,
     .remove_table = catalog_table_mapping_remove,
     .get_table_num = catalog_get_table_num,
+    .table_contains = catalog_table_mapping_contains,
     .close = catalog_close,
     .test_print = catalog_test_print,
     .print_table_info = catalog_print_table_map_info,
