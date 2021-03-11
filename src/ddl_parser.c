@@ -8,9 +8,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../include/ddl_parser_helper.h"
 #include "../include/ddl_parser.h"
-#include "catalog.h"
+#include "../include/ddl_parser_helper.h"
 
 int parse_ddl_statement( char* input_statement ) {
     char* statement = strdup(input_statement);
@@ -87,6 +86,7 @@ int parse_ddl_statement( char* input_statement ) {
     
     // call one of the other parse funcs
     int result;
+
     if (stmt_type == DROP) {
         result = parse_drop_table_stmt(input_statement);
     } else if (stmt_type == ALTER) {
@@ -94,13 +94,16 @@ int parse_ddl_statement( char* input_statement ) {
     } else if (stmt_type == CREATE) {
         result = parse_create_table_stmt(input_statement);
     } else {
-        printf("%s: %s\n", 
-            "Something went wrong. Check type", check_type);
+        // printf("%s: %s\n", 
+        //    "Something went wrong. Check type", check_type);
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid DDL statement", input_statement);
         return -1;
     }
-    
+    if (result < 0) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", input_statement);
+    }
     return result;
 }
 
@@ -114,7 +117,7 @@ int parse_drop_table_stmt( char* input_statement ) {
     // "DROP/ALTER/CREATE TABLE <NAME>"
     // move input string pointer to skip beginning
     statement += strlen(DROP_START) + 1 +
-                 strlen(TABLE) + 1;
+                        strlen(TABLE) + 1;
 
     // printf("Drop STMT: %s\n", statement);
     const char delimiter[2] = " ";
@@ -125,11 +128,10 @@ int parse_drop_table_stmt( char* input_statement ) {
 
     char* check_rest = strtok(NULL, delimiter);
     if (check_rest != NULL) {
-        fprintf(stderr, "%s: '%s'\n",
-                "Invalid drop table name", input_statement);
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid drop table name", input_statement);
         return -1;
     }
-    //
 
     return 0;
 }
@@ -137,8 +139,4 @@ int parse_drop_table_stmt( char* input_statement ) {
 int parse_alter_table_stmt( char* statement ) {
     printf("Alter STMT: %s\n", statement);
     return 0;
-}
-
-void ddl_parser_drop_table(char* table_name){
-
 }

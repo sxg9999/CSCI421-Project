@@ -6,6 +6,7 @@
  
 #ifndef DDL_PARSER_H
 #define DDL_PARSER_H
+
  /*
   * This function handles the parsing of DDL statments
   *
