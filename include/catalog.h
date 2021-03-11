@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 
-int init_catalog();
+int init_catalog(char* db_path);
 
 int catalog_get_table_num(char* table_name);
 int catalog_table_mapping_add(char* table_name, int num);

@@ -17,6 +17,9 @@ int process_statement(char* statement){
 }
 
 
+
+
+
 /**
  * Free up memory
  */
@@ -25,11 +28,13 @@ int database_clean_up(){
     return 0;
 }
 
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
 
 int main(int argc, char* argv[] ) {
+    test_catalog();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);

@@ -4,6 +4,7 @@
 
 #include "catalog.h"
 #include "helper_module/hash_function.h"
+#include "helper_module/helper_function.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -66,11 +67,13 @@ int init_catalog(char* db_path){
 
 
 int init_mapping(int capacity, bool catalog_exist){
-    
+
+    printf("initial size : %d\n", table_map_size);
+
     if(catalog_exist==true){
         //load the capacity of the table_map, its multiplier, its size
         //and the table_map content
-        printf("reading catalog file...");
+        printf("reading catalog file...\n");
         read_catalog();
     }else{
         table_map_capacity = capacity;
@@ -242,11 +245,65 @@ int catalog_table_mapping_remove(char* table_name){
 
 int read_catalog(){
     //do reading
+    FILE* catalog_file = fopen(catalog_loc, "rb");
+    int map_size;
+    fread(&table_map_capacity, sizeof(int), 1, catalog_file);
+    fread(&table_map_multiplier, sizeof(int), 1, catalog_file);
+    fread(&map_size, sizeof(int), 1, catalog_file);
+
+    //initialize the table_map
+    table_map = (struct i_node**)malloc(sizeof(struct i_node*)*table_map_capacity);
+    for(int i = 0; i <table_map_capacity; i++){
+        table_map[i] = NULL;
+    }
+    //read all entries
+    //format: <len of table name> <table_name> <table_num>
+    char buffer[255];
+    buffer[0] = 0;
+    printf("size of map is : %d\n", map_size);
+    for(int i = 0; i < map_size; i++){
+        int table_name_len;
+        int table_num;
+        fread(&table_name_len, sizeof(int), 1, catalog_file);
+        fread(buffer, sizeof(char), table_name_len, catalog_file);
+        buffer[table_name_len]=0;
+        fread(&table_num, sizeof(int), 1, catalog_file);
+        catalog_table_mapping_add(buffer,table_num);
+        printf("name is: %s\n", buffer);
+        clear_buffer(buffer, table_name_len+2);
+    }
+
+    fclose(catalog_file);
     return 0;
 }
 
 int write_catalog(){
     //do writing
+    FILE* catalog_file = fopen(catalog_loc, "wb");
+
+    //write table_map_capacity
+    fwrite(&table_map_capacity, sizeof(int), 1, catalog_file);
+    //write table_map_multiplier
+    fwrite(&table_map_multiplier, sizeof(int), 1, catalog_file);
+    //write table_map_size
+    fwrite(&table_map_size, sizeof(int), 1, catalog_file);
+
+    //write all the mapping pairs to the file
+    //format: <len of table name> <table_name> <table_num>
+    for(int i = 0; i < table_map_capacity; i++){
+        if(table_map[i]!=NULL){
+            struct i_node* curr = table_map[i];
+            while(curr!=NULL){
+                int table_name_length = strlen(curr->key);
+                int table_num = curr->value;
+                fwrite(&table_name_length, sizeof(int), 1, catalog_file);
+                fwrite(curr->key, sizeof(char), table_name_length, catalog_file);
+                fwrite(&table_num, sizeof(int), 1, catalog_file);
+                curr = curr->next_node;
+            }
+        }
+    }
+    fclose(catalog_file);
     return 0;
 }
 
@@ -289,7 +346,6 @@ int catalog_close(){
  */
 
 void catalog_print_table_map_content(){
-
 
     if(table_map_size == 0){
         printf("Table_Map's Content: {}\n");
