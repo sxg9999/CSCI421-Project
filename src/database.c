@@ -60,7 +60,7 @@ int main(int argc, char* argv[] ) {
     }
 
     create_database(db_loc_path, page_size, buffer_size, exist);
-    init_catalog(db_loc_path);                                 //initates the catalog
+    init_catalog(db_loc_path);                      //initates the catalog
     catalog.print_table_map();
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
