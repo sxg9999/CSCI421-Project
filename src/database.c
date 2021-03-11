@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <conio.h>
 #include "../include/database.h"
 #include "helper_module/multiline_input.h"
 #include "catalog.h"
@@ -25,6 +26,7 @@ int process_statement(char* statement){
  */
 int database_clean_up(){
     free_input();
+    catalog.close();
     return 0;
 }
 
@@ -50,6 +52,9 @@ int main(int argc, char* argv[] ) {
     bool exist = false;
     if(stat(db_loc, &s) == 0 && (s.st_mode & S_IFDIR)?true:false){
         exist = true;
+    }else{
+        //if the db dir doesn't exist then create one
+        mkdir(db_loc,0777);
     }
 
     char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
@@ -61,6 +66,7 @@ int main(int argc, char* argv[] ) {
 
     create_database(db_loc_path, page_size, buffer_size, exist);
     init_catalog(db_loc_path);                      //initates the catalog
+    catalog.add_table("bob",123);
     catalog.print_table_map();
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
