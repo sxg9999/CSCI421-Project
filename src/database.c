@@ -3,7 +3,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdbool.h>
-#include <conio.h>
 #include "../include/database.h"
 #include "helper_module/multiline_input.h"
 #include "catalog.h"
@@ -91,7 +90,6 @@ int database_clean_up(){
  */
 
 int main(int argc, char* argv[] ) {
-    test_statement_type();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
