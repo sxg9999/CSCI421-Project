@@ -58,14 +58,15 @@ int execute_query(char * query, union record_item *** result){
 int process_statement(char* statement){
     //To be done
 
-    int result = -1;
-    //determine whether its a non_query or a query
-    if(is_query(statement)){
-        union record_item*** table;
-        result = execute_query(statement, table);
-    }else{
-        result = execute_non_query(statement);
-    }
+    int result = 0;
+//    int result = -1;
+//    //determine whether its a non_query or a query
+//    if(is_query(statement)){
+//        union record_item*** table;
+//        result = execute_query(statement, table);
+//    }else{
+//        result = execute_non_query(statement);
+//    }
 
     return result;
 }
