@@ -8,6 +8,7 @@
 #include "helper_module/multiline_input.h"
 #include "catalog.h"
 #include "ddl_parser.h"
+#include "statement_type.h"
 
 
 
@@ -52,15 +53,6 @@ int execute_query(char * query, union record_item *** result){
 }
 
 
-
-/**
- * checks if the statement is a query
- * @param statement
- * @return 0 if not and 1 if it is
- */
-int is_query(char* statement){
-    return 0;
-}
 /**
  * All parsing, executing related task goes here
  */
@@ -93,11 +85,13 @@ int database_clean_up(){
 }
 
 
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
 
 int main(int argc, char* argv[] ) {
+    test_statement_type();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
@@ -127,6 +121,7 @@ int main(int argc, char* argv[] ) {
     }
 
     create_database(db_loc_path, page_size, buffer_size, exist);
+    init_statement_types();                         //initiates the statement type class
     init_catalog(db_loc_path);                      //initates the catalog
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs

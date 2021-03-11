@@ -149,7 +149,6 @@ int catalog_table_mapping_add(char* table_name, int num){
         //check if a node with the key already exist and replace the value
         while(curr!=NULL){
             if(strncmp(curr->key, table_name, strlen(table_name))==0){
-                printf("Already Existed\n");
                 curr->value = num;
                 return 0;
             }

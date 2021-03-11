@@ -6,5 +6,6 @@
 #define HELPER_FUNCTION_H
 
 void clear_buffer(char* buffer, int length);
+void str_lower(char* buffer, char* str, int length);
 
 #endif
