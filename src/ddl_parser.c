@@ -10,12 +10,13 @@
 
 #include "../include/ddl_parser.h"
 #include "../include/ddl_parser_helper.h"
+#include "../include/keywords.h"
 
 int parse_ddl_statement( char* input_statement ) {
     char* statement = strdup(input_statement);
     enum statement_type stmt_type;
     char* token;
-    const char delimiter[2] = " ";
+    const char delimiter[2] = " \n";
     
     // get first word in statement
     token = strtok(statement, delimiter);
@@ -120,18 +121,30 @@ int parse_drop_table_stmt( char* input_statement ) {
                         strlen(TABLE) + 1;
 
     // printf("Drop STMT: %s\n", statement);
-    const char delimiter[2] = " ";
+    const char delimiter[2] = " \n";
     char* table_name;
+    // whether or not ';' directly follows <NAME> '<NAME>; vs <NAME> ;'
+    // 1 = space between <NAME> and ';'
+    int name_space_semi = 1;
+
     table_name = strtok(statement, delimiter);
-    // printf("Table name: %s\n", table_name);
+    if (table_name[strlen(table_name)-1] == STMT_END_CHAR) {
+        table_name[strlen(table_name)-1] = '\0';
+        name_space_semi = 0;
+    }
 
 
     char* check_rest = strtok(NULL, delimiter);
-    if (check_rest != NULL) {
+    if (check_rest != NULL && check_rest[0] != STMT_END_CHAR && name_space_semi) {
+
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid drop table name", input_statement);
         return -1;
     }
+
+
+    printf("Dropping table %s...\n", table_name);
+    // CALL TO DROP TABLE
 
     return 0;
 }
