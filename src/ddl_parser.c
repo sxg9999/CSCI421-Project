@@ -107,7 +107,10 @@ int parse_ddl_statement( char* input_statement ) {
     return result;
 }
 
-int parse_create_table_stmt( char* statement ) {
+int parse_create_table_stmt( char* input_statement ) {
+    char* statement = strdup(input_statement);
+    statement += strlen(CREATE_START) + 1 + strlen(TABLE) + 1;
+
     printf("Create STMT: %s\n", statement);
     return 0;
 }
