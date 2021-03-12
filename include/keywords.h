@@ -27,6 +27,13 @@
 //
 #define TABLE "table"
 
+// TYPES
+#define INTEGER_TYPE "integer"
+#define DOUBLE_TYPE "double"
+#define BOOLEAN_TYPE "boolean"
+#define CHAR_TYPE "char"
+#define VARCHAR_TYPE "varchar"
+
 //  
 #define STMT_END_STR ";"
 #define STMT_END_CHAR ';'
