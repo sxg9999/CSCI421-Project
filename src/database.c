@@ -163,6 +163,5 @@ int main(int argc, char* argv[] ) {
         }
     }
 
-
     shutdown_database();                         // a function that handles cleaning and frees up memory
 }
