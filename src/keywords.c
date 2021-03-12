@@ -11,6 +11,13 @@ const char* KEYWORDS[] = {CREATE_START, DROP_START, ALTER_START,
         STMT_END_STR,};
 const int KEYWORD_COUNT = 18;
 
+const char* CONSTRAINTS[] = {PRIMARY_KEY_CON, UNIQUE_CON, FOREIGN_CON};
+const int CONSTRAINT_COUNT = 3;
+
+const char* ATTR_TYPES[] = {
+                INTEGER_TYPE, DOUBLE_TYPE, BOOLEAN_TYPE, CHAR_TYPE, VARCHAR_TYPE};
+const int ATTR_TYPE_COUNT = 5;
+
 int is_keyword(char* word) {
         int result;
         for (int i = 0; i < KEYWORD_COUNT; i++) {
@@ -21,3 +28,27 @@ int is_keyword(char* word) {
         }
         return 0;
 }
+
+int is_constraint(char* word) {
+        int result;
+        for (int i = 0; i < CONSTRAINT_COUNT; i++) {
+                result = strncmp(CONSTRAINTS[i], word, strlen(CONSTRAINTS[i]));
+                if (result == 0) {
+                        return 1;
+                }
+        }
+        return 0;
+}
+
+int is_attr_type(char* word) {
+        int result;
+        for (int i = 0; i < ATTR_TYPE_COUNT; i++) {
+                result = strncmp(ATTR_TYPES[i], word, 
+                        strlen(ATTR_TYPES[i]));
+                if (result == 0) {
+                        return 1;
+                }
+        }
+        return 0;
+}
+
