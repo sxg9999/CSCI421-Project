@@ -127,24 +127,36 @@ int parse_drop_table_stmt( char* input_statement ) {
     // 1 = space between <NAME> and ';'
     int name_space_semi = 1;
 
+    // get table name parameter
     table_name = strtok(statement, delimiter);
     if (table_name[strlen(table_name)-1] == STMT_END_CHAR) {
         table_name[strlen(table_name)-1] = '\0';
         name_space_semi = 0;
     }
 
+    char lower_char;
+    for (int i = 0; table_name[i] != '\0'; i++) {
+        lower_char = tolower(table_name[i]);
+        table_name[i] = lower_char;
+    }
+
+    // check if table name is not a keyword
+    if (is_keyword(table_name)) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid table name; table name is a keyword", table_name);
+        return -1;
+    } 
 
     char* check_rest = strtok(NULL, delimiter);
     if (check_rest != NULL && check_rest[0] != STMT_END_CHAR && name_space_semi) {
 
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid drop table name", input_statement);
+            "Invalid table name", table_name);
         return -1;
     }
 
 
     printf("Dropping table %s...\n", table_name);
-    // CALL TO DROP TABLE
 
     return 0;
 }
