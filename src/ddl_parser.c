@@ -108,6 +108,10 @@ int parse_ddl_statement( char* input_statement ) {
     return result;
 }
 
+/*
+ * Most simple: CREATE TABLE BAZZLE( baz double PRIMARYKEY );
+ * 
+ */
 int parse_create_table_stmt( char* input_statement ) {
     char* statement = strdup(input_statement);
     statement += strlen(CREATE_START) + 1 + strlen(TABLE) + 1;
