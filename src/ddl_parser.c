@@ -111,7 +111,27 @@ int parse_create_table_stmt( char* input_statement ) {
     char* statement = strdup(input_statement);
     statement += strlen(CREATE_START) + 1 + strlen(TABLE) + 1;
 
+    //Create Table setup
     printf("Create STMT: %s\n", statement);
+    const char openDelimiter[2] = "(";
+    const char closeDelimiter[2] = ")";
+    const char attDelimiter[2] = ",";
+    const char delimiter[2] = " ";
+    char* table_name;
+    char* inParen;
+    
+    //get everything to left of first open parenthesis
+    table_name = strtok(statement, openDelimiter);
+    //everything (except maybe later constraints?) to the right. Replace with comma delim + skip length of table_name?
+    inParen = strtok(NULL, openDelimiter);
+    //how to retrieve up until constraints?
+    
+    table_name = strtok(table_name, delimiter);
+
+    
+
+    char* remainder = strtok(NULL, delimiter);
+    if (remainder != NULL)
     return 0;
 }
 
