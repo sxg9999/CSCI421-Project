@@ -53,6 +53,8 @@ int add_type(struct node* type){
         table[index] = type;
     }
 
+
+    return 0; 
 }
 
 
