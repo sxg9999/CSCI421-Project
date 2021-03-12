@@ -113,8 +113,8 @@ void catalog_test(){
 int main(int argc, char* argv[] ) {
 //    catalog_test();
     char* test0 = "DROP TABLE NAME1";
-    char* test1 = "CREATE TABLE BAZZLE( baz double PRIMARYKEY );";
-    char* test2 = "create table foo(baz integer,bar Double notnull,primarykey( bar baz ),foreignkey( bar ) references bazzle( baz ));";
+    char* test1 = "CREATE TABLE BAZZLE( BAZ INTEGER );";
+    char* test2 = "create table foo( baz integer, bar Double notnull, primarykey( bar baz ), foreignkey( bar ) references bazzle( baz ));";
     parse_ddl_statement(test1);
     return 0;
     

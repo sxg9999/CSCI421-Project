@@ -155,7 +155,7 @@ int parse_create_table_stmt( char* input_statement ) {
             newAtrribute[strlen(newAtrribute) - 1] = '\0';
             is_last_attr = 1;
         }
-        printf("New attribute: '%s'\n", newAtrribute);
+        // printf("New attribute: '%s'\n", newAtrribute);
         // save attribute
         attributes[attrCount] = strdup(newAtrribute);
         attrCount += 1;
@@ -165,7 +165,67 @@ int parse_create_table_stmt( char* input_statement ) {
     }
 
     // check if each attribute is form properly
+    for (int i = 0; i < attrCount; i++) {
+        // check if new attribute, or constraint
+        char* currentAttr = attributes[i];
+        printf("Attribute line: '%s'\n", currentAttr);
+        char* token;
+        token = strtok(currentAttr, " ");
+        // force attr lower lowercase
+        for (int i = 0; token[i] != '\0'; i++) {
+            if ( isalpha(token[i]) ) {
+                token[i] = tolower(token[i]);
+            }
+        }
+        // check if valid attribute name
+        if ( is_keyword(token) ) {
+            // if it is check if attribute is constraint
+            if ( is_constraint(token) && i == 0) {
+                fprintf(stderr, "%s: '%s'\n", 
+                    "Invalid attribute definition. Attribute name is a keyword", token);
+                return -1;
+            }
+            // check if valid constraint def
+            while ( (token = strtok(NULL, " ")) ) {
+                if (token[0] == ')') {
+                    break;
+                }
+                printf("TOk: '%s'\n", token);
 
+            }
+        } else { // check if attribute def is valid
+            // get attr type
+            token = strtok(NULL, " ");
+            for (int i = 0; token[i] != '\0'; i++) {
+                if ( isalpha(token[i]) ) {
+                    token[i] = tolower(token[i]);
+                }
+            }
+            // check if valid attribute type
+            if ( !is_attr_type(token) ) {
+                fprintf(stderr, "%s: '%s'\n", 
+                    "Invalid attribute definition. Attribute type is invalid", token);
+                return -1;
+            }
+            // check for constraints on attribute
+            char* constraints_used[3];
+            while ( (token = strtok(NULL, " ")) ) {
+                printf("Possible constraint: '%s'\n", token);
+                if (token[0] == ')') {
+                    break;
+                }
+                if ( !is_attr_con(token) ) {
+                    fprintf(stderr, "%s: '%s'\n", 
+                    "Invalid attribute definition. Attribute constraint is invalid", token);
+                    return -1;
+                }
+            }
+
+
+        } 
+    }
+
+    printf("Valid Create Table statement: '%s'\n", input_statement);
 
     free(attributes);
     return 0;
@@ -214,7 +274,6 @@ int parse_drop_table_stmt( char* input_statement ) {
     }
 
     printf("Valid Drop Table statement: '%s'\n", input_statement);
-
     return 0;
 }
 
