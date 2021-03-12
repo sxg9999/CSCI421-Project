@@ -78,9 +78,10 @@ int process_statement(char* statement){
 /**
  * Free up memory
  */
-int database_clean_up(){
+int shutdown_database(){
     free_input();
     catalog.close();
+    terminate_database();
     return 0;
 }
 
@@ -162,5 +163,5 @@ int main(int argc, char* argv[] ) {
         }
     }
 
-    database_clean_up();                           // a function that handles cleaning and frees up memory
+    shutdown_database();                         // a function that handles cleaning and frees up memory
 }
