@@ -155,8 +155,7 @@ int parse_drop_table_stmt( char* input_statement ) {
         return -1;
     }
 
-
-    printf("Dropping table %s...\n", table_name);
+    printf("Valid Drop Table statement: '%s'\n", input_statement);
 
     return 0;
 }
