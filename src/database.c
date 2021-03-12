@@ -58,6 +58,8 @@ int execute_query(char * query, union record_item *** result){
 int process_statement(char* statement){
     //To be done
 
+
+
     int result = 0;
 //    int result = -1;
 //    //determine whether its a non_query or a query
@@ -137,7 +139,9 @@ int main(int argc, char* argv[] ) {
         db_loc_path[strlen(db_loc_path)] = '/';
     }
 
+
     create_database(db_loc_path, page_size, buffer_size, exist);
+
     init_statement_types();                         //initiates the statement type class
     init_catalog(db_loc_path);                      //initates the catalog
     create_multiline_input();                       //initiates the structs and fields neccessary for 
