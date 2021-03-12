@@ -444,7 +444,11 @@ int drop_table( int table_id ){
 		fprintf(stderr, "Failed to drop table\n");
 		return -1;
 	}
-	table_data[table_id] = NULL;
+	//modified
+	//old: table_data[table_id] = NULL;
+	table_data[table_id] = table_data[num_tables-1];
+	table_data[num_tables-1]=NULL;
+	num_tables--;
 	return 0;
 }
 
@@ -975,7 +979,7 @@ static void read_table_metadata(FILE * meta_file){
 }
 
 static int read_metadata(){ 
-	int length = snprintf(NULL, 0, "%smetadata.dat", db_db_loc);
+	int length = snprintf(NULL, 0, "%smetadata.data", db_db_loc);
 	char * meta_loc = malloc(length+1);
 	snprintf(meta_loc, length+1, "%smetadata.data", db_db_loc);
 	
