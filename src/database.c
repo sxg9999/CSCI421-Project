@@ -15,35 +15,55 @@ int get_query_type(char* key_word){
     return 0;
 }
 
+
+
 int execute_drop_table(char* statement){
-    char* table_name;
+    statement = statement+11;               //11th index contains the key word
+    char* table_name =(char*)malloc(strlen(statement)+2);
+    strncpy(table_name, statement, strlen(statement)+1);    //add a 1 for null term
+    table_name[strlen(table_name)-1] = 0;
+
     int table_num = catalog.get_table_num(table_name);
     drop_table(table_num);
     catalog.remove_table(table_name);
     return 0;
 }
 
+/**
+ * Executes a non query statement
+ * @param statement
+ * @return 0 if successful and -1 if failed
+ */
 int execute_non_query(char * statement){
-    int result = parse_ddl_statement(statement);
-    if(result==0){
-        char* key_word;
+    int execute_result = 0;
+    int valid = parse_ddl_statement(statement);
+    if(valid ==0){
+        char delim[2] = " ";
+        char* key_word = strtok(statement, delim);
         int query_type = get_query_type(key_word);
 
         switch(query_type){
             case 0:
-                //assuming case 0 is drop table
+                //create table
                 execute_drop_table(statement);
                 break;
             case 1:
+                //drop table
+                execute_drop_table(statement);
                 break;
             case 2:
+                //alter table
                 break;
             default:
+                fprintf(stderr, "Invalid Key Word: %s\n", key_word);
+                execute_result = -1;
                 break;
         }
-        return 0;
+    }else{
+        execute_result = -1;
     }
-    return -1;
+
+    return execute_result;
 
 }
 
@@ -109,7 +129,7 @@ void catalog_test(){
  */
 
 int main(int argc, char* argv[] ) {
-//    catalog_test();
+
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
