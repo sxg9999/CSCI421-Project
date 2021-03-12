@@ -166,6 +166,7 @@ int main(int argc, char* argv[] ) {
     char* statement;                                
     int result;                                     // the result of processing the statement (parsing, execution, etc)
     while(true){
+        printf("Enter a statement: \n");
         statement = get_input();
         if(strncmp(statement, "quit", 4)==0){
             printf("Program Ended\n");

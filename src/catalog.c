@@ -90,7 +90,6 @@ int init_mapping(int capacity, bool catalog_exist){
         init_table_names_list();
 
     }
-    printf("catalog initiated...\n");
     return 0;
 }
 
@@ -407,7 +406,7 @@ int catalog_close(){
     free(table_names);
     free(catalog_loc);
 
-    printf("catalog closed...\n");
+//    printf("catalog closed...\n");
 
     return 0;
 }
