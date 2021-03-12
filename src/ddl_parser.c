@@ -123,14 +123,9 @@ int parse_create_table_stmt( char* input_statement ) {
                 + strlen(TABLE) + 1;
 
     //Create Table setup
-    const char openDelimiter[2] = "(";
-    const char closeDelimiter[2] = ")";
-    const char attDelimiter[2] = ",";
-    const char delimiter[2] = " ";
     char* table_name;
-    char* rest;
     // resize if needed
-    char* attributes[10];
+    char** attributes = malloc(10 * sizeof(int*));
     int attrCount = 0;
     char* newAtrribute;
     int is_last_attr = 0;
@@ -140,29 +135,39 @@ int parse_create_table_stmt( char* input_statement ) {
     printf("Table Name: '%s'\n", table_name);
 
     // get all attributes
-        // get next attribute
-    newAtrribute = strtok(NULL, ",");
-    // check if there is any attributes
-    if (newAtrribute == NULL) {
-        fprintf(stderr, "%s: '%s'\n%s\n", 
-            "Invalid Create statement", input_statement,
-            "create table <name>(\
-                <a_name> <a_type> <constraint_1> ... <constraint_N>,\
-                [primarykey( <a_1> ... <a_N> ),]\
-                [unique( <a_1> ... <a_N> ),]\
-                [foreignkey( <a_1> ... <a_N> ) references <r_name>( <r_1> ... <r_N> )]\
-                );");
-        return -1;
+    while (is_last_attr == 0) {
+            // get next attribute
+        newAtrribute = strtok(NULL, ",");
+        // check if there is any attributes
+        if (newAtrribute == NULL) {
+            fprintf(stderr, "%s: '%s'\n%s\n", 
+                "Invalid Create statement", input_statement,
+                "create table <name>(\
+                    <a_name> <a_type> <constraint_1> ... <constraint_N>,\
+                    [primarykey( <a_1> ... <a_N> ),]\
+                    [unique( <a_1> ... <a_N> ),]\
+                    [foreignkey( <a_1> ... <a_N> ) references <r_name>( <r_1> ... <r_N> )]\
+                    );");
+            return -1;
+        }
+        // check if last attribute
+        if (  newAtrribute[strlen(newAtrribute) - 1] == ';' ) {
+            newAtrribute[strlen(newAtrribute) - 1] = '\0';
+            is_last_attr = 1;
+        }
+        printf("New attribute: '%s'\n", newAtrribute);
+        // save attribute
+        attributes[attrCount] = strdup(newAtrribute);
+        attrCount += 1;
+        if (attrCount%10 == 0) {
+            attributes = realloc(attributes, (attrCount+10)* sizeof(int*));
+        }
     }
-    // check if last attribute
-    if (  newAtrribute[strlen(newAtrribute) - 1] == ')' ) {
-        newAtrribute[strlen(newAtrribute) - 1] = '\0';
-        is_last_attr = 1;
-    }
-    printf("New attribute: '%s'\n", newAtrribute);
-    // save attribute
-    attributes[attrCount] = strdup(newAtrribute);
 
+    // check if each attribute is form properly
+
+
+    free(attributes);
     return 0;
 }
 
