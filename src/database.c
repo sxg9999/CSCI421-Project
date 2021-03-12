@@ -86,11 +86,29 @@ int database_clean_up(){
 
 
 
+void catalog_test(){
+    init_catalog("./db/");                      //initates the catalog
+    catalog.add_table("bob",1);
+    catalog.add_table("tree",2);
+    catalog.add_table("bill",3);
+    catalog.add_table("haa",4);
+    catalog.print_table_map();
+    catalog.print_table_names();
+
+    printf("\n\nAfter removing bob\n");
+    catalog.remove_table("bob");
+    catalog.print_table_map();
+    catalog.print_table_names();
+    exit(0);
+}
+
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
 
 int main(int argc, char* argv[] ) {
+//    catalog_test();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);

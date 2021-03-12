@@ -22,6 +22,7 @@ int catalog_close();
 void catalog_test_print();
 void catalog_print_table_map_info();
 void catalog_print_table_map_content();
+void catalog_print_table_names();
 
 
 struct catalog_func{
@@ -33,6 +34,7 @@ struct catalog_func{
     void (*test_print)();
     void (*print_table_info)();
     void (*print_table_map)();
+    void (*print_table_names)();
 };
 
 static struct catalog_func catalog = {
@@ -44,6 +46,7 @@ static struct catalog_func catalog = {
     .test_print = catalog_test_print,
     .print_table_info = catalog_print_table_map_info,
     .print_table_map = catalog_print_table_map_content,
+    .print_table_names = catalog_print_table_names
 };
 
 

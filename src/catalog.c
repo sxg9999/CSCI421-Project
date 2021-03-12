@@ -32,12 +32,16 @@ static int table_map_multiplier;
 static int table_map_size;
 static struct i_node** table_map = NULL;          //a hashtable that maps a table name to a table num
 
+static int table_names_arr_cap;                   //capacity of table names arr
+static char** table_names;                        //a array of table names
 
 /*
  *  Private function predefintion 
  */
 int init_mapping(int capacity, bool catalog_exist);
+int init_table_names_list();
 int table_map_resize();
+int table_reorder(int removed_table_num);
 int read_catalog();
 
 
@@ -61,6 +65,7 @@ int init_catalog(char* db_path){
     }
     
     init_mapping(5, catalog_exist);
+    init_table_names_list();
     return 0;
 }
 
@@ -68,12 +73,12 @@ int init_catalog(char* db_path){
 
 int init_mapping(int capacity, bool catalog_exist){
 
-    printf("initial size : %d\n", table_map_size);
+//    printf("initial size : %d\n", table_map_size);
 
     if(catalog_exist==true){
         //load the capacity of the table_map, its multiplier, its size
         //and the table_map content
-        printf("reading catalog file...\n");
+//        printf("reading catalog file...\n");
         read_catalog();
     }else{
         table_map_capacity = capacity;
@@ -85,6 +90,16 @@ int init_mapping(int capacity, bool catalog_exist){
         }
     }
     printf("catalog initiated...\n");
+    return 0;
+}
+
+int init_table_names_list(){
+    if(table_map_size == 0){
+        table_names_arr_cap = 10;
+    }else{
+        table_names_arr_cap = table_map_size * 2;
+    }
+    table_names = (char**)malloc(sizeof(char*)*table_names_arr_cap);
     return 0;
 }
 
@@ -134,9 +149,12 @@ int catalog_table_mapping_add(char* table_name, int num){
     //check if resize is needed
     table_map_resize();
 
+//    printf("added");
     char* hash_code_str = hash_str(table_name);            //compute the hash_code
     int index = hash_compute_index(hash_code_str, table_map_capacity);
     struct i_node* curr = table_map[index];
+
+    int add_successful = -1;
 
     if(curr==NULL){
         table_map[index] = malloc(sizeof(struct i_node));
@@ -145,6 +163,7 @@ int catalog_table_mapping_add(char* table_name, int num){
         table_map[index]->hash_code_str = hash_code_str;
         table_map[index]->value = num;
         table_map[index]->next_node = NULL;
+        add_successful = 0;
     }else{
         //check if a node with the key already exist and replace the value
         while(curr!=NULL){
@@ -162,8 +181,22 @@ int catalog_table_mapping_add(char* table_name, int num){
         new_node->value = num;
         new_node->next_node = table_map[index];
         table_map[index] = new_node;
-
+        add_successful = 0;
     }
+
+    if(add_successful==0){
+        if(table_map_size >= table_names_arr_cap){
+            table_names_arr_cap = table_names_arr_cap * 2;
+            table_names = (char**)realloc(table_name, sizeof(char*) * table_names_arr_cap);
+        }
+        //add table_name to table_names
+//        printf("here\n");
+//        printf("table_name %s\n", table_map[index]->key);
+//        printf("table_map_size %d\n", table_map_size);
+        table_names[table_map_size] = table_map[index]->key;
+    }
+
+
 
     table_map_size++;
     return 0;
@@ -217,8 +250,10 @@ int table_map_resize(){
 
 int catalog_table_mapping_remove(char* table_name){
     char* hash_code_str = hash_str(table_name);
-    int index = hash_compute_index(hash_code_str, table_map_size);
+    int index = hash_compute_index(hash_code_str, table_map_capacity);
 
+
+    int result = -1;
     struct i_node* curr = table_map[index];
     struct i_node* prev = NULL;
     while(curr!=NULL){
@@ -230,16 +265,45 @@ int catalog_table_mapping_remove(char* table_name){
             }else{
                 prev->next_node = curr->next_node; 
             }
-            free(curr->key);
-            free(curr->hash_code_str);
-            free(curr);
-            return 0;
-
+            result = 0;
+            break;
         }
         prev = curr;
         curr = curr->next_node;
     }
-    return -1;
+
+    table_reorder(curr->value);
+
+    //reorder the tables
+    free(hash_code_str);
+    free(curr->key);
+    free(curr->hash_code_str);
+    free(curr);
+
+
+    //decrement the size
+    table_map_size--;
+//    printf("size of map is : %d\n", table_map_size);
+
+    return result;
+}
+
+int table_reorder(int removed_table_num){
+
+    char* hash_code_str = hash_str(table_names[table_map_size-1]);
+    int index = hash_compute_index(hash_code_str, table_map_capacity);
+
+
+    //table_names[remove_table_num] points to the last table's name
+    table_names[removed_table_num-1] = table_map[index]->key;
+    printf("table name is %s\n", table_map[index]->key);
+    //point the old table name in table_name arr to NULL;
+    table_names[table_map[index]->value-1] = NULL;
+    //change the table_num of the newly placed table to the removed table's num
+    table_map[index]->value = removed_table_num;
+
+
+    return 0;
 }
 
 int read_catalog(){
@@ -259,7 +323,7 @@ int read_catalog(){
     //format: <len of table name> <table_name> <table_num>
     char buffer[255];
     buffer[0] = 0;
-    printf("size of map is : %d\n", map_size);
+//    printf("size of map is : %d\n", map_size);
     for(int i = 0; i < map_size; i++){
         int table_name_len;
         int table_num;
@@ -332,6 +396,7 @@ int catalog_close(){
     //write everything to storage and then free everything
     write_catalog();
     catalog_free_table_map();
+    free(table_names);
     free(catalog_loc);
 
     printf("catalog closed...\n");
@@ -366,6 +431,19 @@ void catalog_print_table_map_content(){
 void catalog_print_table_map_info(){
     printf("size : %d, capacity : %d, multiplier : %d,  load_factor : %lf, threshold : %lf\n",
            table_map_size, table_map_capacity, table_map_multiplier, load_factor, ceil(table_map_capacity*load_factor));
+
+}
+
+void catalog_print_table_names(){
+    if(table_map_size == 0){
+        printf("Table_name's content = {}\n");
+    }
+    printf("Table_names's Content: {\n");
+    for(int i = 0; i < table_map_size; i++){
+        printf("table_num: %d, table_name: %s\n", i+1, table_names[i]);
+    }
+    printf("}\n");
+
 
 }
 
