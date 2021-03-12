@@ -1,5 +1,6 @@
 *.gch
 .vscode/*
+.idea/*
 Test_DB_Loc
 TestCode
 Garbage
@@ -12,3 +13,5 @@ src/test
 src/main.c
 *.o
 *.exe
+*.bat`
+db

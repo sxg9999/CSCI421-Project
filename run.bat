@@ -1,0 +1,1 @@
+database ./db 10000 10
