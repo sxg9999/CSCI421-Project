@@ -48,5 +48,8 @@ int is_keyword(char* word);
 
 int is_constraint(char* word);
 
+int is_attr_con(char* word);
+
+
 int is_attr_type(char* word);
 #endif
