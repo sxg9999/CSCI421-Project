@@ -16,7 +16,7 @@ int parse_ddl_statement( char* input_statement ) {
     char* statement = strdup(input_statement);
     enum statement_type stmt_type;
     char* token;
-    const char delimiter[2] = " \n";
+    const char delimiter[2] = " ";
     
     // get first word in statement
     token = strtok(statement, delimiter);
@@ -29,9 +29,12 @@ int parse_ddl_statement( char* input_statement ) {
     char a;
     // make the token all lowercase
     for (int i = 0; token[i] != '\0'; i++) {
-        a = tolower(token[i]);
-        first_word[i] = a;
+        if isalpha(token[i]) {
+            a = tolower(token[i]);
+            first_word[i] = a;
+        }
     }
+    printf("%s\n",first_word);
 
     // check for statement type 
     char* check_type;
@@ -113,30 +116,51 @@ int parse_ddl_statement( char* input_statement ) {
  * 
  */
 int parse_create_table_stmt( char* input_statement ) {
+    printf("Create STMT: %s\n", input_statement);
+
     char* statement = strdup(input_statement);
-    statement += strlen(CREATE_START) + 1 + strlen(TABLE) + 1;
+    statement += strlen(CREATE_START) + 1 
+                + strlen(TABLE) + 1;
 
     //Create Table setup
-    printf("Create STMT: %s\n", statement);
     const char openDelimiter[2] = "(";
     const char closeDelimiter[2] = ")";
     const char attDelimiter[2] = ",";
     const char delimiter[2] = " ";
     char* table_name;
-    char* inParen;
+    char* rest;
+    // resize if needed
+    char* attributes[10];
+    int attrCount = 0;
+    char* newAtrribute;
     
     //get everything to left of first open parenthesis
-    table_name = strtok(statement, openDelimiter);
-    //everything (except maybe later constraints?) to the right. Replace with comma delim + skip length of table_name?
-    inParen = strtok(NULL, openDelimiter);
-    //how to retrieve up until constraints?
-    
-    table_name = strtok(table_name, delimiter);
+    table_name = strtok(statement, "(");
+    printf("Table Name: '%s'\n", table_name);
 
-    
+    // check for attribute validity
+        // get next attribute
+    newAtrribute = strtok(NULL, ",");
+    // check if there is any attributes
+    if (newAtrribute == NULL) {
+        fprintf(stderr, "%s: '%s'\n%s\n", 
+            "Invalid Create statement", input_statement,
+            "create table <name>(\
+                <a_name> <a_type> <constraint_1> ... <constraint_N>,\
+                [primarykey( <a_1> ... <a_N> ),]\
+                [unique( <a_1> ... <a_N> ),]\
+                [foreignkey( <a_1> ... <a_N> ) references <r_name>( <r_1> ... <r_N> )]\
+                );");
+        return -1;
+    }
+    // check if last attribute
+    if (  newAtrribute[strlen(newAtrribute) - 1] == ')' ) {
+        newAtrribute[strlen(newAtrribute) - 1] = '\0';
+    }
+    printf("New attribute: '%s'\n", newAtrribute);
+    // save attribute
+    attributes[attrCount] = strdup(newAtrribute);
 
-    char* remainder = strtok(NULL, delimiter);
-    if (remainder != NULL)
     return 0;
 }
 
