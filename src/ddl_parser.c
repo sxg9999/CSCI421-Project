@@ -133,12 +133,13 @@ int parse_create_table_stmt( char* input_statement ) {
     char* attributes[10];
     int attrCount = 0;
     char* newAtrribute;
+    int is_last_attr = 0;
     
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
     printf("Table Name: '%s'\n", table_name);
 
-    // check for attribute validity
+    // get all attributes
         // get next attribute
     newAtrribute = strtok(NULL, ",");
     // check if there is any attributes
@@ -156,6 +157,7 @@ int parse_create_table_stmt( char* input_statement ) {
     // check if last attribute
     if (  newAtrribute[strlen(newAtrribute) - 1] == ')' ) {
         newAtrribute[strlen(newAtrribute) - 1] = '\0';
+        is_last_attr = 1;
     }
     printf("New attribute: '%s'\n", newAtrribute);
     // save attribute
