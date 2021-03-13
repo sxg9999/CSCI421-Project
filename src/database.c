@@ -130,6 +130,8 @@ void catalog_test(){
 
 int main(int argc, char* argv[] ) {
 
+//    printf("here again");
+
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
