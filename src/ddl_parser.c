@@ -38,7 +38,7 @@ int parse_ddl_statement( char* input_statement ) {
 
     // check for statement type 
     char* check_type;
-    if (first_word == DROP) {
+    if (strlen(first_word) == DROP) {
         check_type = DROP_START;
         stmt_type = DROP;
     } else if (strlen(first_word) == ALTER) {

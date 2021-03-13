@@ -8,6 +8,7 @@
 #define DDL_PARSER_HELPER_H
 
 enum statement_type {
+    ADD = 3,
     DROP = 4,
     ALTER = 5,
     CREATE = 6,
