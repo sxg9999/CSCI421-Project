@@ -29,7 +29,7 @@ int parse_ddl_statement( char* input_statement ) {
     char a;
     // make the token all lowercase
     for (int i = 0; token[i] != '\0'; i++) {
-        if isalpha(token[i]) {
+        if ( isalpha(token[i]) ) {
             a = tolower(token[i]);
             first_word[i] = a;
         }

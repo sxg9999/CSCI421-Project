@@ -139,7 +139,11 @@ int main(int argc, char* argv[] ) {
         exist = true;
     }else{
         //if the db dir doesn't exist then create one
-        mkdir(db_loc,0777);
+#ifdef __linux__
+        mkdir(name, 0777);
+#else
+        _mkdir(db_loc);
+#endif
     }
 
     char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
