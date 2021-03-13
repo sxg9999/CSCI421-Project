@@ -60,9 +60,9 @@ int add_type(struct node* type){
 
 int typeof_s(char* key_word){
     char buffer[15];
-    str_lower(buffer, key_word, 10);
+    str_lower(buffer, key_word, strlen(key_word));
 
-    printf("buffer is %s\n", buffer);
+//    printf("buffer is %s\n", buffer);
 
     char* hash_code_str = hash_str(buffer);
     int index = hash_compute_index(hash_code_str, 25);
@@ -71,6 +71,7 @@ int typeof_s(char* key_word){
     struct node* curr = table[index];
     while(curr!=NULL){
         if(strncmp(curr->key, buffer, strlen(buffer))==0){
+//            printf("current key is %s\n", curr->key);
             value = curr->value;
             break;
         }
@@ -84,7 +85,7 @@ int typeof_s(char* key_word){
 
 int is_query(char* key_word){
     char buffer[15];                //stores the key_word that is lowercased
-    str_lower(buffer, key_word, 10);
+    str_lower(buffer, key_word, strlen(key_word));
 
     char* hash_code_str = hash_str(buffer);
     int index = hash_compute_index(hash_code_str, 25);
