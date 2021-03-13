@@ -34,7 +34,7 @@ int parse_ddl_statement( char* input_statement ) {
             first_word[i] = a;
         }
     }
-    printf("%s\n",first_word);
+    first_word[strlen(first_word)] = '\0';
 
     // check for statement type 
     char* check_type;
@@ -178,6 +178,8 @@ int parse_create_table_stmt( char* input_statement ) {
             }
         }
         // check if valid attribute name
+        // printf("Prob: '%s', %d\n", token, is_keyword(token));
+
         if ( is_keyword(token) ) {
             // if it is check if attribute is constraint
             if ( is_constraint(token) && i == 0) {
@@ -185,13 +187,22 @@ int parse_create_table_stmt( char* input_statement ) {
                     "Invalid attribute definition. Attribute name is a keyword", token);
                 return -1;
             }
-            // check if valid constraint def
-            while ( (token = strtok(NULL, " ")) ) {
-                if (token[0] == ')') {
-                    break;
-                }
-                printf("TOk: '%s'\n", token);
+            // check if foreignkey
+            if ( strncmp(FOREIGN_CON, token, strlen(FOREIGN_CON)) == 0 ) {
+                printf("Is foreign constraint: %s\n", token);
 
+            } else {
+                // check if valid constraint def
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                }
             }
         } else { // check if attribute def is valid
             // get attr type
@@ -216,7 +227,7 @@ int parse_create_table_stmt( char* input_statement ) {
                         token[i] = tolower(token[i]);
                     }
                 }
-                printf("Possible constraint: '%s'\n", token);
+                // printf("Possible constraint: '%s'\n", token);
                 if (token[0] == ')') {
                     break;
                 }
@@ -236,8 +247,6 @@ int parse_create_table_stmt( char* input_statement ) {
                     constraints_count += 1;
                 }
             }
-
-
         } 
     }
 
