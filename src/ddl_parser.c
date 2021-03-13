@@ -209,7 +209,13 @@ int parse_create_table_stmt( char* input_statement ) {
             }
             // check for constraints on attribute
             char* constraints_used[3];
+            int constraints_count = 0;
             while ( (token = strtok(NULL, " ")) ) {
+                for (int i = 0; token[i] != '\0'; i++) {
+                    if ( isalpha(token[i]) ) {
+                        token[i] = tolower(token[i]);
+                    }
+                }
                 printf("Possible constraint: '%s'\n", token);
                 if (token[0] == ')') {
                     break;
@@ -218,6 +224,17 @@ int parse_create_table_stmt( char* input_statement ) {
                     fprintf(stderr, "%s: '%s'\n", 
                     "Invalid attribute definition. Attribute constraint is invalid", token);
                     return -1;
+                } else {
+                    for (int i = 0; i < constraints_count; i++ ) {
+                        if (strcmp(token, constraints_used[i]) == 0) {
+                            fprintf(stderr, "%s: '%s'\n", 
+                            "Invalid attribute definition. Attribute constraint already used", token);
+                            return -1;
+                        }
+                    }
+
+                    constraints_used[constraints_count] = strdup(token);
+                    constraints_count += 1;
                 }
             }
 
