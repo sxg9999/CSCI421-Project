@@ -65,7 +65,6 @@ int init_catalog(char* db_path){
     }
     
     init_mapping(5, catalog_exist);
-    init_table_names_list();
     return 0;
 }
 
@@ -88,8 +87,9 @@ int init_mapping(int capacity, bool catalog_exist){
         for(int i =  0; i < table_map_capacity; i++){
             table_map[i] = NULL;
         }
+        init_table_names_list();
+
     }
-    printf("catalog initiated...\n");
     return 0;
 }
 
@@ -314,8 +314,13 @@ int read_catalog(){
     fread(&table_map_multiplier, sizeof(int), 1, catalog_file);
     fread(&map_size, sizeof(int), 1, catalog_file);
 
+
     //initialize the table_map
     table_map = (struct i_node**)malloc(sizeof(struct i_node*)*table_map_capacity);
+
+    //initialize the table_name arr
+    init_table_names_list();
+
     for(int i = 0; i <table_map_capacity; i++){
         table_map[i] = NULL;
     }
@@ -332,7 +337,7 @@ int read_catalog(){
         buffer[table_name_len]=0;
         fread(&table_num, sizeof(int), 1, catalog_file);
         catalog_table_mapping_add(buffer,table_num);
-        printf("name is: %s\n", buffer);
+//        printf("name is: %s\n", buffer);
         clear_buffer(buffer, table_name_len+2);
     }
 
@@ -401,7 +406,7 @@ int catalog_close(){
     free(table_names);
     free(catalog_loc);
 
-    printf("catalog closed...\n");
+//    printf("catalog closed...\n");
 
     return 0;
 }

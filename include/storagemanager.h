@@ -165,4 +165,14 @@ int purge_buffer();
  */
 int terminate_database();
 
+
+/**
+ * Below are test functions
+ */
+
+/**
+ * prints all the tables and its records
+ */
+void storage_print_tables();
+
 #endif

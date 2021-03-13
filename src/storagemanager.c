@@ -170,7 +170,6 @@ int restart_database( char * db_loc ){
 		fprintf(stderr, "Failed to restart database\n");
 		return -1;
 	}
-	printf("Here1\n");
 	page_buffer = malloc(sizeof(struct page_data *) * db_buffer_size);
 	for(int i = 0; i < db_buffer_size; i++){
 		page_buffer[i] = NULL;
@@ -999,5 +998,55 @@ static int read_metadata(){
 		read_table_metadata(meta_file);
 	}
 	return 0; 
- }	
+ }
+
+/**
+ * prints all the tables content
+ */
+
+void storage_print_records(){
+
+//    int num_records = 0;
+//    for(int page_i = 0; page_i < td->num_pages; page_i++){
+//        struct page_data * p_data = NULL;
+//        num_records += read_page(&p_data, td->pages[page_i], td);
+//    }
+//
+//    for(int records_i = 0; records_i < num_records; records_i++){
+//        printf("record_%d = ",records_i);
+//        union record_item** records = table[records_i];
+//        for(int item_i = 0; item_i < td->num_attr; item_i++){
+//            union record_item* item = records[item_i];
+//
+//        }
+//    }
+
+}
+void storage_print_tables(){
+    for(int i = 0; i < num_tables; i++){
+        if(table_data[i]!=NULL){
+            struct table_data* td = table_data[i];
+//            union record_item*** table;
+//            int table_size = get_records(td->table_num, table);
+
+            printf("Table num : %s\n", td->table_num);
+            //print number of attributes
+            printf("num of attr: %d\n", td->num_attr);
+            printf("attribute types: ");
+            for(int a_i = 0; a_i < td->num_attr; a_i++){
+                printf("%d ", td->attr_types[a_i]);
+            }
+            printf("\n");
+//
+            //print the primary key
+            printf("primary key indices: ");
+            for(int p_i = 0; p_i < td->num_key_attr; p_i++){
+                printf("%d ", td->key_indices[p_i]);
+            }
+            printf("\n");
+
+        }
+
+    }
+}
 	
