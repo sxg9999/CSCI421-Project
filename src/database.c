@@ -113,7 +113,7 @@ void catalog_test(){
 int main(int argc, char* argv[] ) {
 //    catalog_test();
     char* test0 = "DROP TABLE NAME1";
-    char* test1 = "ALTER TABLE foo ADD gar double DEFAULT 10.1;"
+    char* test1 = "ALTER TABLE foo ADD gar double DEFAULT 10.1;";
     char* test2 = "CREATE TABLE BAZZLE( BAZ INTEGER );";
     char* test3 = "create table foo( baz integer, bar Double notnull, primarykey( bar baz ), foreignkey( bar ) references bazzle( baz ));";
     parse_ddl_statement(test1);
