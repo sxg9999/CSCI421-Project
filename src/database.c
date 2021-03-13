@@ -141,7 +141,7 @@ int main(int argc, char* argv[] ) {
     }else{
         //if the db dir doesn't exist then create one
 #ifdef __linux__
-        mkdir(name, 0777);
+        mkdir(db_loc, 0777);
 #else
         _mkdir(db_loc);
 #endif
