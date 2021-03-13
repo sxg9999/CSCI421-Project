@@ -227,7 +227,8 @@ int main(int argc, char* argv[] ) {
     init_catalog(db_loc_path);                      //initates the catalog
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
-    char* statement;                                
+
+    char* statement;
     int result;                                     // the result of processing the statement (parsing, execution, etc)
     while(true){
         printf("Enter a statement: \n");
