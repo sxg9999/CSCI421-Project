@@ -232,7 +232,6 @@ int parse_create_table_stmt( char* input_statement ) {
                             return -1;
                         }
                     }
-
                     constraints_used[constraints_count] = strdup(token);
                     constraints_count += 1;
                 }
