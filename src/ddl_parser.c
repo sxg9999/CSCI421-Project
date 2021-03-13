@@ -34,7 +34,7 @@ int parse_ddl_statement( char* input_statement ) {
             first_word[i] = a;
         }
     }
-    printf("%s\n",first_word);
+    first_word[strlen(first_word)] = '\0';
 
     // check for statement type 
     char* check_type;
@@ -116,7 +116,7 @@ int parse_ddl_statement( char* input_statement ) {
  * 
  */
 int parse_create_table_stmt( char* input_statement ) {
-    printf("Create STMT: %s\n", input_statement);
+    // printf("Create STMT: %s\n", input_statement);
 
     char* statement = strdup(input_statement);
     statement += strlen(CREATE_START) + 1 
@@ -125,14 +125,15 @@ int parse_create_table_stmt( char* input_statement ) {
     //Create Table setup
     char* table_name;
     // resize if needed
-    char** attributes = malloc(10 * sizeof(int*));
+    char** attributes = malloc(10 * sizeof(char*));
+    char** attr_names = malloc(10 * sizeof(char*));
     int attrCount = 0;
+    int name_count = 0;
     char* newAtrribute;
     int is_last_attr = 0;
     
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
-    printf("Table Name: '%s'\n", table_name);
 
     // get all attributes
     while (is_last_attr == 0) {
@@ -168,7 +169,7 @@ int parse_create_table_stmt( char* input_statement ) {
     for (int i = 0; i < attrCount; i++) {
         // check if new attribute, or constraint
         char* currentAttr = attributes[i];
-        printf("Attribute line: '%s'\n", currentAttr);
+        // printf("Attribute line: '%s'\n", currentAttr);
         char* token;
         token = strtok(currentAttr, " ");
         // force attr lower lowercase
@@ -178,6 +179,8 @@ int parse_create_table_stmt( char* input_statement ) {
             }
         }
         // check if valid attribute name
+        // printf("Prob: '%s', %d\n", token, is_keyword(token));
+
         if ( is_keyword(token) ) {
             // if it is check if attribute is constraint
             if ( is_constraint(token) && i == 0) {
@@ -185,16 +188,94 @@ int parse_create_table_stmt( char* input_statement ) {
                     "Invalid attribute definition. Attribute name is a keyword", token);
                 return -1;
             }
-            // check if valid constraint def
-            while ( (token = strtok(NULL, " ")) ) {
-                if (token[0] == ')') {
-                    break;
+            // check if foreignkey
+            if ( strncmp(FOREIGN_CON, token, strlen(FOREIGN_CON)) == 0 ) {
+                // printf("Is foreign constraint: %s\n", token);
+                // check for key attribute names
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                    int is_defined = 0;
+                    for (int i = 0; i < name_count; i++){
+                        if ( strcmp(attr_names[i], token) == 0 ) {
+                            is_defined = 1;
+                            break;
+                        }
+                    }
+                    if ( is_defined == 0 ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint parameter. Attribute name undefined", token);
+                        return -1;
+                    }
                 }
-                printf("TOk: '%s'\n", token);
+                // check for 'references'
+                token = strtok(NULL, " ");
+                // printf("Token: '%s'\n", token);
+                if ( strcmp(REFERENCES_CON, token) != 0) {
+                     fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Missing 'references' keyword", token);
+                        return -1;
+                }
 
+                // <relation>( check
+                token = strtok(NULL, " ");
+                // printf("Token: '%s'\n", token);
+                if ( token[strlen(token) - 1] != '(' ) {
+                    fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Missing '('", token);
+                        return -1;
+                }
+
+                // <r_1> ... <r_n>
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    // printf("<r_n>: %s\n", token);
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                }
+            } else {
+                // check if valid constraint def
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                    int is_defined = 0;
+                    for (int i = 0; i < name_count; i++){
+                        if ( strcmp(attr_names[i], token) == 0 ) {
+                            is_defined = 1;
+                            break;
+                        }
+                    }
+                    if ( is_defined == 0 ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint parameter. Attribute name undefined", token);
+                        return -1;
+                    }
+                }
             }
         } else { // check if attribute def is valid
             // get attr type
+            attr_names[name_count] = strdup(token);
+            name_count += 1;
+            if (name_count%10 == 0) {
+                attr_names = realloc(attr_names, (name_count+10)* sizeof(int*));
+            }
             token = strtok(NULL, " ");
             for (int i = 0; token[i] != '\0'; i++) {
                 if ( isalpha(token[i]) ) {
@@ -216,7 +297,7 @@ int parse_create_table_stmt( char* input_statement ) {
                         token[i] = tolower(token[i]);
                     }
                 }
-                printf("Possible constraint: '%s'\n", token);
+                // printf("Possible constraint: '%s'\n", token);
                 if (token[0] == ')') {
                     break;
                 }
@@ -232,16 +313,12 @@ int parse_create_table_stmt( char* input_statement ) {
                             return -1;
                         }
                     }
-
                     constraints_used[constraints_count] = strdup(token);
                     constraints_count += 1;
                 }
             }
-
-
         } 
     }
-
     printf("Valid Create Table statement: '%s'\n", input_statement);
 
     free(attributes);

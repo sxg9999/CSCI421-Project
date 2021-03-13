@@ -137,7 +137,6 @@ int main(int argc, char* argv[] ) {
 
 
 
-
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
