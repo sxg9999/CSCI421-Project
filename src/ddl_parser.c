@@ -294,7 +294,10 @@ int parse_drop_table_stmt( char* input_statement ) {
     return 0;
 }
 
-int parse_alter_table_stmt( char* statement ) {
-    printf("Alter STMT: %s\n", statement);
+int parse_alter_table_stmt( char* input_statement ) {
+    printf("Alter STMT: %s\n", input_statement);
+
+    char* statement = strdup(input_statement);
+    statement += strlen(ALTER_START) + 1 + strlen(TABLE);
     return 0;
 }
