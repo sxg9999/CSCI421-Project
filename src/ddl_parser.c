@@ -38,7 +38,7 @@ int parse_ddl_statement( char* input_statement ) {
 
     // check for statement type 
     char* check_type;
-    if (strlen(first_word) == DROP) {
+    if (first_word == DROP) {
         check_type = DROP_START;
         stmt_type = DROP;
     } else if (strlen(first_word) == ALTER) {
@@ -295,13 +295,33 @@ int parse_drop_table_stmt( char* input_statement ) {
 }
 
 int parse_alter_table_stmt( char* input_statement ) {
-    char* statement = strdup(input_statement);
+    char *statement = strdup(input_statement);
     statement += strlen(ALTER_START) + 1 + strlen(TABLE) + 1;
 
     printf("Alter STMT: %s\n", input_statement);
-    char* table_name;
+    char *table_name;
     const char delimiter[2] = " ";
 
+    table_name = strtok(statement, delimiter);
+    printf("%s\n", table_name);
+    char *action = strtok(NULL, delimiter);
+    printf("%s\n", action);
+    if (strcmp(action, "ADD") == 0) {
+        printf("add");
+        //If add, given a name and a type OR a name, type, and default phrase.
+        char* attName = strtok(NULL, delimiter);
+        char* attType = strtok(NULL, delimiter);
+        if(strtok(NULL, delimiter) != NULL) {
+            //add default
+        }
+    } else if (strcmp(action, "DROP") == 0) {
+        printf("drop");
+        //If drop, given only attribute name.
+        char* attToDrop = strtok(NULL, delimiter);
+        //send attribute to drop and table to drop from back
+    } else {
+        fprintf(stderr, "%s: %s\n", "Invalid operation", action);
+    }
 
     return 0;
 }

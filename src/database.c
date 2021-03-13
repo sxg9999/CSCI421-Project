@@ -104,7 +104,7 @@ int shutdown_database(){
 }
 
 
-
+/**
 void catalog_test(){
     init_catalog("./db/");                      //initates the catalog
     catalog.add_table("bob",1);
@@ -120,7 +120,7 @@ void catalog_test(){
     catalog.print_table_names();
     exit(0);
 }
-
+*/
 
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
@@ -128,12 +128,12 @@ void catalog_test(){
 
 int main(int argc, char* argv[] ) {
 //    catalog_test();
-//    char* test0 = "DROP TABLE NAME1";
-//    char* test1 = "ALTER TABLE foo ADD gar double DEFAULT 10.1;";
-//    char* test2 = "CREATE TABLE BAZZLE( BAZ INTEGER );";
-//    char* test3 = "create table foo( baz integer, bar Double notnull, primarykey( bar baz ), foreignkey( bar ) references bazzle( baz ));";
-//    parse_ddl_statement(test1);
-//    return 0;
+    char* test0 = "DROP TABLE NAME1";
+    char* test1 = "ALTER TABLE foo ADD gar double DEFAULT 10.1;";
+    char* test2 = "CREATE TABLE BAZZLE( BAZ INTEGER );";
+    char* test3 = "create table foo( baz integer, bar Double notnull, primarykey( bar baz ), foreignkey( bar ) references bazzle( baz ));";
+    parse_ddl_statement(test1);
+    return 0;
 
 
 
