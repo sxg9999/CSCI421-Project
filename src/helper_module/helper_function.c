@@ -5,6 +5,7 @@
 #include "helper_module/helper_function.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 
 void clear_buffer(char* buffer, int length){

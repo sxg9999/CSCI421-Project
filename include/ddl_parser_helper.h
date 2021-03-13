@@ -7,12 +7,8 @@
 #ifndef DDL_PARSER_HELPER_H
 #define DDL_PARSER_HELPER_H
 
-#define CREATE_START "create"
-#define DROP_START "drop"
-#define ALTER_START "alter"
-#define TABLE "table"
-
 enum statement_type {
+    ADD = 3,
     DROP = 4,
     ALTER = 5,
     CREATE = 6,
