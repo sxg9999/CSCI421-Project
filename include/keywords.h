@@ -15,7 +15,7 @@
 // CREATE TABLE CONSTRAINTS
 #define PRIMARY_KEY_CON "primarykey"
 #define UNIQUE_CON "unique"
-#define FOREIGN_CON "foreginkey"
+#define FOREIGN_CON "foreignkey"
 #define REFERENCES_CON "references"
 #define NOTNULL_CON "notnull"
 
