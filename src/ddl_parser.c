@@ -189,8 +189,47 @@ int parse_create_table_stmt( char* input_statement ) {
             }
             // check if foreignkey
             if ( strncmp(FOREIGN_CON, token, strlen(FOREIGN_CON)) == 0 ) {
-                printf("Is foreign constraint: %s\n", token);
+                // printf("Is foreign constraint: %s\n", token);
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                }
+                // check for 'references'
+                token = strtok(NULL, " ");
+                // printf("Token: '%s'\n", token);
+                if ( strcmp(REFERENCES_CON, token) != 0) {
+                     fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Missing 'references' keyword", token);
+                        return -1;
+                }
 
+                // <relation>( check
+                token = strtok(NULL, " ");
+                // printf("Token: '%s'\n", token);
+                if ( token[strlen(token) - 1] != '(' ) {
+                    fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Missing '('", token);
+                        return -1;
+                }
+
+                // <r_1> ... <r_n>
+                while ( (token = strtok(NULL, " ")) ) {
+                    if (token[0] == ')') {
+                        break;
+                    }
+                    // printf("<r_n>: %s\n", token);
+                    if ( is_keyword(token) ) {
+                        fprintf(stderr, "%s: '%s'\n", 
+                        "Invalid constraint definition. Constraint name is a keyword", token);
+                        return -1;
+                    }
+                }
             } else {
                 // check if valid constraint def
                 while ( (token = strtok(NULL, " ")) ) {
