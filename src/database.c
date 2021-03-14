@@ -8,7 +8,8 @@
 #include "../include/catalog.h"
 #include "../include/ddl_parser.h"
 #include "../include/statement_type.h"
-
+#include "../include/helper_module/helper_function.h"
+#include <time.h>
 
 
 int get_query_type(char* key_word){
@@ -32,6 +33,7 @@ int execute_create_table(char* statement){
     char* table_name_lower = (char*)malloc(sizeof(char)*strlen(table_name)+2);
     table_name_lower[0] = 0;
     str_lower(table_name_lower, table_name, strlen(table_name));
+
 
 
     int attr_end_index = strlen(statement_copy) - 2;
@@ -74,6 +76,8 @@ int execute_create_table(char* statement){
     printf("no error");
 
 
+
+    exit(0);
 //    for(int i = 0; i<index;i++){
 //
 //        char* ptr = attributes[i];
@@ -91,6 +95,8 @@ int execute_create_table(char* statement){
 
     return 0;
 }
+
+
 
 int execute_drop_table(char* statement){
     statement = statement+11;               //11th index contains the key word
@@ -183,6 +189,40 @@ int shutdown_database(){
 
 
 
+void test_create_table(){
+
+    char statement[] = "create table student ( "\
+                    "ID varchar(5), "\
+                    "course_id varchar(8), "\
+                    "primary key (ID), "\
+                    "foreign key (dept_name) references department );";
+    char statement2[] = "1001      ,       2001, 3001, 4001,    5001, 6001,     7001    , 8001, 9001";
+////    printf("%s\n", statement);
+//
+
+
+    char** arr;
+    int count = split_n(&arr, statement, ' ', 4);
+
+    for(int i = 0; i < count; i++){
+        printf("str : %s\n", arr[i]);
+    }
+
+    char* body = substring_copy(arr[3], 2, strlen(arr[3])-4);
+    printf("The body is >%s\n", body);
+
+    char** body_statement;
+    int body_state_count = split(&body_statement, body, ',');
+    for(int i = 0; i < body_state_count; i++){
+        printf("str : %s\n", body_statement[i]);
+    }
+
+    exit(0);
+
+
+}
+
+
 
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
@@ -190,6 +230,7 @@ int shutdown_database(){
 
 int main(int argc, char* argv[] ) {
 
+    test_create_table();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
@@ -208,12 +249,14 @@ int main(int argc, char* argv[] ) {
         exist = true;
     }else{
         //if the db dir doesn't exist then create one
-#ifdef __linux__
         mkdir(db_loc, 0777);
-#else
-        _mkdir(db_loc, 0777);
-#endif
+//#ifdef __linux__
+//        mkdir(db_loc, 0777);
+//#else
+//        _mkdir(db_loc, 0777);
+//#endif
     }
+
 
     char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
     strncpy(db_loc_path, db_loc, strlen(db_loc)+1);
