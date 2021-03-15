@@ -1,5 +1,5 @@
 /*
- * Author: Dylan Cuprewich (dxc2961)
+ * Author: Dylan Cuprewich (dxc2961), Robert Gandley ()
  * Source file for DDL Parser
  * Implements the public functionality for the DDL Parser
  */
@@ -124,7 +124,7 @@ int parse_create_table_stmt( char* input_statement ) {
 
     //Create Table setup
     char* table_name;
-    // resize if needed
+    // resize as needed
     char** attributes = malloc(10 * sizeof(char*));
     char** attr_names = malloc(10 * sizeof(char*));
     int attrCount = 0;
@@ -134,6 +134,17 @@ int parse_create_table_stmt( char* input_statement ) {
     
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
+    if (table_name == NULL) {
+        fprintf(stderr, "%s: '%s'\n%s\n", 
+            "Invalid Create statement", input_statement,
+            "create table <name>(\
+                <a_name> <a_type> <constraint_1> ... <constraint_N>,\
+                [primarykey( <a_1> ... <a_N> ),]\
+                [unique( <a_1> ... <a_N> ),]\
+                [foreignkey( <a_1> ... <a_N> ) references <r_name>( <r_1> ... <r_N> )]\
+                );");
+        return -1;
+    }
 
     // get all attributes
     while (is_last_attr == 0) {
@@ -322,52 +333,6 @@ int parse_create_table_stmt( char* input_statement ) {
     printf("Valid Create Table statement: '%s'\n", input_statement);
 
     free(attributes);
-    return 0;
-}
-
-int parse_drop_table_stmt( char* input_statement ) {
-    char* statement = strdup(input_statement);
-    // "DROP/ALTER/CREATE TABLE <NAME>"
-    // move input string pointer to skip beginning
-    statement += strlen(DROP_START) + 1 +
-                        strlen(TABLE) + 1;
-
-    // printf("Drop STMT: %s\n", statement);
-    const char delimiter[2] = " \n";
-    char* table_name;
-    // whether or not ';' directly follows <NAME> '<NAME>; vs <NAME> ;'
-    // 1 = space between <NAME> and ';'
-    int name_space_semi = 1;
-
-    // get table name parameter
-    table_name = strtok(statement, delimiter);
-    if (table_name[strlen(table_name)-1] == STMT_END_CHAR) {
-        table_name[strlen(table_name)-1] = '\0';
-        name_space_semi = 0;
-    }
-
-    char lower_char;
-    for (int i = 0; table_name[i] != '\0'; i++) {
-        lower_char = tolower(table_name[i]);
-        table_name[i] = lower_char;
-    }
-
-    // check if table name is not a keyword
-    if (is_keyword(table_name)) {
-        fprintf(stderr, "%s: '%s'\n", 
-            "Invalid table name; table name is a keyword", table_name);
-        return -1;
-    } 
-
-    char* check_rest = strtok(NULL, delimiter);
-    if (check_rest != NULL && check_rest[0] != STMT_END_CHAR && name_space_semi) {
-
-        fprintf(stderr, "%s: '%s'\n", 
-            "Invalid table name", table_name);
-        return -1;
-    }
-
-    printf("Valid Drop Table statement: '%s'\n", input_statement);
     return 0;
 }
 
