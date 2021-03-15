@@ -1,8 +1,8 @@
 # compiler flags for debugging and warnings
 CC = gcc
 CFLAGS = -g -Wall -Wextra -lm
-SOURCE_FILES = ./src/*.c ./src/helper_module/*.c
-HEADER_FILES = include/*.h include/helper_module/*.h
+SOURCE_FILES = ./src/*.c ./src/helper_module/*.c ./src/hash_table/*.c
+HEADER_FILES = include/*.h include/helper_module/*.h include/hash_table/*.h
 INCLUDE_DIR = -I ./include -I ./include/helper_module
 
 # first entry for make to envoke

@@ -9,6 +9,8 @@
 #include "../include/ddl_parser.h"
 #include "../include/statement_type.h"
 #include "../include/helper_module/helper_function.h"
+#include "../include/hash_table/hashtable.h"
+#include "../include/helper_module/hash_function.h"
 #include <time.h>
 
 
@@ -223,6 +225,66 @@ void test_create_table(){
 }
 
 
+void test_hash_table(){
+
+//    char* hash_code_str = hash_str("");
+//    printf("hash code is : %s\n", hash_code_str);
+
+    struct ht_container* ht_content;
+    struct ht_str_int* ht = ht_create(&ht_content, STRING, INT, 5, 0.75);
+//    printf("load_factor is : %lf\n", ht.load_factor);
+//    printf("the capacity is : %d\n", ht.capacity);
+
+    ht->print_test();
+    ht->add(ht_content, "hey", 2);
+    ht->add(ht_content, "bob", 3);
+    ht->add(ht_content, "cat", 4);
+    ht->print(ht_content);
+    ht->add(ht_content, "dog", 5);
+    ht->print(ht_content);
+
+    printf("size of ht is : %d\n", ht_content->size);
+    int result = ht->add(ht_content, "dog", 51);
+    ht->print(ht_content);
+    printf("size of ht is : %d\n", ht_content->size);
+
+    if(result == 0){
+        printf("updated\n");
+    }
+
+    exit(0);
+
+
+//
+
+////
+//    ht->print(ht_content);
+//    printf("size of table is : %d\n", ht_content->size);
+//
+//    int val_of_cat = ht->get(ht_content, "cat");
+//    printf("val of cat is : %d\n", val_of_cat);
+//
+//    printf("here\n");
+//    ht->remove(ht_content, "bob");
+//    ht->print(ht_content);
+//    printf("size of table is : %d\n", ht_content->size);
+//
+//    printf("the capacity is : %d\n", ht_content->capacity);
+//
+//
+//    if(ht->contains(ht_content, "cat")){
+//        printf("cat exist\n");
+//    }
+//
+////
+//    if(ht->contains(ht_content, "bob")==0){
+//        printf("bob does not exist\n");
+//    }
+//
+//    ht->close(ht_content);
+//
+//    exit(0);
+}
 
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
@@ -230,7 +292,8 @@ void test_create_table(){
 
 int main(int argc, char* argv[] ) {
 
-    test_create_table();
+    test_hash_table();
+
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
@@ -264,6 +327,8 @@ int main(int argc, char* argv[] ) {
     if(db_loc_path[strlen(db_loc_path)-1] != '/'){
         db_loc_path[strlen(db_loc_path)] = '/';
     }
+
+
 
     create_database(db_loc_path, page_size, buffer_size, exist);
     init_statement_types();                         //initiates the statement type class
