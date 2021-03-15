@@ -231,30 +231,22 @@ void test_hash_table(){
 //    printf("hash code is : %s\n", hash_code_str);
 
     struct ht_container* ht_content;
-    struct ht_str_int* ht = ht_create(&ht_content, STRING, INT, 5, 0.75);
-//    printf("load_factor is : %lf\n", ht.load_factor);
-//    printf("the capacity is : %d\n", ht.capacity);
+    struct ht_str_void* ht = ht_create(&ht_content, STRING, VOID_PTR, 5, 0.75);
 
-    ht->print_test();
-    ht->add(ht_content, "hey", 2);
-    ht->add(ht_content, "bob", 3);
-    ht->add(ht_content, "cat", 4);
-    ht->print(ht_content);
-    ht->add(ht_content, "dog", 5);
+    char bob_lastname[] = "apples";
+    ht->add(ht_content, "bob", bob_lastname);
+
+    printf("add succesfully\n");
+
+    char* lastname = ht->get(ht_content, "bob");
+    printf("last name of bob is : %s\n", lastname);
+
     ht->print(ht_content);
 
-    printf("size of ht is : %d\n", ht_content->size);
-    int result = ht->add(ht_content, "dog", 51);
+    ht->remove(ht_content, "bob");
     ht->print(ht_content);
-    printf("size of ht is : %d\n", ht_content->size);
-
-    if(result == 0){
-        printf("updated\n");
-    }
 
     exit(0);
-
-
 //
 
 ////

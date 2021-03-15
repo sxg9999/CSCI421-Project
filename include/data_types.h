@@ -10,6 +10,7 @@ enum d_type{
     DOUBLE,
     STRING,
     CHAR,
+    VOID_PTR
 };
 
 #endif

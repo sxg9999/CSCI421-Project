@@ -80,7 +80,7 @@ int ht_str_int_get(struct ht_container* content, char* key){
     if(result==1){
         return value->i;
     }
-    return 0;
+    return -1;
 }
 
 /**

@@ -7,6 +7,7 @@
 
 #include "../data_types.h"
 #include "ht_str_int.h"
+#include "ht_str_void.h"
 
 enum ht_type {HT_STR_INT, HT_INT_INT};
 

@@ -9,6 +9,7 @@
 #include "../../include/hash_table/hashtable.h"
 #include "../../include/helper_module/hash_function.h"
 #include "../../include/hash_table/ht_str_int.h"
+#include "../../include/hash_table/ht_str_void.h"
 
 
 
@@ -61,6 +62,8 @@ void* ht_create(struct ht_container** content, enum d_type key, enum d_type val,
                     break;
                 case STRING:
                     break;
+                case VOID_PTR:
+                    return (void*)get_ht_str_void();
                 default:
                     fprintf(stderr, "Invalid val type : %d\n", val);
                     break;

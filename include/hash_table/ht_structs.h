@@ -10,6 +10,7 @@ union ht_node_value{
     double d;
     char* c;
     char** c_2d;
+    void* v_ptr;
 };
 
 struct ht_node{
