@@ -177,7 +177,6 @@ int process_statement(char* statement){
 
 
 
-
 /**
  * Free up memory
  */
@@ -189,40 +188,6 @@ int shutdown_database(){
 }
 
 
-
-
-void test_create_table(){
-
-    char statement[] = "create table student ( "\
-                    "ID varchar(5), "\
-                    "course_id varchar(8), "\
-                    "primary key (ID), "\
-                    "foreign key (dept_name) references department );";
-    char statement2[] = "1001      ,       2001, 3001, 4001,    5001, 6001,     7001    , 8001, 9001";
-////    printf("%s\n", statement);
-//
-
-
-    char** arr;
-    int count = split_n(&arr, statement, ' ', 4);
-
-    for(int i = 0; i < count; i++){
-        printf("str : %s\n", arr[i]);
-    }
-
-    char* body = substring_copy(arr[3], 2, strlen(arr[3])-4);
-    printf("The body is >%s\n", body);
-
-    char** body_statement;
-    int body_state_count = split(&body_statement, body, ',');
-    for(int i = 0; i < body_state_count; i++){
-        printf("str : %s\n", body_statement[i]);
-    }
-
-    exit(0);
-
-
-}
 
 
 
