@@ -225,58 +225,6 @@ void test_create_table(){
 }
 
 
-void test_hash_table(){
-
-//    char* hash_code_str = hash_str("");
-//    printf("hash code is : %s\n", hash_code_str);
-
-    struct ht_container* ht_content;
-    struct ht_str_void* ht = ht_create(&ht_content, STRING, VOID_PTR, 5, 0.75);
-
-    char bob_lastname[] = "apples";
-    ht->add(ht_content, "bob", bob_lastname);
-
-    printf("add succesfully\n");
-
-    char* lastname = ht->get(ht_content, "bob");
-    printf("last name of bob is : %s\n", lastname);
-
-    ht->print(ht_content);
-
-    ht->remove(ht_content, "bob");
-    ht->print(ht_content);
-
-    exit(0);
-//
-
-////
-//    ht->print(ht_content);
-//    printf("size of table is : %d\n", ht_content->size);
-//
-//    int val_of_cat = ht->get(ht_content, "cat");
-//    printf("val of cat is : %d\n", val_of_cat);
-//
-//    printf("here\n");
-//    ht->remove(ht_content, "bob");
-//    ht->print(ht_content);
-//    printf("size of table is : %d\n", ht_content->size);
-//
-//    printf("the capacity is : %d\n", ht_content->capacity);
-//
-//
-//    if(ht->contains(ht_content, "cat")){
-//        printf("cat exist\n");
-//    }
-//
-////
-//    if(ht->contains(ht_content, "bob")==0){
-//        printf("bob does not exist\n");
-//    }
-//
-//    ht->close(ht_content);
-//
-//    exit(0);
-}
 
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
@@ -284,7 +232,6 @@ void test_hash_table(){
 
 int main(int argc, char* argv[] ) {
 
-//    test_hash_table();
 
     char* db_loc = argv[1];
     char* ptr;
