@@ -292,7 +292,7 @@ void test_hash_table(){
 
 int main(int argc, char* argv[] ) {
 
-    test_hash_table();
+//    test_hash_table();
 
     char* db_loc = argv[1];
     char* ptr;
