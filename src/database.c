@@ -314,12 +314,12 @@ int main(int argc, char* argv[] ) {
 
 
     char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
-    strncpy(db_loc_path, db_loc, strlen(db_loc)+1);
+    db_loc_path[0] = 0;
+    strncpy(db_loc_path, db_loc, strlen(db_loc)+2);
 
     if(db_loc_path[strlen(db_loc_path)-1] != '/'){
         db_loc_path[strlen(db_loc_path)] = '/';
     }
-
 
 
     create_database(db_loc_path, page_size, buffer_size, exist);

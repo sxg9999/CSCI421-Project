@@ -5,6 +5,7 @@
 #include "catalog.h"
 #include "helper_module/hash_function.h"
 #include "helper_module/helper_function.h"
+#include "../include/hash_table/hashtable.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -34,6 +35,10 @@ static struct i_node** table_map = NULL;          //a hashtable that maps a tabl
 
 static int table_names_arr_cap;                   //capacity of table names arr
 static char** table_names;                        //a array of table names
+
+
+
+static struct ht_container* ht_content;
 
 /*
  *  Private function predefintion 
