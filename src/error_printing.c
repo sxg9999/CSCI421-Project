@@ -24,3 +24,14 @@ int null_check_str_statement(char* words, char* source_text) {
 
     return 0;
 }
+
+int int_equality_check(int a, int b, char* source_text) {
+    if ( a != b ) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid DDL statement", source_text);
+        return -1;
+    }
+
+    return 0;
+}
+
