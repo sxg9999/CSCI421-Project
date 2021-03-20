@@ -26,9 +26,9 @@ void str_lower(char* buffer, char* str, int length){
 /**
  * Allocate enough memory for the substring and
  * copy from src to the substring desc and return
- * the substring
+ * the substring. (the end index is included)
  */
-char* substring_copy(char*src, int start_index, int end_index){
+char* substring(char*src, int start_index, int end_index){
     int len = end_index-start_index+1;
     char* dest = malloc(len+1);
     dest[0] = 0;
@@ -88,14 +88,14 @@ int split(char*** dest, char* str, char delim){
 
         if(ptr == NULL){
             end_index = strlen(str)-1;
-            (*dest)[count] = substring_copy(str, start_index, end_index);
+            (*dest)[count] = substring(str, start_index, end_index);
             remove_leading_spaces((*dest)[count]);
             remove_ending_spaces((*dest)[count]);
             count++;
             break;
         }
         end_index = ptr - str - 1;
-        (*dest)[count] = substring_copy(str, start_index, end_index);
+        (*dest)[count] = substring(str, start_index, end_index);
         remove_leading_spaces((*dest)[count]);
         remove_ending_spaces((*dest)[count]);
         start_index = end_index + 2;
@@ -130,7 +130,7 @@ int split_n(char*** dest, char* str, char delim, int n){
 
         if(ptr == NULL){
             end_index = strlen(str)-1;
-            (*dest)[count] = substring_copy(str, start_index, end_index);
+            (*dest)[count] = substring(str, start_index, end_index);
             remove_leading_spaces((*dest)[count]);
             remove_ending_spaces((*dest)[count]);
             count++;
@@ -138,7 +138,7 @@ int split_n(char*** dest, char* str, char delim, int n){
             return count;
         }
         end_index = ptr - str - 1;
-        (*dest)[count] = substring_copy(str, start_index, end_index);
+        (*dest)[count] = substring(str, start_index, end_index);
         remove_leading_spaces((*dest)[count]);
         remove_ending_spaces((*dest)[count]);
         start_index = end_index + 2;
@@ -148,7 +148,7 @@ int split_n(char*** dest, char* str, char delim, int n){
 
     //put everything that is left into arr
     end_index = strlen(str)-1;
-    (*dest)[count] = substring_copy(str, start_index, end_index);
+    (*dest)[count] = substring(str, start_index, end_index);
     count++;
     return count;
 }

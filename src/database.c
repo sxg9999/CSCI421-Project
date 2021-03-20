@@ -7,11 +7,11 @@
 #include "../include/helper_module/multiline_input.h"
 #include "../include/catalog.h"
 #include "../include/ddl_parser.h"
-#include "../include/statement_type.h"
+#include "../include/types/statement_type.h"
+#include "../include/types/attr_type.h"
 #include "../include/helper_module/helper_function.h"
-#include "../include/hash_table/hashtable.h"
-#include "../include/helper_module/hash_function.h"
-#include <time.h>
+#include "../include/hash_collection/hash_table.h"
+#include "../include/hash_collection/si_ht.h"
 
 
 int get_query_type(char* key_word){
@@ -20,82 +20,29 @@ int get_query_type(char* key_word){
 
 
 int execute_create_table(char* statement){
+    char** stmt_arr;
+    int num_of_parts = split_n(&stmt_arr, statement, ' ', 4);
 
-    init_statement_types();
+    char* table_name = stmt_arr[2];
+    char* stmt_body = stmt_arr[3];
+    char* stmt_body_unwrapped = substring(stmt_body, 1, strlen(stmt_body)-4);
 
-    char* statement_copy = (char*)malloc(sizeof(char)*strlen(statement)+3);
-    statement_copy[0] = 0;
-    strncpy(statement_copy, statement, strlen(statement)+1);
+    char** body_arr;
+    int body_arr_count = split(&body_arr, stmt_body_unwrapped, ',');
+    printf("body arr count = %d\n", body_arr_count);
 
-
-    char delim[2] = " ";
-    char* table_name = strtok(statement+13, delim);
-
-
-    char* table_name_lower = (char*)malloc(sizeof(char)*strlen(table_name)+2);
-    table_name_lower[0] = 0;
-    str_lower(table_name_lower, table_name, strlen(table_name));
-
-
-
-    int attr_end_index = strlen(statement_copy) - 2;
-    int attr_start_index = strlen(table_name_lower) + 3;
-    statement_copy[attr_end_index] = ',';
-    statement_copy[attr_end_index+1] = 0;
-    statement_copy = statement_copy + 13 + attr_start_index;
-//    char* attr_start = statement + 13 + strlen(table_name) +3;        //pointer to the start of the paren
-
-
-
-//    char* curr_str = strtok(statement_copy, ",");
-
-    char** attributes =(char**)malloc(sizeof(char*)*10);
-
-    char* curr = strtok(statement_copy, ",");
-    int index = 0;
-    while(curr!=NULL){
-        char* tmp = malloc(strlen(curr)+2);
-        strncpy(tmp, curr, strlen(curr)+1);
-        if(tmp[0] == ' '){
-            tmp = tmp+1;
+    for(int i = 0; i < body_arr_count; i++){
+        char** body_content;
+        int bc_count = split(&body_content, body_arr[i], ' ');
+        printf("content_%d:\n", i);
+        for(int j = 0; j < bc_count; j++){
+            printf("%s\n",body_content[j]);
+            free(body_content[j]);
         }
-        attributes[index] = tmp;
-        index++;
-        curr = strtok(NULL, ",");
+        printf("\n\n");
+        free(body_content);
     }
 
-    //filler code
-    int data_types[3];
-    data_types[0] = 1;
-    data_types[1] = 2;
-    data_types[2] = 3;
-
-    int key_index[1];
-    key_index[0] = 0;
-
-    add_table(data_types, key_index, 3, 1);
-
-    printf("no error");
-
-
-
-    exit(0);
-//    for(int i = 0; i<index;i++){
-//
-//        char* ptr = attributes[i];
-//        for(int j = 0; j < strlen(ptr); j++){
-//            if(ptr[i]==' '){
-//                printf("space %s\n", ptr);
-//            }
-//            printf("done here");
-//        }
-//    }
-//    printf("done %s\n", attributes[0]);
-//    char* curr_
-
-
-
-    return 0;
 }
 
 
@@ -106,9 +53,9 @@ int execute_drop_table(char* statement){
     strncpy(table_name, statement, strlen(statement)+1);    //add a 1 for null term
     table_name[strlen(table_name)-1] = 0;
 
-    int table_num = catalog.get_table_num(table_name);
-    drop_table(table_num);
-    catalog.remove_table(table_name);
+//    int table_num = catalog.get_table_num(table_name);
+//    drop_table(table_num);
+//    catalog.remove_table(table_name);
     return 0;
 }
 
@@ -177,17 +124,40 @@ int process_statement(char* statement){
 
 
 
+
+int un_init(){
+    statement_type_close();
+    attr_type_close();
+}
+
 /**
  * Free up memory
  */
 int shutdown_database(){
     free_input();
-    catalog.close();
+    un_init();
+//    catalog.close();
     terminate_database();
     return 0;
 }
 
 
+
+void test_create_table(){
+    char statement[] = "Create table student ("\
+                        "ID varchar(5), "\
+                        "name varchar(20) not null, "\
+                        "primary key (ID), "\
+                        "foreign key (dept_name) references department );";
+
+    printf("Statement:\n%s\n", statement);
+
+    execute_create_table(statement);
+
+
+
+    exit(0);
+}
 
 
 
@@ -196,6 +166,8 @@ int shutdown_database(){
  */
 
 int main(int argc, char* argv[] ) {
+    init_statement_types();
+    init_attr_types();
 
 
     char* db_loc = argv[1];
@@ -236,7 +208,7 @@ int main(int argc, char* argv[] ) {
 
     create_database(db_loc_path, page_size, buffer_size, exist);
     init_statement_types();                         //initiates the statement type class
-    init_catalog(db_loc_path);                      //initates the catalog
+//    init_catalog(db_loc_path);                      //initates the catalog
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
 

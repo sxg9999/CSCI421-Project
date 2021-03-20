@@ -1,5 +1,5 @@
 //
-// Created by SGuan on 3/14/2021.
+// Created by SGuan on 3/17/2021.
 //
 
 #ifndef HT_STRUCTS_H
@@ -8,26 +8,28 @@
 union ht_node_value{
     int i;
     double d;
-    char* c;
-    char** c_2d;
     void* v_ptr;
 };
 
+struct ht_node;
+
 struct ht_node{
+    int table_index;
+    int list_index;
     char* key;
-    char* hash_code_str;
+    unsigned long long hash_code;
     union ht_node_value* value;
     struct ht_node* next_node;
 
 };
 
-struct ht_container{
+struct hashtable{
     int size;
     int capacity;
     int base_multiplier;
     double load_factor;
     struct ht_node** table;
+    struct ht_node** node_list;
 };
 
-
-#endif
+#endif //IMPLEMENTATION_1_HT_STRUCTS_H
