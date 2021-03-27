@@ -8,10 +8,10 @@
 #include <string.h>
 #include <ctype.h>
 
-int null_check_str_statement(char* words, char* source_text) {
-    if ( words == NULL) {
+int null_check_str_create_stmt(char* str, char* stmt) {
+    if ( str == NULL) {
         fprintf(stderr, "%s: '%s'\nUsage:\n%s\n", 
-            "Invalid Create statement", source_text,
+            "Invalid Create statement", stmt,
             "create table <name>( "
             "<a_name> <a_type> <constraint_1> ... <constraint_N>, "
             "[primarykey( <a_1> ... <a_N> ),] "
@@ -25,10 +25,10 @@ int null_check_str_statement(char* words, char* source_text) {
     return 0;
 }
 
-int int_equality_check(int a, int b, char* source_text) {
+int int_equality_check(int a, int b, char* stmt) {
     if ( a != b ) {
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement", source_text);
+            "Invalid DDL statement", stmt);
         return -1;
     }
 
