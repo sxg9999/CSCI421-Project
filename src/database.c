@@ -197,10 +197,13 @@ int shutdown_database(){
 
 int main(int argc, char* argv[] ) {
     char* test0 = "DROP TABLE P";
-    char* test1 = "CREATE TABLE BAZZLE baz double PRIMARYKEY );";
-    printf("%s\n", test1);
+    char* test1 = "CREATE TABLE BAZZLE( baz double PRIMARYKEY );";
+    printf("INPUT: '%s'\n", test1);
     parse_ddl_statement(test1);
     return 0;
+
+
+
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
