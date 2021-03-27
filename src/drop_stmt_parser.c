@@ -11,6 +11,7 @@
 #include "../include/ddl_parser.h"
 #include "../include/ddl_parser_helper.h"
 #include "../include/keywords.h"
+#include "../include/error_printing.h"
 
 
 int parse_drop_table_stmt( char* input_statement ) {
@@ -35,10 +36,15 @@ int parse_drop_table_stmt( char* input_statement ) {
     }
 
     char lower_char;
+    // TODO: replace with str_lower func
+    for(int i = 0; i < strlen(table_name); i++){
+        table_name[i] = tolower(table_name[i]);
+    }
+    /*
     for (int i = 0; table_name[i] != '\0'; i++) {
         lower_char = tolower(table_name[i]);
         table_name[i] = lower_char;
-    }
+    }*/
 
     // check if table name is not a keyword
     if (is_keyword(table_name)) {
