@@ -9,6 +9,27 @@
 #include <ctype.h>
 #include <time.h>
 
+/**
+ * checks if the the str is a valid number
+ * @param str
+ * @return 1 for true, 0 for false
+ */
+int is_int(char* str){
+    if(str == NULL || str[0]=='\0'){
+        printf("not a int, it is null\n");
+        return 0;
+    }
+
+    for(int i = 0; str[i]!='\0'; i++){
+//        printf("char = %c\n", str[i]);
+        if(str[i] < '0' || str[i] > '9'){
+//            printf("invalid char val is %d\n", (int)str[i]);
+            return 0;
+        }
+    }
+    return 1;
+
+}
 
 
 void clear_buffer(char* buffer, int length){
@@ -29,7 +50,11 @@ void str_lower(char* buffer, char* str, int length){
  * the substring. (the end index is included)
  */
 char* substring(char*src, int start_index, int end_index){
-    int len = end_index-start_index+1;
+    if(src==NULL || src[0] == '\0'){
+        fprintf(stderr, "(Error in substring) can't create a substring from a null source!\n");
+        exit(0);
+    }
+    int len = end_index-start_index + 1; // add 1 one because the index starts from the 0th index
     char* dest = malloc(len+1);
     dest[0] = 0;
     strncpy(dest, src+start_index, len);

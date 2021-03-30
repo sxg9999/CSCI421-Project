@@ -89,6 +89,7 @@ union ht_node_value* ht_get(struct hashtable* ht, char* key){
     return NULL;
 }
 
+
 union ht_node_value* ht_remove(struct hashtable* ht, char* key){
     unsigned long long hash_code = hash_str(key);
     int index = hash_compute_index(hash_code, ht->capacity);

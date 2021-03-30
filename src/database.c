@@ -5,43 +5,66 @@
 #include <stdbool.h>
 #include "../include/database.h"
 #include "../include/helper_module/multiline_input.h"
-#include "../include/catalog.h"
+#include "../include/catalog/catalog.h"
 #include "../include/ddl_parser.h"
-#include "../include/types/statement_type.h"
-#include "../include/types/attr_type.h"
+//#include "../include/types/statement_type.h"
+//#include "../include/types/attr_type.h"
+#include "../include/db_types.h"
 #include "../include/helper_module/helper_function.h"
+#include "../include/hash_collection/hash_collection.h"
 #include "../include/hash_collection/hash_table.h"
 #include "../include/hash_collection/si_ht.h"
+#include "time.h"
+
 
 
 int get_query_type(char* key_word){
     return 0;
 }
 
+char* exec_create_table_get_table_name(char* str){
+    int start_index = 0;
+    char* delim_ptr = strchr(str, '(');
+    int end_index = delim_ptr - str - 1;
+
+    char* table_name = substring(str, start_index, end_index);
+    return table_name;
+}
+
+void exec_create_table_parse_attr_data(char* str ){
+    char** attributes;
+    int count = split(&attributes, str, ',');
+}
+
 
 int execute_create_table(char* statement){
+    int table_num;
+    char* table_name;
+    char** attributes;
+    struct attr_data* a_data;
+    struct primary_key_data* pkey_data;
+    struct foreign_key_data* fkey_data;
+    struct catalog_table_data* t_data;
+
     char** stmt_arr;
-    int num_of_parts = split_n(&stmt_arr, statement, ' ', 4);
+    split_n(&stmt_arr, statement, ' ', 3);
+    printf("%s\n", stmt_arr[2]);
 
-    char* table_name = stmt_arr[2];
-    char* stmt_body = stmt_arr[3];
-    char* stmt_body_unwrapped = substring(stmt_body, 1, strlen(stmt_body)-4);
+    table_name = exec_create_table_get_table_name(stmt_arr[2]);
 
-    char** body_arr;
-    int body_arr_count = split(&body_arr, stmt_body_unwrapped, ',');
-    printf("body arr count = %d\n", body_arr_count);
 
-    for(int i = 0; i < body_arr_count; i++){
-        char** body_content;
-        int bc_count = split(&body_content, body_arr[i], ' ');
-        printf("content_%d:\n", i);
-        for(int j = 0; j < bc_count; j++){
-            printf("%s\n",body_content[j]);
-            free(body_content[j]);
-        }
-        printf("\n\n");
-        free(body_content);
-    }
+    printf("table name is : >%s<\n", table_name);
+
+//    start_index = end_index + 2;
+//    ptr = strc
+//
+//
+//    char* tmp_str = substring(stmt_arr[2], )
+//    char** tmp_arr;
+
+
+
+
 
 }
 
@@ -126,8 +149,7 @@ int process_statement(char* statement){
 
 
 int un_init(){
-    statement_type_close();
-    attr_type_close();
+    return 0;
 }
 
 /**
@@ -144,18 +166,55 @@ int shutdown_database(){
 
 
 void test_create_table(){
-    char statement[] = "Create table student ("\
+    char statement[] = "Create table student( "\
                         "ID varchar(5), "\
-                        "name varchar(20) not null, "\
-                        "primary key (ID), "\
-                        "foreign key (dept_name) references department );";
+                        "name varchar(20) notnull, "\
+                        "primarykey(ID), "\
+                        "unique(ID, name), "\
+                        "foreignkey(dept_name, prof) references department(dept_name, prof) );";
 
-    printf("Statement:\n%s\n", statement);
+    char data_str[] =   "ID varchar(5), "\
+                        "name varchar(20) notnull, "\
+                        "primarykey(ID), "\
+                        "unique(ID, name), "\
+                        "foreignkey(dept_name, prof) references department(dept_name, prof);";
+//    execute_create_table(statement);
+    char data_str_2[] =  "id char(5), "\
+                        "name varchar(20), "\
+                        "age int";
+    char test_str[] = "";
+//    char* ptr = strchr(test_str, '(');
+//    int end_index = ptr - test_str -1;
+//    printf("end index is : %d\n", end_index);
+//    char* sub = substring(test_str, 0, 1);
+//    printf("sub string is %s\n", sub);
 
-    execute_create_table(statement);
+    init_catalog("./database/");
+    catalog_add_table(0, "student", data_str_2);
+//    catalog_add_table(3, "users", "ahahah");
+//    catalog_add_table(2, "stocks", "ahahah");
+//    catalog_print_tables();
+
+    exit(0);
+}
 
 
+void test_attr_type(){
 
+
+    db_type_print_all();
+
+    enum db_type type = typeof_kw("create f");
+
+    if(type == SELECT){
+        printf("is select\n");
+    }else if(type == CREATE){
+        printf("is create\n");
+    }else{
+        printf("is unknown\n");
+    }
+
+    printf("done\n");
     exit(0);
 }
 
@@ -166,10 +225,8 @@ void test_create_table(){
  */
 
 int main(int argc, char* argv[] ) {
-    init_statement_types();
-    init_attr_types();
-
-
+//    test_attr_type();
+    test_create_table();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
@@ -207,7 +264,6 @@ int main(int argc, char* argv[] ) {
 
 
     create_database(db_loc_path, page_size, buffer_size, exist);
-    init_statement_types();                         //initiates the statement type class
 //    init_catalog(db_loc_path);                      //initates the catalog
     create_multiline_input();                       //initiates the structs and fields neccessary for 
                                                     //handling multiline user inputs
