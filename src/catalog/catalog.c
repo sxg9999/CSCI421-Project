@@ -147,6 +147,7 @@ union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type
         char* constr_name = substring(*str, start_index, end_index);
         enum db_type tmp_type = typeof_kw(constr_name);
 
+
         if(tmp_type == UNKNOWN || tmp_type == DEFAULT){
             fprintf(stderr, "(catalog.c/get_attr_constr_type_val) Type of constraint name is not the following: notnull !!!\n");
             fprintf(stderr, "constraint name is >%s<\n", constr_name);
@@ -190,64 +191,12 @@ union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type
 
 
 
-//struct attr_constraint** get_attr_constr(int* count, enum db_type attr_type, int attr_size, char* constr_str){
-//    printf("constraints are : >%s<\n", constr_str);
-//    struct attr_constraint** constr = malloc(sizeof(struct attr_constraint*) * 4);
-//    *count = 0;
-//
-//    int constr_index = 0;
-//    int start_index = 0;
-//    int end_index = 0;
-//
-//    char* ptr = NULL;
-//    char* key_word;
-//    enum db_type type;
-//
-//    ptr = strchr(constr_str, ' ');
-//
-//    while(1){
-//        if(ptr == NULL){
-//            end_index = strlen(constr_str) - 1;
-//            key_word = substring(constr_str, start_index, end_index);
-//            type = typeof_kw(key_word);
-//            constr[constr_index]->type = type;
-//            constr_index += 1;
-//            break;
-//        }
-//
-//        int end_index = ptr - constr_str - 1;
-////        key_word = substring(constr_str, start_index, end_index);
-//        type = typeof_kw(key_word);
-//        printf("here\n");
-//        free(key_word);
-//
-//        // add the constraint type
-//        constr[constr_index] = malloc(sizeof(struct attr_constraint));
-//        constr[constr_index]->type = type;
-//
-//        if(type == DEFAULT){
-//            char* str_start_ptr = ptr + 1;
-//            ptr = constr_add_default_val(attr_type, str_start_ptr, &(constr[constr_index]));
-//        }else{
-//            ptr = ptr + 1;
-//            ptr = strchr(ptr, ' ');
-//        }
-//        constr_index += 1;
-//    }
-//
-//    *count = constr_index;
-//    return constr;
-//}
-
 struct attr_constraint** get_attr_constraints(int* count, enum db_type attr_type, char* constr_str){
     printf("constraints are : >%s<\n", constr_str);
     struct attr_constraint** constr = malloc(sizeof(struct attr_constraint*)*4);
     *count = 0;
 
     int constr_index = 0;
-    int start_index = 0;
-    int end_index = 0;
-
     char* ptr = constr_str;
     enum db_type constr_type;
 
@@ -439,6 +388,7 @@ struct attr_data* get_attr(char* attr_data_str){
         constr = NULL;
     }else{
 //        constr = get_attr_constr(&num_of_constr, type, attr_size, ptr);
+        constr = get_attr_constraints(&num_of_constr, type, ptr);
 //        if(constr == NULL){
 //            fprintf(stderr, "(catalog.c/get_attr) (struct attr_constraint**)constr is unexpectedly NULL\n");
 //            exit(0);

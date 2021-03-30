@@ -180,7 +180,7 @@ void test_create_table(){
                         "foreignkey(dept_name, prof) references department(dept_name, prof);";
 //    execute_create_table(statement);
     char data_str_2[] =  "id char(5), "\
-                        "name varchar(20), "\
+                        "name varchar(20) notnull, "\
                         "age int";
     char test_str[] = "";
 //    char* ptr = strchr(test_str, '(');
