@@ -131,6 +131,15 @@ int type_is_constr(enum db_type type){
     return 0;
 }
 
+char* type_to_str(enum db_type type){
+    for(int i = 0; i < num_of_types; i++){
+        if(type_pairs[i].type == type){
+            return &(type_pairs[i].type_name);
+        }
+    }
+    return NULL;
+}
+
 void db_type_print_all(){
     for(int i = 0; i < num_of_types; i++){
         printf("type_name=%s, type_val=%d\n", type_pairs[i].type_name, type_pairs[i].type);

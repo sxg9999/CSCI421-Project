@@ -79,6 +79,7 @@ int type_is_attr(enum db_type t);
 int type_is_constr(enum db_type t);
 
 
+char* type_to_str(enum db_type type);
 
 void db_type_print_all();
 /**

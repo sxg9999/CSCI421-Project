@@ -180,7 +180,7 @@ void test_create_table(){
                         "foreignkey(dept_name, prof) references department(dept_name, prof);";
 //    execute_create_table(statement);
     char data_str_2[] =  "id char(5), "\
-                        "name varchar(20) notnull, "\
+                        "name varchar(20) notnull unique default \"apples\", "\
                         "age int";
     char test_str[] = "";
 //    char* ptr = strchr(test_str, '(');
@@ -191,6 +191,8 @@ void test_create_table(){
 
     init_catalog("./database/");
     catalog_add_table(0, "student", data_str_2);
+
+    catalog_print_tables();
 //    catalog_add_table(3, "users", "ahahah");
 //    catalog_add_table(2, "stocks", "ahahah");
 //    catalog_print_tables();

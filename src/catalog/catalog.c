@@ -61,8 +61,10 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
     int end_index = 0;
     char* ptr;
 
+    printf("in default val\n");
+
     //check if str = "constr_val" <constraints>
-    if(str[0] != '"'){
+    if((*str)[0] != '"'){
         // this means str = constr_val <constraints>
         ptr = strchr((*str)+1, ' ');
 
@@ -71,6 +73,11 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
         }else{
             end_index = ptr - *str - 1;
             ptr = ptr + 1;
+        }
+
+        if((*str)==NULL || (*str)[0] == '\0'){
+            fprintf(stderr, "(catalog.c/get_attr_constr_default_val) Expected a default val string but got none!!!\n");
+            exit(0);
         }
 
         char* val_str = substring(*str, start_index, end_index);
@@ -94,11 +101,13 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
                 }
                 break;
             default:
-                fprintf(stderr, "Error: cannot match constraint type!!!\n");
+                fprintf(stderr, "(catalog.c/get_attr_constr_default_val) Error: cannot match constraint type!!!\n");
+                exit(0);
                 break;
         }
         free(val_str);
     }else{
+
         //str = "constraint val" <constraints>
         ptr = strchr((*str) + 1, '"');     //ptr currently points to '" <constrains>'
 
@@ -112,8 +121,10 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
         start_index = 1;
         ptr = ptr + 2;          //ptr now currently points to "<constraints>..."
 
+        printf("end_index is = %d, default val again is : >%s<\n", end_index, *str);
         char* val_str = substring(*str, start_index, end_index);
 
+        printf("sub string is : >%s<\n", val_str);
         if(attr_type == CHAR){
             strncpy(val->c, val_str, strlen(val_str) + 1);
         }else{
@@ -134,16 +145,25 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
  * @param val
  * @return
  */
-union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type, enum db_type* constr_type){
+union default_value* get_attr_constr_type_val(char** str, char* attr_name, enum db_type attr_type, enum db_type* constr_type){
     int start_index = 0;
     int end_index = 0;
     char* ptr;
     union default_value* val;
     val = NULL;
 
+    printf("string to be parsed is : >%s<\n", *str);
+
     ptr = strchr(*str, ' ');         //i.e "notnull" -> null b/c there is no space afterward
     if(ptr == NULL){
         end_index = strlen(*str) - 1;
+
+        if((*str)[0] == '\0' || (*str)==NULL){
+            fprintf(stderr, "(catalog.c/get_attr_constr_type_val) Expected a constraint string but got null\n");
+            fprintf(stderr, "attribute is >%s<\n", attr_name);
+            exit(0);
+        }
+
         char* constr_name = substring(*str, start_index, end_index);
         enum db_type tmp_type = typeof_kw(constr_name);
 
@@ -162,6 +182,12 @@ union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type
 
     //else there is more than one constraint i.e. "notnull default ..." -> " default ..."
     end_index = ptr - *str - 1;
+
+    if((*str)[0] == '\0' || (*str)==NULL){
+        fprintf(stderr, "(catalog.c/get_attr_constr_type_val) Expected a constraint string but got null\n");
+        exit(0);
+    }
+
     char* constr_name = substring(*str, start_index, end_index);
     enum db_type tmp_type = typeof_kw(constr_name);
     free(constr_name);
@@ -175,6 +201,12 @@ union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type
 
     if(tmp_type == DEFAULT){
         *constr_type = tmp_type;
+        if(ptr[0] == ' '){
+            fprintf(stderr, "(catalog.c/get_attr_constr_type_val) Default value starts with a space!!!\n");
+            exit(0);
+        }
+        printf("default val str is : >%s<\n", ptr);
+
         val = get_attr_constr_default_val(&ptr, attr_type);
         *str = ptr;
         return val;
@@ -191,8 +223,8 @@ union default_value* get_attr_constr_type_val(char** str, enum db_type attr_type
 
 
 
-struct attr_constraint** get_attr_constraints(int* count, enum db_type attr_type, char* constr_str){
-    printf("constraints are : >%s<\n", constr_str);
+struct attr_constraint** get_attr_constraints(int* count, char* attr_name, enum db_type attr_type, char* constr_str){
+//    printf("constraints are : >%s<\n", constr_str);
     struct attr_constraint** constr = malloc(sizeof(struct attr_constraint*)*4);
     *count = 0;
 
@@ -202,20 +234,22 @@ struct attr_constraint** get_attr_constraints(int* count, enum db_type attr_type
 
 
     while(1){
-        union default_value* default_val = get_attr_constr_type_val(&ptr, attr_type, &constr_type);
+
+        union default_value* default_val = get_attr_constr_type_val(&ptr, attr_name, attr_type, &constr_type);
 
         if(constr_type == UNKNOWN){
             // just a precaution
             fprintf(stderr, "(catalog.c/get_attr_constraints) returned constr_type is unknown (this is IMPOSSIBLE)!!!\n");
             exit(0);
         }
+        printf("%d\n", constr_index);
 
         constr[constr_index] = malloc(sizeof(struct attr_constraint));
         constr[constr_index]->type = constr_type;
         constr[constr_index]->value = default_val;
         constr_index += 1;
 
-        if(ptr == NULL){
+        if(ptr == NULL || ptr[0] == '\0'){
             break;
         }
     }
@@ -388,12 +422,12 @@ struct attr_data* get_attr(char* attr_data_str){
         constr = NULL;
     }else{
 //        constr = get_attr_constr(&num_of_constr, type, attr_size, ptr);
-        constr = get_attr_constraints(&num_of_constr, type, ptr);
+        constr = get_attr_constraints(&num_of_constr, attr_name, type, ptr);
+        printf("constrs finished ==============================\n");
 //        if(constr == NULL){
 //            fprintf(stderr, "(catalog.c/get_attr) (struct attr_constraint**)constr is unexpectedly NULL\n");
 //            exit(0);
 //        }
-        printf("nothing hahaha\n");
     }
     a_data->attr_size = attr_size;
     a_data->type = type;
@@ -421,6 +455,7 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char* data_str){
         char* kw_end_ptr = strchr(str_arr[i], '(');
 
         if(kw_end_ptr != NULL){
+            printf("index : %d\n", i);
             int kw_end_index = kw_end_ptr - str_arr[i] - 1;
             int kw_start_index = 0;
             key_word = substring(str_arr[i], kw_start_index, kw_end_index);
@@ -436,6 +471,7 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char* data_str){
 
             }
         }else{
+            printf("index : %d\n", i);
             //if there are no parentheses then it is an attribute
             struct attr_data* a_data = get_attr(str_arr[i]);
 //            printf("create attr_data\n");
@@ -484,11 +520,57 @@ int catalog_remove_table(char* table_name){
 }
 
 void catalog_print_tables(){
-    struct ht_node** node_list = table_ht->node_list;
 
+
+    struct ht_node** node_list = table_ht->node_list;
     for(int i = 0; i < table_ht->size; i++){
         struct catalog_table_data* t_data = node_list[i]->value->v_ptr;
         printf("Table:%d - %s\n", t_data->table_num, t_data->table_name);
+
+        //print the attributes and its constraints
+        struct ht_node** attr_node_list = t_data->attr_ht->node_list;
+        int num_of_attr = t_data->attr_ht->size;
+
+        for(int j = 0; j < num_of_attr; j++){
+            struct attr_data* a_data = attr_node_list[j]->value->v_ptr;
+            char* type_str = type_to_str(a_data->type);
+            int constr_count = a_data->num_of_constr;
+
+            printf("a_name=%s, a_type=%s, a_size=%d, a_constr_count=%d, constraints=[ ", a_data->attr_name,
+                   type_str, a_data->attr_size, a_data->num_of_constr);
+
+            for(int k = 0; k < constr_count; k++){
+                struct attr_constraint* a_constr = a_data->constr[k];
+                char* constr_type_str = type_to_str(a_constr->type);
+
+                if(a_constr->type == DEFAULT){
+                    switch(a_data->type){
+                        case INT:
+                            printf("%s(%d), ", constr_type_str, a_constr->value->i);
+                            break;
+                        case DOUBLE:
+                            printf("%s(%lf), ", constr_type_str, a_constr->value->d);
+                            break;
+                        case BOOL:
+                            if(a_constr->value->b == true){
+                                printf("%s(true), ", constr_type_str);
+                            }else{
+                                printf("%s(false), ", constr_type_str);
+                            }
+                            break;
+                        case CHAR:
+                            printf("%s(%s), ", constr_type_str, a_constr->value->c);
+                            break;
+                        case VARCHAR:
+                            printf("%s(%s), ", constr_type_str, a_constr->value->v);
+                            break;
+                    }
+                }
+
+            }
+            printf("]\n");
+        }
+
         printf("\n\n");
     }
 }
