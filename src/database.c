@@ -180,8 +180,32 @@ void test_create_table(){
                         "foreignkey(dept_name, prof) references department(dept_name, prof);";
 //    execute_create_table(statement);
     char data_str_2[] =  "id char(5), "\
-                        "name varchar(20) notnull unique default \"apples\", "\
-                        "age int";
+                        "name varchar(20) primaryKey notnull unique default \"apples\", "\
+                        "age int, "\
+                        "primarykey( id name age)";
+
+
+    char data_str_3[] = "id char(5), "\
+                        "name varchar(20) primaryKey notnull unique default \"apples\", "\
+                        "age int, "\
+                        "primarykey( id name age), "\
+                        "foreignkey( dept_name prof ) references department( r_dept_name r_prof ) ";
+
+    char department_table[] = "r_dept_id char(10), "\
+                                "r_dept_name char(20), "\
+                                "r_prof char(20), "\
+                                "primarykey( r_dept_id r_prof )";
+
+
+    char student_table[] = "id char(5), "\
+                        "name varchar(20) primaryKey notnull unique default \"apples\", "\
+                        "age int, "\
+                        "dept_name char(20), "\
+                        "prof char(20), "\
+                        "primarykey( id name age), "\
+                        "foreignkey( dept_name prof ) references department( r_dept_name r_prof ), "\
+                        "foreignkey( dept_name prof ) references department( r_dept_name r_prof )";
+
     char test_str[] = "";
 //    char* ptr = strchr(test_str, '(');
 //    int end_index = ptr - test_str -1;
@@ -190,7 +214,8 @@ void test_create_table(){
 //    printf("sub string is %s\n", sub);
 
     init_catalog("./database/");
-    catalog_add_table(0, "student", data_str_2);
+    catalog_add_table(0, "department", department_table);
+    catalog_add_table(1, "student", student_table);
 
     catalog_print_tables();
 //    catalog_add_table(3, "users", "ahahah");

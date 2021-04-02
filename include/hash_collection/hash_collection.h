@@ -1,5 +1,5 @@
-#ifndef HASHTABLE_H
-#define HASHTABLE_H
+#ifndef HASH_COLLECTION_H
+#define HASH_COLLECTION_H
 
 #include "ht_structs.h"
 

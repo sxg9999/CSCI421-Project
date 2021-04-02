@@ -17,15 +17,6 @@ struct pair{
     enum db_type type;
 };
 
-static enum db_type types[15] = {NOT_NULL, UNIQUE, PRIMARY_KEY, FOREIGN_KEY, DEFAULT,
-                                INT, DOUBLE, BOOL, CHAR, VARCHAR,
-                                CREATE, DROP, ADD, ALTER,
-                                INSERT, UPDATE, DELETE, SELECT};
-
-static char type_names[][15] = {"notnull", "unique", "primarykey", "foreignkey", "default",
-                                 "int", "double", "bool", "char", "varchar",
-                                 "create", "drop", "add", "alter",
-                                 "insert", "update", "delete", "select"};
 
 static struct pair type_pairs[] = {
         {.type_name = "notnull", .type = NOT_NULL},

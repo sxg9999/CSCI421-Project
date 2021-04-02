@@ -16,6 +16,7 @@
 #include "../../include/hash_collection/hash_collection.h"
 #include "../../include/hash_collection/si_ht.h"
 #include "../../include/hash_collection/sv_ht.h"
+#include "hash_collection.h"
 
 
 
@@ -61,7 +62,6 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
     int end_index = 0;
     char* ptr;
 
-    printf("in default val\n");
 
     //check if str = "constr_val" <constraints>
     if((*str)[0] != '"'){
@@ -121,10 +121,8 @@ union default_value* get_attr_constr_default_val(char** str, enum db_type attr_t
         start_index = 1;
         ptr = ptr + 2;          //ptr now currently points to "<constraints>..."
 
-        printf("end_index is = %d, default val again is : >%s<\n", end_index, *str);
         char* val_str = substring(*str, start_index, end_index);
 
-        printf("sub string is : >%s<\n", val_str);
         if(attr_type == CHAR){
             strncpy(val->c, val_str, strlen(val_str) + 1);
         }else{
@@ -152,7 +150,6 @@ union default_value* get_attr_constr_type_val(char** str, char* attr_name, enum 
     union default_value* val;
     val = NULL;
 
-    printf("string to be parsed is : >%s<\n", *str);
 
     ptr = strchr(*str, ' ');         //i.e "notnull" -> null b/c there is no space afterward
     if(ptr == NULL){
@@ -205,7 +202,6 @@ union default_value* get_attr_constr_type_val(char** str, char* attr_name, enum 
             fprintf(stderr, "(catalog.c/get_attr_constr_type_val) Default value starts with a space!!!\n");
             exit(0);
         }
-        printf("default val str is : >%s<\n", ptr);
 
         val = get_attr_constr_default_val(&ptr, attr_type);
         *str = ptr;
@@ -242,7 +238,6 @@ struct attr_constraint** get_attr_constraints(int* count, char* attr_name, enum 
             fprintf(stderr, "(catalog.c/get_attr_constraints) returned constr_type is unknown (this is IMPOSSIBLE)!!!\n");
             exit(0);
         }
-        printf("%d\n", constr_index);
 
         constr[constr_index] = malloc(sizeof(struct attr_constraint));
         constr[constr_index]->type = constr_type;
@@ -305,6 +300,9 @@ int get_attr_size(enum db_type type){
         case BOOL:
             size = sizeof(bool);
             break;
+        default:
+            fprintf(stderr, "(catalog.c/get_attr_size)Got an unexpected type for attribute!!!\n");
+            exit(0);
     }
 
     return size;
@@ -354,12 +352,10 @@ char* get_attr_type_n_size(char* str, enum db_type* type, int* size){
     ptr = strchr(str, '(');     //i.e., "char(23) <constraints>"  -> "(23) <constraints>"
 
     if(ptr == NULL){
-        printf("Not a char or a Varchar\n");
 
         ptr = strchr(str, ' '); //i.e., "int <constraints>" -> " <constraints>"
 
         if(ptr == NULL){
-            printf("No constraints in %s\n", str);
             end_index = strlen(str) - 1;
             char* attr_type_str = substring(str, start_index, end_index);
             enum db_type tmp_type = typeof_kw(attr_type_str);
@@ -394,7 +390,6 @@ char* get_attr_type_n_size(char* str, enum db_type* type, int* size){
 
     if(ptr == NULL){
         //there are no constraint
-        printf("No constraints in %s\n", str);
         return NULL;
     }
     return ptr;
@@ -421,13 +416,7 @@ struct attr_data* get_attr(char* attr_data_str){
         num_of_constr = 0;
         constr = NULL;
     }else{
-//        constr = get_attr_constr(&num_of_constr, type, attr_size, ptr);
         constr = get_attr_constraints(&num_of_constr, attr_name, type, ptr);
-        printf("constrs finished ==============================\n");
-//        if(constr == NULL){
-//            fprintf(stderr, "(catalog.c/get_attr) (struct attr_constraint**)constr is unexpectedly NULL\n");
-//            exit(0);
-//        }
     }
     a_data->attr_size = attr_size;
     a_data->type = type;
@@ -442,47 +431,387 @@ struct attr_data* get_attr(char* attr_data_str){
     return a_data;
 }
 
-int catalog_add_attributes(struct catalog_table_data* t_data, char* data_str){
+int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_arr, int data_str_size){
     struct hashtable* attr_ht = ht_create(12, 0.75);
-    char** str_arr;
-    int count = split(&str_arr, data_str, ',');
 
     char* key_word;
     enum db_type type;
 
-    for(int i = 0; i < count; i++){
+    for(int i = 0; i < data_str_size; i++){
 
-        char* kw_end_ptr = strchr(str_arr[i], '(');
+        char* kw_end_ptr = strchr(data_str_arr[i], '(');
 
         if(kw_end_ptr != NULL){
-            printf("index : %d\n", i);
-            int kw_end_index = kw_end_ptr - str_arr[i] - 1;
+            int kw_end_index = kw_end_ptr - data_str_arr[i] - 1;
             int kw_start_index = 0;
-            key_word = substring(str_arr[i], kw_start_index, kw_end_index);
+            key_word = substring(data_str_arr[i], kw_start_index, kw_end_index);
             /*check if the s_str(sub string) is a keyword*/
             type = typeof_kw(key_word);
             free(key_word);
 
             if(type == UNKNOWN) {
                 //if the keyword is UNKNOWN/invalid then it has to be a attribute
-                struct attr_data* a_data = get_attr(str_arr[i]);
+                struct attr_data* a_data = get_attr(data_str_arr[i]);
                 sv_ht_add(attr_ht, a_data->attr_name, a_data);
 //                printf("create attr_data\n");
 
             }
         }else{
-            printf("index : %d\n", i);
             //if there are no parentheses then it is an attribute
-            struct attr_data* a_data = get_attr(str_arr[i]);
+            struct attr_data* a_data = get_attr(data_str_arr[i]);
 //            printf("create attr_data\n");
 //            struct attr_data* a_data = get_attr(str_arr[i]);
             sv_ht_add(attr_ht, a_data->attr_name, a_data);
         }
 
     }
-    free_2d_char(str_arr, count);
+
     t_data->attr_ht = attr_ht;
 
+    return 0;
+}
+
+
+
+/**
+ * get all the attributes in the data_str and
+ * add it to an array that represents the primary key
+ * and return it
+ * @param p_key_len : length of the primary key
+ * @param data_str  : the string that contains the attributes of the primary key
+ * @return an array that represents the primary key
+ */
+char** get_primary_key_attrs(int* p_key_len, char* data_str){
+    // data_str = "<attr>, <attr>, <attr>, ..."
+    char** primary_key_attrs;
+    *p_key_len = split(&primary_key_attrs, data_str, ' ');
+
+    return primary_key_attrs;
+}
+/**
+ * add the primary key to the table
+ * @param t_data : a struct that stores information regarding the table
+ * @param data_str : a 2d array of strings that needs to be parsed
+ * @return 0 for success
+ */
+int catalog_add_primary_key(struct catalog_table_data* t_data, char** data_str_arr, int data_str_size){
+
+    char* key_word;
+    char* ptr;
+    enum db_type type;
+
+    int start_index = 0;
+    int end_index = 0;
+
+    for(int i = 0; i < data_str_size; i++){
+        ptr = strchr(data_str_arr[i], '(');
+
+        if(ptr != NULL){
+            //it is either a primary key, foreign key, or unique constraint
+            end_index = ptr - data_str_arr[i] - 1;
+            key_word = substring(data_str_arr[i], start_index, end_index);
+
+//            printf("key word is : %s\n", key_word);
+            /*check if the s_str(sub string) is a keyword*/
+            type = typeof_kw(key_word);
+            free(key_word);
+
+            if(type == PRIMARY_KEY){
+                // ptr current points to "( <attr> <attr> ... <attr> )" There could be space after paren or no space
+                start_index = end_index + 2;
+                ptr = strchr(ptr + 1, ')');
+                end_index = ptr - data_str_arr[i] - 1;
+
+                if(end_index < start_index){
+                    fprintf(stderr, "(catalog.c/catalog_add_primary_key) end index is less than start index when getting primary key attributes\n");
+                    exit(0);
+                }
+
+//                printf("data_str_arr[i] is : %s\n", data_str_arr[i]);
+                char* p_key_attr_str = substring(data_str_arr[i], start_index, end_index);
+                remove_leading_spaces(p_key_attr_str);
+                remove_ending_spaces(p_key_attr_str);
+
+                int p_key_len;
+                char** primary_key_attrs = get_primary_key_attrs(&p_key_len, p_key_attr_str);
+                free(p_key_attr_str);
+
+                t_data->p_key_len = p_key_len;
+                t_data->primary_key_attrs = primary_key_attrs;
+                return 0;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+/**
+ * Return 1 if the attributes are the same type and 0 if they are not
+ * @param a_data_1
+ * @param a_data_2
+ * @return
+ */
+int compare_attr_data(struct attr_data* a_data_1, struct attr_data* a_data_2){
+    if(a_data_1->type != a_data_2->type){
+        return 0;
+    }
+    return 1;
+}
+
+
+int check_if_attr_matches(int count, struct hashtable* attr_ht, struct hashtable* ref_attr_ht,
+        char** foreign_key_attrs, char** ref_table_attrs){
+
+    for(int i = 0; i < count; i++){
+        struct attr_data* a_data_1 = sv_ht_get(attr_ht, foreign_key_attrs[i]);
+        struct attr_data* a_data_2 = sv_ht_get(ref_attr_ht, ref_table_attrs[i]);
+
+        if(compare_attr_data(a_data_1, a_data_2) == 0){
+            fprintf(stderr, "(catalog.c/get_foreign_key) a_data_1=%s, a_data_2=%s does not match!!!\n", a_data_1->attr_name, a_data_2->attr_name);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Create a foreign key and return it
+ * @param attr_count
+ * @param ref_table_name
+ * @param foreign_key_attrs
+ * @param ref_attrs
+ * @return
+ */
+struct foreign_key_data* create_foreign_key(int attr_count, char* ref_table_name, char** foreign_key_attrs, char** ref_attrs){
+    struct foreign_key_data* f_key = malloc(sizeof(struct foreign_key_data));
+
+    f_key->parent_table_name = ref_table_name;
+
+    struct hashtable* f_key_ht = ht_create(12, 0.75);
+
+    for(int i = 0; i < attr_count; i++){
+        sv_ht_add(f_key_ht, foreign_key_attrs[i], ref_attrs[i]);
+    }
+
+    f_key->f_keys = f_key_ht;
+    return f_key;
+}
+
+/**
+ * Creates a foreign_key_data struct using the data_str and returns it.
+ *
+ * The foreign_key_data struct holds all information on the foreign key and
+ * the mapping from the foreign_key to the primary_key of the referenced table
+ * @param data_str : the string to be parsed
+ * @return a foreign_key_data struct
+ */
+struct foreign_key_data* get_foreign_key(int num_of_f_key_attr, int num_of_ref_attr, char** foreign_key_attrs,
+        char** ref_table_attrs, char* ref_table_name, struct hashtable* table_attr_ht, int* result){
+
+    int table_exist = sv_ht_contains(table_ht, ref_table_name);
+    if(table_exist){
+        printf("Table name exist : >%s<\n", ref_table_name);
+    }else{
+        fprintf(stderr, "(catalog.c/get_foreign_key)Table name does not exist : >%s<\n", ref_table_name);
+        *result = -1;
+        return NULL;
+    }
+
+    if(num_of_ref_attr != num_of_f_key_attr){
+        fprintf(stderr, "(catalog.c/get_foreign_key) len of foreign key attr does not match len of ref attrs\n");
+        *result = -1;
+        return NULL;
+    }
+
+    struct catalog_table_data* ref_table = sv_ht_get(table_ht, ref_table_name);
+    struct hashtable* ref_table_attr_ht = ref_table->attr_ht;
+//    printf("ref table name after getting the table is : %s\n", ref_table->table_name);
+
+/* check if f_key_attr match the corresponding ref attr*/
+    int attr_match = check_if_attr_matches(num_of_f_key_attr, table_attr_ht, ref_table_attr_ht,
+                                           foreign_key_attrs, ref_table_attrs);
+
+    if(attr_match == 0){
+        *result = -1;
+        return NULL;
+    }
+
+
+    /*Add foreign key*/
+    *result = 1;
+    struct foreign_key_data* f_key = create_foreign_key(num_of_f_key_attr, ref_table_name,
+            foreign_key_attrs, ref_table_attrs);
+
+    return f_key;
+
+}
+
+/**
+ * parse the data_str for attributes and store it in foreign_key_attrs
+ * @param data_str
+ * @param foreign_key_attrs
+ * @return a pointer to the remaining part of the string
+ */
+char* get_foreign_key_attrs(char* data_str, char*** foreign_key_attrs, int* num_of_f_key_attr){
+
+    if(data_str == NULL || data_str[0] == '\0'){
+        fprintf(stderr, "(catalog.c/get_foreign_key_attrs) data_str is invalid!!!\n");
+        exit(0);
+    }
+
+    int start_index = 1;
+    int end_index = 0;
+
+    char* ptr = strchr(data_str, ')');
+    end_index = ptr - data_str - 1;
+
+    // error checking
+    if(end_index < start_index){
+        fprintf(stderr, "(catalog.c/get_foreign_key_attrs) end index is less than start index!!!\n");
+        exit(0);
+    }
+
+
+
+    char* foreign_key_attr_str = substring(data_str, start_index, end_index);   // " <attr> <attr> ... <attr> "
+    remove_leading_spaces(foreign_key_attr_str);
+    remove_ending_spaces(foreign_key_attr_str);
+
+    *num_of_f_key_attr = split(&(*foreign_key_attrs), foreign_key_attr_str, ' ');
+
+
+    return ptr + 2;  //ptr + 2 points to "references <r_name>( <r_attr> <r_attr> ... <r_attr>)
+}
+
+
+char* get_ref_table_name(char* data_str, char** ref_table_name){
+    //data_str should be "references <ref_table_name>( <attr> <attr> ... <attr> )"
+    int start_index = 11;
+    int end_index = 0;
+
+    char* ptr = strchr(data_str, '(');
+    end_index = ptr - data_str - 1;
+
+    *ref_table_name = substring(data_str, start_index, end_index);
+
+    str_lower(*ref_table_name, *ref_table_name, strlen(*ref_table_name));
+    printf("ref table_name is : >%s<\n", *ref_table_name);
+
+    return ptr; // ptr should point to "( <attr> <attr> ... <attr> )"
+}
+
+char* get_ref_table_attrs(char* data_str, char*** ref_table_attrs, int* num_of_ref_attr){
+
+    if(data_str == NULL || data_str[0] == '\0'){
+        fprintf(stderr, "(catalog.c/get_ref_table_attrs) data_str is invalid!!!\n");
+        exit(0);
+    }
+
+    int start_index = 1;
+    int end_index = 0;
+
+    char* ptr = strchr(data_str, ')');
+    end_index = ptr - data_str - 1;
+
+    //error checking
+    if(end_index < start_index){
+        fprintf(stderr, "(catalog.c/get_ref_table_attrs) end index is less than start index!!!\n");
+        exit(0);
+    }
+
+    char* ref_table_attr_str = substring(data_str, start_index, end_index);
+    remove_leading_spaces(ref_table_attr_str);
+    remove_ending_spaces(ref_table_attr_str);
+
+    *num_of_ref_attr = split(&(*ref_table_attrs), ref_table_attr_str, ' ');
+
+    return ptr;     // ptr should be pointing to ')';
+}
+
+/**
+ * add all the foreign keys to the table
+ * @param t_data : a struct that stores information regarding the table
+ * @param data_str_arr : a 2d array of strings that needs to be parsed
+ * @param data_str_size : the num of strings in the 2d array
+ * @return 0 for success
+ */
+int catalog_add_foreign_keys(struct catalog_table_data* t_data, char** data_str_arr, int data_str_size){
+    char* key_word;
+    char* ptr;
+    enum db_type type;
+
+    int f_keys_size = 12;
+    int f_key_count = 0;
+    int start_index = 0;
+    int end_index = 0;
+
+    struct foreign_key_data** f_keys = malloc(sizeof(struct foreign_key_data*) * f_keys_size);
+
+    for(int i = 0; i < data_str_size; i++){
+        ptr = strchr(data_str_arr[i], '(');
+
+        if(ptr != NULL){
+            end_index = ptr - data_str_arr[i] - 1;
+            key_word = substring(data_str_arr[i], start_index, end_index);
+
+            type = typeof_kw(key_word);
+            free(key_word);
+
+            if(type == FOREIGN_KEY){
+                //ptr currently points to "( <attr> <attr> ...<attr> ) references <r_name>( <r_attr> <r_attr> ... <r_attr> )"
+
+                int num_of_f_key_attr;
+                char** foreign_key_attrs;
+                ptr = get_foreign_key_attrs(ptr, &foreign_key_attrs, &num_of_f_key_attr);
+
+                for(int j = 0; j < num_of_f_key_attr; j++){
+                    printf("f_key attr : %s\n", foreign_key_attrs[j]);
+                }
+
+                char* ref_table_name;
+                ptr = get_ref_table_name(ptr, &ref_table_name);
+//                printf("ref table name is : >%s<\n", ref_table_name);
+
+                int num_of_ref_attr;
+                char** ref_table_attrs;         // the attrs that the user specified that should exist in the ref table
+                ptr = get_ref_table_attrs(ptr, &ref_table_attrs, &num_of_ref_attr);
+
+                for(int j = 0; j < num_of_ref_attr; j++){
+                    printf("ref attr : %s\n", ref_table_attrs[j]);
+                }
+
+                int get_f_key_result;
+                struct foreign_key_data* f_key = get_foreign_key(num_of_f_key_attr, num_of_ref_attr,
+                        foreign_key_attrs, ref_table_attrs, ref_table_name, t_data->attr_ht, &get_f_key_result);
+
+                printf("result of getting foreign key is: %d\n", get_f_key_result);
+                if(get_f_key_result){
+                    if(f_key == NULL){
+                        fprintf(stderr, "(catalog.c/catalog_add_foreign_keys) f_key expected to be not null!!!\n");
+                        exit(0);
+                    }
+                    if(f_key_count == f_keys_size){
+                        f_keys_size = f_keys_size * 2;
+                        f_keys = realloc(f_keys, sizeof(struct foreign_key_data*) * f_keys_size);
+                    }
+
+                    f_keys[f_key_count] = f_key;
+                    f_key_count++;
+                }else{
+                    fprintf(stderr, "(catalog.c/catalog_add_foreign_keys) Getting foreign key failed!!!\n ");
+                }
+
+
+            }
+        }
+    }
+
+    t_data->num_of_f_key = f_key_count;
+    t_data->f_keys = f_keys;
+    return 0;
 }
 
 int catalog_add_table(int table_num, char* table_name, char* data_str){
@@ -494,21 +823,24 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
     t_data->table_name = malloc(sizeof(table_name_len));
     strncpy(t_data->table_name, table_name, table_name_len + 1);
 
+    char** data_str_arr;
+    int count = split(&data_str_arr, data_str, ',');
+
     /*Add the attributes*/
-    catalog_add_attributes(t_data, data_str);
+    catalog_add_attributes(t_data, data_str_arr, count);
+
+    /*Add the primary key*/
+    catalog_add_primary_key(t_data, data_str_arr, count);
+
+    /*Add the foreign keys*/
+    catalog_add_foreign_keys(t_data, data_str_arr, count);
 
     sv_ht_add(table_ht, table_name, t_data);
 
-    printf("\n\nprint the tables\n");
-    struct catalog_table_data* t_data_2 = sv_ht_get(table_ht, table_name);
-    printf("table=%s, table_num=%d\n", t_data_2->table_name, t_data_2->table_num );
 
-    struct ht_node** node_list = t_data_2->attr_ht->node_list;
-    for(int i = 0; i < t_data_2->attr_ht->size; i++){
-        struct attr_data* attr_data = node_list[i]->value->v_ptr;
-        printf("a_name=%s, a_type=%d, a_size=%d, a_constr_count=%d\n", attr_data->attr_name,
-               (int)(attr_data->type), attr_data->attr_size, attr_data->num_of_constr);
-    }
+    free_2d_char(data_str_arr, count);
+    return 0;
+
 }
 
 
@@ -519,8 +851,34 @@ int catalog_remove_table(char* table_name){
     return 0;
 }
 
-void catalog_print_tables(){
+void catalog_print_foreign_key(int count, struct foreign_key_data** f_keys){
 
+    printf("foreign Keys:\n");
+    if(count == 0){
+        printf("(No foreign keys)\n");
+    }
+    for(int i = 0; i < count; i++){
+        char* referenced_table_name = f_keys[i]->parent_table_name;
+
+
+        struct hashtable* f_keys_mapping = f_keys[i]->f_keys;
+        int num_of_mapping = f_keys_mapping->size;
+        struct ht_node** f_key_attrs = f_keys_mapping->node_list;
+
+
+        printf("(foreign_key_%d) ref_table=%s", i, referenced_table_name);
+
+        for(int j = 0; j < num_of_mapping; j++){
+            printf(", %s=%s", f_key_attrs[i]->key, (char*)(f_key_attrs[i]->value->v_ptr));
+        }
+
+        printf("\n");
+
+    }
+}
+
+
+void catalog_print_tables(){
 
     struct ht_node** node_list = table_ht->node_list;
     for(int i = 0; i < table_ht->size; i++){
@@ -538,6 +896,7 @@ void catalog_print_tables(){
 
             printf("a_name=%s, a_type=%s, a_size=%d, a_constr_count=%d, constraints=[ ", a_data->attr_name,
                    type_str, a_data->attr_size, a_data->num_of_constr);
+
 
             for(int k = 0; k < constr_count; k++){
                 struct attr_constraint* a_constr = a_data->constr[k];
@@ -564,12 +923,30 @@ void catalog_print_tables(){
                         case VARCHAR:
                             printf("%s(%s), ", constr_type_str, a_constr->value->v);
                             break;
+                        default:
+                            fprintf(stderr, "(catalog.c/catalog_print_table) Got an unexpected constraint type!!!\n");
+                            exit(0);
                     }
+                }else{
+                    printf("%s, ", constr_type_str);
                 }
 
             }
             printf("]\n");
+
+            /*print the primary key*/
         }
+
+        printf("primary_key=[ ");
+        for(int j = 0; j < t_data->p_key_len; j++){
+            printf("%s, ", t_data->primary_key_attrs[j]);
+        }
+        printf("]\n");
+
+        /*Print the foreign keys*/
+        catalog_print_foreign_key(t_data->num_of_f_key, t_data->f_keys);
+
+
 
         printf("\n\n");
     }
