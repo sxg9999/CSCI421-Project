@@ -19,6 +19,8 @@
 #include "../include/hash_collection/hash_table.h"
 #include "../include/hash_collection/sv_ht.h"
 
+#include "../include/file_sys/file_sys.h"
+
 
 #include <time.h>
 
@@ -134,11 +136,16 @@ int shutdown_database(){
 
 
 
+void get_args(char* db_loc_path, int* page_size, int* buffer_size){
+
+}
+
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
 
 int main(int argc, char* argv[] ) {
+    print_platform();
     char* db_loc = argv[1];
     char* ptr;
     int page_size = strtol(argv[2], &ptr, 10);
