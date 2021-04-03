@@ -14,6 +14,7 @@
 #include "../include/hash_collection/hash_collection.h"
 #include "../include/hash_collection/hash_table.h"
 #include "../include/hash_collection/si_ht.h"
+#include "../include/hash_collection/sv_ht.h"
 #include "time.h"
 #include "../include/storagemanager.h"
 
@@ -45,11 +46,11 @@ char* parse_table_name(char* data_str, char** table_name){
 
     end_index = strlen(remaining_str_with_closing_braces) - 2;
 
-    char* remaining_str_clean = substring(remaining_str_with_closing_braces, start_index + 2, end_index);
+    char* remaining_str_clean = substring(remaining_str_with_closing_braces, 2, end_index);
     free(remaining_str_with_closing_braces);
     remove_leading_spaces(remaining_str_clean);
     remove_ending_spaces(remaining_str_clean);
-//    printf("(actual)remaining str is : >%s<\n", remaining_str_clean);
+    printf("(actual)remaining str is : >%s<\n", remaining_str_clean);
 
     return remaining_str_clean;
 }
@@ -67,6 +68,14 @@ int execute_create_table(char* statement){
     char* remaining_str = parse_table_name(statement, &table_name);
 
     catalog_add_table(table_num, table_name, remaining_str);
+
+    struct hashtable* test_ht = ht_create(12, 0.75);
+
+//    char test_str[] = "Hello";
+//    sv_ht_add(test_ht, "abc", test_str);
+//
+//    char* ret_str = sv_ht_get(test_ht, "abc");
+//    printf("ret str is : %s\n", ret_str);
 
     catalog_print_tables();
     return 0;

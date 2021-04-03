@@ -858,23 +858,34 @@ int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
     struct ht_node** attr_nodes = attr_ht->node_list;
 
     for(int i = 0; i < num_of_attrs; i++){
+
         struct attr_data* a_data = attr_nodes[i]->value->v_ptr;
+        printf("attr name is : >%s<\n", a_data->attr_name);
         enum db_type type = a_data->type;
         int type_int_val = (int)type;
 
         data_types[i] = type_int_val;
+
+//        int num_of_constr = a_data->
     }
 
-//    char** primary_key_attrs = t_data->primary_key_attrs;
-//    for(int i = 0; i < num_of_attrs; i++){
-//        struct attr_data* a_data = sv_ht_get(attr_ht, primary_key_attrs[i]);
-//        enum db_type type = a_data->type;
-//        int type_int_val = (int)type;
-//
-//        key_indices[i] = type_int_val;
-//    }
+    printf("primary key len is : %d\n", p_key_len);
+    char** primary_key_attrs = t_data->primary_key_attrs;
 
-//    add_table(data_types, key_indices, num_of_attrs, p_key_len);
+    for(int i = 0; i < p_key_len; i++){
+        printf("primary key : >%s<\n", primary_key_attrs[i]);
+    }
+
+
+    for(int i = 0; i < p_key_len; i++){
+        struct attr_data* a_data = sv_ht_get(attr_ht, primary_key_attrs[i]);
+        enum db_type type = a_data->type;
+        int type_int_val = (int)type;
+
+        key_indices[i] = type_int_val;
+    }
+
+    add_table(data_types, key_indices, num_of_attrs, p_key_len);
 }
 
 int catalog_add_table(int table_num, char* table_name, char* data_str){
