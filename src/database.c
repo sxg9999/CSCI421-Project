@@ -1,7 +1,7 @@
 /**
- * Some bugs that wasn't fixed:
+ * Some things to note:
  * - Creating table is fine but can't drop it due to some memory issue
- *
+ * - Saving Catalog is not implemented
  */
 
 
@@ -128,7 +128,6 @@ int execute_query(char * query, union record_item *** result){
  */
 int shutdown_database(){
     free_input();
-//    catalog.close();
     terminate_database();
     return 0;
 }
