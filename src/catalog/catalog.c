@@ -1,7 +1,9 @@
-///**
-// * Note: Case does not matter
-// */
-//
+/**
+ * Note: Case does not matter
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

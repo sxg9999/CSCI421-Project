@@ -1,3 +1,10 @@
+/**
+ * Some bugs that wasn't fixed:
+ * - Creating table is fine but can't drop it due to some memory issue
+ *
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
