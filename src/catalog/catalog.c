@@ -16,6 +16,7 @@
 #include "../../include/hash_collection/hash_collection.h"
 #include "../../include/hash_collection/si_ht.h"
 #include "../../include/hash_collection/sv_ht.h"
+#include "../../include/storagemanager.h"
 #include "hash_collection.h"
 
 
@@ -731,6 +732,32 @@ char* get_ref_table_attrs(char* data_str, char*** ref_table_attrs, int* num_of_r
     return ptr;     // ptr should be pointing to ')';
 }
 
+
+int table_add_child(char* parent_name, char* child_name){
+    struct catalog_table_data* parent_table = sv_ht_get(table_ht, parent_name);
+
+    if(parent_table->num_of_childs == parent_table->child_arr_size){
+        parent_table->child_arr_size = parent_table->child_arr_size * 2;
+        parent_table->childs = realloc(parent_table->childs, sizeof(char*) * parent_table->child_arr_size);
+    }
+
+    int count = parent_table->num_of_childs;
+    char** childs = parent_table->childs;
+    for(int i = 0; i < count; i++){
+        if(strncmp(childs[i], child_name, strlen(child_name)) == 0){
+            return -1;
+        }
+    }
+
+    int current_index = parent_table->num_of_childs;
+    parent_table->childs[current_index] = malloc(strlen(child_name) + 1);
+    strncpy(parent_table->childs[current_index], child_name, strlen(child_name) + 1);
+
+    parent_table->num_of_childs += 1;
+
+    return 0;
+
+}
 /**
  * add all the foreign keys to the table
  * @param t_data : a struct that stores information regarding the table
@@ -800,6 +827,7 @@ int catalog_add_foreign_keys(struct catalog_table_data* t_data, char** data_str_
 
                     f_keys[f_key_count] = f_key;
                     f_key_count++;
+                    table_add_child(ref_table_name, t_data->table_name);
                 }else{
                     fprintf(stderr, "(catalog.c/catalog_add_foreign_keys) Getting foreign key failed!!!\n ");
                 }
@@ -813,6 +841,41 @@ int catalog_add_foreign_keys(struct catalog_table_data* t_data, char** data_str_
     t_data->f_keys = f_keys;
     return 0;
 }
+int catalog_get_next_table_num(){
+    return table_ht->size;
+}
+
+
+int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
+
+    int num_of_attrs = t_data->attr_ht->size;
+    int p_key_len = t_data->p_key_len;
+
+    int* data_types = malloc(sizeof(int)*num_of_attrs);
+    int* key_indices = malloc(sizeof(int)*p_key_len);
+
+    struct hashtable* attr_ht = t_data->attr_ht;
+    struct ht_node** attr_nodes = attr_ht->node_list;
+
+    for(int i = 0; i < num_of_attrs; i++){
+        struct attr_data* a_data = attr_nodes[i]->value->v_ptr;
+        enum db_type type = a_data->type;
+        int type_int_val = (int)type;
+
+        data_types[i] = type_int_val;
+    }
+
+//    char** primary_key_attrs = t_data->primary_key_attrs;
+//    for(int i = 0; i < num_of_attrs; i++){
+//        struct attr_data* a_data = sv_ht_get(attr_ht, primary_key_attrs[i]);
+//        enum db_type type = a_data->type;
+//        int type_int_val = (int)type;
+//
+//        key_indices[i] = type_int_val;
+//    }
+
+//    add_table(data_types, key_indices, num_of_attrs, p_key_len);
+}
 
 int catalog_add_table(int table_num, char* table_name, char* data_str){
     printf("data str is : %s\n", data_str);
@@ -822,6 +885,10 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
     int table_name_len = strlen(table_name);
     t_data->table_name = malloc(sizeof(table_name_len));
     strncpy(t_data->table_name, table_name, table_name_len + 1);
+
+    t_data->num_of_childs = 0;
+    t_data->child_arr_size = 12;
+    t_data->childs = malloc(sizeof(char*) * t_data->child_arr_size);
 
     char** data_str_arr;
     int count = split(&data_str_arr, data_str, ',');
@@ -837,12 +904,12 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
 
     sv_ht_add(table_ht, table_name, t_data);
 
+    catalog_add_table_to_storage_manager(t_data);
 
     free_2d_char(data_str_arr, count);
     return 0;
 
 }
-
 
 
 
@@ -877,6 +944,13 @@ void catalog_print_foreign_key(int count, struct foreign_key_data** f_keys){
     }
 }
 
+void catalog_print_childs(int count, char** childs){
+    printf("childs: [");
+    for(int i = 0; i < count; i++){
+        printf("%s, ", childs[i]);
+    }
+    printf("]\n");
+}
 
 void catalog_print_tables(){
 
@@ -885,6 +959,7 @@ void catalog_print_tables(){
         struct catalog_table_data* t_data = node_list[i]->value->v_ptr;
         printf("Table:%d - %s\n", t_data->table_num, t_data->table_name);
 
+        catalog_print_childs(t_data->num_of_childs, t_data->childs);
         //print the attributes and its constraints
         struct ht_node** attr_node_list = t_data->attr_ht->node_list;
         int num_of_attr = t_data->attr_ht->size;

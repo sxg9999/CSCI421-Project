@@ -15,6 +15,7 @@
 int init_catalog(char* db_path);
 
 
+int catalog_get_next_table_num();
 
 int catalog_add_table(int table_num, char* table_name, char* data_str);
 

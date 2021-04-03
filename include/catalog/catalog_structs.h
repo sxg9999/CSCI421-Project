@@ -53,7 +53,10 @@ struct catalog_table_data{
     int table_num;
     int p_key_len;
     int num_of_f_key;
+    int num_of_childs;
+    int child_arr_size;
     char* table_name;
+    char** childs;
     char** primary_key_attrs;
     struct foreign_key_data** f_keys;
     struct hashtable* attr_ht;

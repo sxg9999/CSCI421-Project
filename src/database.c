@@ -15,55 +15,61 @@
 #include "../include/hash_collection/hash_table.h"
 #include "../include/hash_collection/si_ht.h"
 #include "time.h"
+#include "../include/storagemanager.h"
 
 
 
-int get_query_type(char* key_word){
+int get_query_type(){
     return 0;
 }
 
-char* exec_create_table_get_table_name(char* str){
+char* parse_table_name(char* data_str, char** table_name){
+
     int start_index = 0;
-    char* delim_ptr = strchr(str, '(');
-    int end_index = delim_ptr - str - 1;
+    int end_index = 0;
+    data_str = data_str + 13;  // data_str currently points to <table_name>( <content>, <content>, ...)
 
-    char* table_name = substring(str, start_index, end_index);
-    return table_name;
+    char* ptr = strchr(data_str, '(');
+    end_index = ptr - data_str - 1;
+
+    *table_name = substring(data_str, start_index, end_index);
+
+    printf("table name is : >%s<\n", *table_name);
+    printf("remaining str is : >%s<\n", ptr);
+
+    start_index = end_index + 1;
+    end_index = strlen(data_str) - 2;
+
+    char* remaining_str_with_closing_braces = substring(data_str, start_index, end_index);
+    remove_ending_spaces(remaining_str_with_closing_braces);
+
+    end_index = strlen(remaining_str_with_closing_braces) - 2;
+
+    char* remaining_str_clean = substring(remaining_str_with_closing_braces, start_index + 2, end_index);
+    free(remaining_str_with_closing_braces);
+    remove_leading_spaces(remaining_str_clean);
+    remove_ending_spaces(remaining_str_clean);
+//    printf("(actual)remaining str is : >%s<\n", remaining_str_clean);
+
+    return remaining_str_clean;
 }
 
-void exec_create_table_parse_attr_data(char* str ){
-    char** attributes;
-    int count = split(&attributes, str, ',');
-}
+
 
 
 int execute_create_table(char* statement){
-    int table_num;
+
+//    if(parse_ddl_statement(statement) == -1){
+//        return -1    //-1 for false
+//    }
+    int table_num = catalog_get_next_table_num();
     char* table_name;
-    char** attributes;
-    struct attr_data* a_data;
-    struct primary_key_data* pkey_data;
-    struct foreign_key_data* fkey_data;
-    struct catalog_table_data* t_data;
+    char* remaining_str = parse_table_name(statement, &table_name);
 
-    char** stmt_arr;
-    split_n(&stmt_arr, statement, ' ', 3);
-    printf("%s\n", stmt_arr[2]);
+    catalog_add_table(table_num, table_name, remaining_str);
 
-    table_name = exec_create_table_get_table_name(stmt_arr[2]);
-
-
-    printf("table name is : >%s<\n", table_name);
-
-//    start_index = end_index + 2;
-//    ptr = strc
-//
-//
-//    char* tmp_str = substring(stmt_arr[2], )
-//    char** tmp_arr;
-
-
-
+    catalog_print_tables();
+    return 0;
 
 
 }
@@ -165,6 +171,7 @@ int shutdown_database(){
 
 
 
+
 void test_create_table(){
     char statement[] = "Create table student( "\
                         "ID varchar(5), "\
@@ -206,6 +213,10 @@ void test_create_table(){
                         "foreignkey( dept_name prof ) references department( r_dept_name r_prof ), "\
                         "foreignkey( dept_name prof ) references department( r_dept_name r_prof )";
 
+    char department_table_full[] = "create table sales( r_dept_id char(10), "\
+                                "r_dept_name char(20), "\
+                                "r_associate char(20), "\
+                                "primarykey( r_dept_id r_associate ) );";
     char test_str[] = "";
 //    char* ptr = strchr(test_str, '(');
 //    int end_index = ptr - test_str -1;
@@ -214,10 +225,16 @@ void test_create_table(){
 //    printf("sub string is %s\n", sub);
 
     init_catalog("./database/");
-    catalog_add_table(0, "department", department_table);
-    catalog_add_table(1, "student", student_table);
 
-    catalog_print_tables();
+    execute_create_table(department_table_full);
+//    catalog_add_table(0, "department", department_table);
+//    catalog_add_table(1, "student", student_table);
+//
+//    char* table_name_1;
+//    char* remaining_str = parse_table_name(department_table_full, &table_name_1);
+//
+//    catalog_add_table(2, table_name_1, remaining_str);
+//    catalog_print_tables();
 //    catalog_add_table(3, "users", "ahahah");
 //    catalog_add_table(2, "stocks", "ahahah");
 //    catalog_print_tables();
