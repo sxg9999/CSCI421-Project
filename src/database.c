@@ -61,7 +61,7 @@ char* parse_table_name(char* data_str, char** table_name){
 int execute_create_table(char* statement){
 
 //    if(parse_ddl_statement(statement) == -1){
-//        return -1    //-1 for false
+//        return -1;    //-1 for false
 //    }
     int table_num = catalog_get_next_table_num();
     char* table_name;
@@ -69,17 +69,7 @@ int execute_create_table(char* statement){
 
     catalog_add_table(table_num, table_name, remaining_str);
 
-    struct hashtable* test_ht = ht_create(12, 0.75);
-
-//    char test_str[] = "Hello";
-//    sv_ht_add(test_ht, "abc", test_str);
-//
-//    char* ret_str = sv_ht_get(test_ht, "abc");
-//    printf("ret str is : %s\n", ret_str);
-
-    catalog_print_tables();
     return 0;
-
 
 }
 
@@ -87,13 +77,13 @@ int execute_create_table(char* statement){
 
 int execute_drop_table(char* statement){
     statement = statement+11;               //11th index contains the key word
-    char* table_name =(char*)malloc(strlen(statement)+2);
+    char* table_name =(char*)malloc(strlen(statement)+1);
     strncpy(table_name, statement, strlen(statement)+1);    //add a 1 for null term
-    table_name[strlen(table_name)-1] = 0;
 
-//    int table_num = catalog.get_table_num(table_name);
-//    drop_table(table_num);
-//    catalog.remove_table(table_name);
+    /*calls the remove table method in catalog that will remove the table
+     * in catalog and call the drop_table method in storagemanager.c*/
+    catalog_remove_table(table_name);
+
     return 0;
 }
 
@@ -227,26 +217,14 @@ void test_create_table(){
                                 "r_associate char(20), "\
                                 "primarykey( r_dept_id r_associate ) );";
     char test_str[] = "";
-//    char* ptr = strchr(test_str, '(');
-//    int end_index = ptr - test_str -1;
-//    printf("end index is : %d\n", end_index);
-//    char* sub = substring(test_str, 0, 1);
-//    printf("sub string is %s\n", sub);
 
     init_catalog("./database/");
 
     execute_create_table(department_table_full);
-//    catalog_add_table(0, "department", department_table);
-//    catalog_add_table(1, "student", student_table);
-//
-//    char* table_name_1;
-//    char* remaining_str = parse_table_name(department_table_full, &table_name_1);
-//
-//    catalog_add_table(2, table_name_1, remaining_str);
-//    catalog_print_tables();
-//    catalog_add_table(3, "users", "ahahah");
-//    catalog_add_table(2, "stocks", "ahahah");
-//    catalog_print_tables();
+    execute_create_table(department_table_full);
+    execute_drop_table("drop table sales");
+    catalog_remove_table("sales");
+
 
     exit(0);
 }
@@ -278,7 +256,6 @@ void test_attr_type(){
  */
 
 int main(int argc, char* argv[] ) {
-//    test_attr_type();
     test_create_table();
     char* db_loc = argv[1];
     char* ptr;
@@ -298,12 +275,13 @@ int main(int argc, char* argv[] ) {
         exist = true;
     }else{
         //if the db dir doesn't exist then create one
+
+#ifdef __linux__
         mkdir(db_loc, 0777);
-//#ifdef __linux__
-//        mkdir(db_loc, 0777);
-//#else
-//        _mkdir(db_loc, 0777);
-//#endif
+#else
+        _mkdir(db_loc, 0777);
+#endif
+
     }
 
 

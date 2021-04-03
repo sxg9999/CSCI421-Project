@@ -40,8 +40,6 @@ void* sv_ht_remove(struct  hashtable* ht, char* key){
     }
 
     void* ret_val = value->v_ptr;
-    printf("in remove\n");
-    printf("the ret_val is : %s\n", ret_val);
     free(value);
     return ret_val;
 }

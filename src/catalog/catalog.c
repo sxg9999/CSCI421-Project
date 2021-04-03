@@ -889,7 +889,13 @@ int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
 }
 
 int catalog_add_table(int table_num, char* table_name, char* data_str){
-    printf("data str is : %s\n", data_str);
+
+    int table_exist = sv_ht_contains(table_ht, table_name);
+    if(table_exist){
+        fprintf(stderr, "(catalog.c/catalog_add_table) Table already exists !!!\n");
+        return -1;
+    }
+
     struct catalog_table_data* t_data = malloc(sizeof(struct catalog_table_data));
     t_data->table_num = table_num;
 
@@ -926,6 +932,15 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
 
 int catalog_remove_table(char* table_name){
 
+    int table_exist = sv_ht_get(table_ht, table_name);
+    if(table_exist==0){
+        fprintf(stderr, "(catalog.c/catalog_remove_table) Table does not exist or it has been removed!!!\n");
+        return -1;
+    }
+
+    struct catalog_table_data* t_data = sv_ht_remove(table_ht, table_name);
+    drop_table(t_data->table_num);
+    //handing the removal of foreign keys will be done.
     return 0;
 }
 
