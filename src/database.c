@@ -5,22 +5,16 @@
 #include <stdbool.h>
 #include "../include/database.h"
 #include "../include/helper_module/multiline_input.h"
-#include "../include/catalog/catalog.h"
+#include "../include/catalog.h"
 #include "../include/ddl_parser.h"
-//#include "../include/types/statement_type.h"
-//#include "../include/types/attr_type.h"
-#include "../include/db_types.h"
+#include "../include/statement_type.h"
 #include "../include/helper_module/helper_function.h"
-#include "../include/hash_collection/hash_collection.h"
-#include "../include/hash_collection/hash_table.h"
-#include "../include/hash_collection/si_ht.h"
-#include "../include/hash_collection/sv_ht.h"
-#include "time.h"
-#include "../include/storagemanager.h"
+#include "../include/hash_table/hashtable.h"
+#include "../include/helper_module/hash_function.h"
+#include <time.h>
 
 
-
-int get_query_type(){
+int get_query_type(char* key_word){
     return 0;
 }
 
