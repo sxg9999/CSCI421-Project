@@ -860,7 +860,7 @@ int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
     for(int i = 0; i < num_of_attrs; i++){
 
         struct attr_data* a_data = attr_nodes[i]->value->v_ptr;
-        printf("attr name is : >%s<\n", a_data->attr_name);
+//        printf("attr name is : >%s<\n", a_data->attr_name);
         enum db_type type = a_data->type;
         int type_int_val = (int)type;
 
@@ -869,13 +869,8 @@ int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
 //        int num_of_constr = a_data->
     }
 
-    printf("primary key len is : %d\n", p_key_len);
+//    printf("primary key len is : %d\n", p_key_len);
     char** primary_key_attrs = t_data->primary_key_attrs;
-
-    for(int i = 0; i < p_key_len; i++){
-        printf("primary key : >%s<\n", primary_key_attrs[i]);
-    }
-
 
     for(int i = 0; i < p_key_len; i++){
         struct attr_data* a_data = sv_ht_get(attr_ht, primary_key_attrs[i]);
@@ -921,7 +916,7 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
 
     sv_ht_add(table_ht, table_name, t_data);
 
-    catalog_add_table_to_storage_manager(t_data);
+//    catalog_add_table_to_storage_manager(t_data);
 
     free_2d_char(data_str_arr, count);
     return 0;
