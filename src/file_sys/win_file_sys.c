@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/stat.h>
 #include "../../include/file_sys/win_file_sys.h"
 
 static char os_name[] = "windows";
+static struct stat s;
 
 /**
  * print the os
@@ -24,18 +26,10 @@ char* win_platform(){
  * @return 1 if true, 0 if false
  */
 int win_file_exist(char* path){
+
     return 0;
 }
 
-
-/**
- * Check if the directory exist
- * @param path
- * @return 1 if true, 0 if false
- */
-int win_dir_exist(char* path){
-    return 0;
-}
 
 
 /**

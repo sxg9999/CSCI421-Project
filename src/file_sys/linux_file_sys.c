@@ -9,6 +9,7 @@
 #include "../../include/file_sys/linux_file_sys.h"
 
 static char os_name[] = "linux";
+static struct stat s;
 /**
  * print the os
  */
@@ -26,15 +27,6 @@ int linux_file_exist(char* path){
     return 0;
 }
 
-
-/**
- * Check if the directory exist
- * @param path
- * @return 1 if true, 0 if false
- */
-int linux_dir_exist(char* path){
-    return 0;
-}
 
 
 /**

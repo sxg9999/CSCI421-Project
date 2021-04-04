@@ -24,13 +24,6 @@ char* win_platform();
 int win_file_exist(char* path);
 
 
-/**
- * Check if the directory exist
- * @param path
- * @return 1 if true, 0 if false
- */
-int win_dir_exist(char* path);
-
 
 /**
  * checks if the path is a directory

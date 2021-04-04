@@ -46,6 +46,6 @@ int is_dir(char* path);
  * @param path : the path to the directory (including the directory name)
  * @return 0 if successful, -1 if failed
  */
-int mk_dir(char* path);
+int make_dir(char* path);
 
 #endif

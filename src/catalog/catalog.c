@@ -19,6 +19,7 @@
 #include "../../include/hash_collection/si_ht.h"
 #include "../../include/hash_collection/sv_ht.h"
 #include "../../include/storagemanager.h"
+#include "../../include/file_sys/file_sys.h"
 #include "hash_collection.h"
 
 
@@ -36,9 +37,8 @@ int init_catalog(char* db_path){
     int length = strlen(db_path)+strlen(catalog_file_name);
     catalog_loc = malloc(sizeof(char)*length+1);
     snprintf(catalog_loc, length + 1, "%s%s", db_path, catalog_file_name);
-    struct stat s;
 
-    if(stat(catalog_loc, &s)==0){
+    if(file_exist(catalog_loc)){
         //catalog exist
         printf("catalog exist\n");
     }else{

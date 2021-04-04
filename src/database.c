@@ -8,21 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <stdbool.h>
 #include "../include/database.h"
 #include "../include/helper_module/multiline_input.h"
-#include "../include/catalog/catalog.h"
 #include "../include/ddl_parser.h"
-//#include "../include/statement_type.h"
 #include "../include/helper_module/helper_function.h"
-#include "../include/hash_collection/hash_table.h"
-#include "../include/hash_collection/sv_ht.h"
+#include "../include/database_helper.h"
 
-#include "../include/file_sys/file_sys.h"
-
-
-#include <time.h>
 
 
 
@@ -135,57 +127,13 @@ int shutdown_database(){
 }
 
 
-
-void get_args(char* db_loc_path, int* page_size, int* buffer_size){
-
-}
-
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
 
 int main(int argc, char* argv[] ) {
-    print_platform();
-    char* db_loc = argv[1];
-    char* ptr;
-    int page_size = strtol(argv[2], &ptr, 10);
-    int buffer_size = strtol(argv[3], &ptr, 10);
-
-    if(argc < 4 || argc > 4){
-        //print an error message and usage guide and then exit
-        fprintf(stderr, "Invalid Arguments!!!\nExpected: database <db_loc> <page_size> <buffer_size>\n"); 
-        exit(0); 
-    }
-
-    /*check if a database exist at that location (db_loc)*/
-    struct stat s;
-    bool exist = false;
-    if(stat(db_loc, &s) == 0 && (s.st_mode & S_IFDIR)?true:false){
-        exist = true;
-    }else{
-        //if the db dir doesn't exist then create one
-
-#ifdef __linux__
-        mkdir(db_loc, 0777);
-#else
-        _mkdir(db_loc, 0777);
-#endif
-
-    }
-
-    char* db_loc_path = (char*)malloc(sizeof(char)*strlen(db_loc)+2);
-    db_loc_path[0] = 0;
-    strncpy(db_loc_path, db_loc, strlen(db_loc)+2);
-
-    if(db_loc_path[strlen(db_loc_path)-1] != '/'){
-        db_loc_path[strlen(db_loc_path)] = '/';
-    }
-
-
-    create_database(db_loc_path, page_size, buffer_size, exist);
-    init_catalog(db_loc_path);                      //initates the catalog
-    create_multiline_input();                       //initiates the structs and fields neccessary for 
-                                                    //handling multiline user inputs
+    get_cl_args(argc, argv);
+    init_db();
 
     char* statement;
     int result;                                     // the result of processing the statement (parsing, execution, etc)

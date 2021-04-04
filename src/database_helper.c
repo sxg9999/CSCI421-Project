@@ -7,8 +7,11 @@
 #include <stdbool.h>
 #include "../include/database_helper.h"
 #include "../include/helper_module/helper_function.h"
+#include "../include/file_sys/file_sys.h"
 #include "../include/storagemanager.h"
+#include "../include/catalog/catalog.h"
 #include "../include/helper_module/multiline_input.h"
+
 
 void db_close();
 
@@ -32,12 +35,20 @@ void get_cl_args(int argc, int* argv[]){
     db_loc_path[0] = 0;
     strncpy(db_loc_path, db_loc, db_loc_str_len + 2);
 
+    if(dir_exist(db_loc)){
+        printf("Database exist\n");
+        db_loc_exist = true;
+    }else{
+        printf("Database does not exist! Creating a database directory...\n");
+        db_loc_exist = false;
+        make_dir(db_loc);
+    }
+
     if(db_loc_path[db_loc_str_len - 1] != '/'){
         /*if there is no ending '/', add one */
         db_loc_path[db_loc_str_len] = '/';
         db_loc_path[db_loc_str_len + 1] = 0;
     }
-
 
     //verify and store the page size and buffer_size
     char* ptr;
@@ -63,11 +74,13 @@ void get_cl_args(int argc, int* argv[]){
     db_params->page_size = page_size;
     db_params->buffer_size = buffer_size;
 
+
 }
 
 void init_db(){
     create_database(db_params->db_loc_path, db_params->page_size, db_params->buffer_size, db_loc_exist);
     create_multiline_input();
+    init_catalog(db_params->db_loc_path);
 }
 
 void free_db_params(){

@@ -20,6 +20,8 @@
 #include "../../include/file_sys/linux_file_sys.h"
 #endif
 
+static struct stat s;
+
 /**
  * print the os
  */
@@ -37,7 +39,13 @@ void print_platform(){
  * @param path
  * @return 1 if true, 0 if false
  */
-int file_exist(char* path);
+int file_exist(char* path){
+    if(stat(path, &s) == 0){
+        return 1;
+    }
+    return 0;
+}
+
 
 
 /**
@@ -45,13 +53,20 @@ int file_exist(char* path);
  * @param path
  * @return 1 if true, 0 if false
  */
-int dir_exist(char* path);
+int dir_exist(char* path){
+    if(stat(path, &s) == 0 && S_ISDIR(s.st_mode)){
+        return 1;
+    }
+    return 0;
+}
 
 
 /**
  * checks if the path is a directory
  */
-int is_dir(char* path);
+int make_dir(char* path){
+    mkdir(path, 0777);
+}
 
 
 /**
