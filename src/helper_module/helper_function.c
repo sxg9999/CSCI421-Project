@@ -64,6 +64,19 @@ char* substring(char*src, int start_index, int end_index){
     return dest;
 }
 
+void sub_cpy(char** dest, char* src, int start_index, int end_index){
+    if(src==NULL || src[0] == '\0'){
+        fprintf(stderr, "(Error in sub_copy) src string is null/emtpy!\n");
+        exit(0);
+    }
+
+    int src_len = end_index - start_index + 1;
+    int dest_len = strlen(*dest);
+
+    (*dest)[0] = 0;
+    strncpy(*dest, src+start_index, src_len);
+    (*dest)[src_len] = 0;
+}
 
 void remove_leading_spaces(char* src){
 

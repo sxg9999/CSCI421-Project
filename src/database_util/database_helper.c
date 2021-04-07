@@ -5,12 +5,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../include/database_helper.h"
-#include "../include/helper_module/helper_function.h"
-#include "../include/file_sys/file_sys.h"
-#include "../include/storagemanager.h"
-#include "../include/catalog/catalog.h"
-#include "../include/helper_module/multiline_input.h"
+#include "../../include/database_util/database_helper.h"
+#include "../../include/helper_module/helper_function.h"
+#include "../../include/file_sys/file_sys.h"
+#include "../../include/storagemanager.h"
+#include "../../include/catalog/catalog.h"
+#include "../../include/helper_module/multiline_input.h"
 
 
 void db_close();
@@ -81,6 +81,12 @@ void init_db(){
     create_database(db_params->db_loc_path, db_params->page_size, db_params->buffer_size, db_loc_exist);
     create_multiline_input();
     init_catalog(db_params->db_loc_path);
+    init_ddl_exec_ddl();
+}
+
+
+void print_tables(){
+    catalog_print_tables();
 }
 
 void free_db_params(){
@@ -90,4 +96,5 @@ void free_db_params(){
 
 void db_close(){
     free_db_params();
+    db_exec_ddl_close();
 }

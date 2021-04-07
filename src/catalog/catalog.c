@@ -918,7 +918,8 @@ int catalog_add_table(int table_num, char* table_name, char* data_str){
 
     sv_ht_add(table_ht, table_name, t_data);
 
-//    catalog_add_table_to_storage_manager(t_data);
+    printf("finished adding table %s\n", table_name);
+    catalog_add_table_to_storage_manager(t_data);
 
     free_2d_char(data_str_arr, count);
     return 0;
@@ -936,7 +937,7 @@ int catalog_remove_table(char* table_name){
     }
 
     struct catalog_table_data* t_data = sv_ht_remove(table_ht, table_name);
-    drop_table(t_data->table_num);
+//    drop_table(t_data->table_num);
     //handing the removal of foreign keys will be done.
     return 0;
 }

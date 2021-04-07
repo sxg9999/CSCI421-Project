@@ -78,6 +78,12 @@ enum db_type typeof_s(char* statement){
 
 enum db_type typeof_q(char* statement){
     char* ptr = strchr(statement, ' ');
+
+    if(ptr == NULL){
+        fprintf(stderr, "(db_types.c/typeof_q) Not a valid statement!!!\n");
+        exit(0);
+    }
+
     int end_index = ptr - statement - 1;
     char* key_word = substring(statement,0,end_index);
 

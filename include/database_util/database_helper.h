@@ -26,6 +26,8 @@ void get_cl_args(int argc, int* argv[]);
 
 void init_db();
 
+void print_tables();
+
 /**
  * Terminates the database (free, save, everything included)
  */
