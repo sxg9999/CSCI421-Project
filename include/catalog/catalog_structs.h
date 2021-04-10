@@ -82,11 +82,15 @@ struct foreign_key_data{
 
 /**
  * A struct that holds the table information
+ *
+ * attr_ht - A hashtable that stores the name of the attributes with the attributes data (attr_data struct) of the table
+ *           ex: [ (attribute_name_1, attr_data_1), (attribute_name_2, attr_data_2) ...]
  */
 struct catalog_table_data{
     int table_num;                         // The table number
     char* table_name;                      // The name of the table
     struct hashtable* attr_ht;             //A hashtable that stores the attributes data (attr_data struct) of the table
+
 
     int p_key_len;                         // Size of the primary key (amount of attributes that makes up a primary key)
     char** primary_key_attrs;              // A array of attributes that makes up a primary key (in their string form)
