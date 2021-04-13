@@ -9,6 +9,27 @@
 #include <ctype.h>
 #include <time.h>
 
+/**
+ * checks if the the str is a valid number
+ * @param str
+ * @return 1 for true, 0 for false
+ */
+int is_int(char* str){
+    if(str == NULL || str[0]=='\0'){
+        printf("not a int, it is null\n");
+        return 0;
+    }
+
+    for(int i = 0; str[i]!='\0'; i++){
+//        printf("char = %c\n", str[i]);
+        if(str[i] < '0' || str[i] > '9'){
+//            printf("invalid char val is %d\n", (int)str[i]);
+            return 0;
+        }
+    }
+    return 1;
+
+}
 
 
 void clear_buffer(char* buffer, int length){
@@ -19,17 +40,23 @@ void clear_buffer(char* buffer, int length){
 
 void str_lower(char* buffer, char* str, int length){
     for(int i = 0; i < length; i++){
-        buffer[i] = tolower(str[i]);
+        if ( isalpha(str[i]) ) {
+            buffer[i] = tolower(str[i]);
+        }
     }
 }
 
 /**
  * Allocate enough memory for the substring and
  * copy from src to the substring desc and return
- * the substring
+ * the substring. (the end index is included)
  */
-char* substring_copy(char*src, int start_index, int end_index){
-    int len = end_index-start_index+1;
+char* substring(char*src, int start_index, int end_index){
+    if(src==NULL || src[0] == '\0'){
+        fprintf(stderr, "(Error in substring) can't create a substring from a null source!\n");
+        exit(0);
+    }
+    int len = end_index-start_index + 1; // add 1 one because the index starts from the 0th index
     char* dest = malloc(len+1);
     dest[0] = 0;
     strncpy(dest, src+start_index, len);
@@ -37,6 +64,19 @@ char* substring_copy(char*src, int start_index, int end_index){
     return dest;
 }
 
+void sub_cpy(char** dest, char* src, int start_index, int end_index){
+    if(src==NULL || src[0] == '\0'){
+        fprintf(stderr, "(Error in sub_copy) src string is null/emtpy!\n");
+        exit(0);
+    }
+
+    int src_len = end_index - start_index + 1;
+    int dest_len = strlen(*dest);
+
+    (*dest)[0] = 0;
+    strncpy(*dest, src+start_index, src_len);
+    (*dest)[src_len] = 0;
+}
 
 void remove_leading_spaces(char* src){
 
@@ -88,14 +128,14 @@ int split(char*** dest, char* str, char delim){
 
         if(ptr == NULL){
             end_index = strlen(str)-1;
-            (*dest)[count] = substring_copy(str, start_index, end_index);
+            (*dest)[count] = substring(str, start_index, end_index);
             remove_leading_spaces((*dest)[count]);
             remove_ending_spaces((*dest)[count]);
             count++;
             break;
         }
         end_index = ptr - str - 1;
-        (*dest)[count] = substring_copy(str, start_index, end_index);
+        (*dest)[count] = substring(str, start_index, end_index);
         remove_leading_spaces((*dest)[count]);
         remove_ending_spaces((*dest)[count]);
         start_index = end_index + 2;
@@ -130,7 +170,7 @@ int split_n(char*** dest, char* str, char delim, int n){
 
         if(ptr == NULL){
             end_index = strlen(str)-1;
-            (*dest)[count] = substring_copy(str, start_index, end_index);
+            (*dest)[count] = substring(str, start_index, end_index);
             remove_leading_spaces((*dest)[count]);
             remove_ending_spaces((*dest)[count]);
             count++;
@@ -138,7 +178,7 @@ int split_n(char*** dest, char* str, char delim, int n){
             return count;
         }
         end_index = ptr - str - 1;
-        (*dest)[count] = substring_copy(str, start_index, end_index);
+        (*dest)[count] = substring(str, start_index, end_index);
         remove_leading_spaces((*dest)[count]);
         remove_ending_spaces((*dest)[count]);
         start_index = end_index + 2;
@@ -148,7 +188,7 @@ int split_n(char*** dest, char* str, char delim, int n){
 
     //put everything that is left into arr
     end_index = strlen(str)-1;
-    (*dest)[count] = substring_copy(str, start_index, end_index);
+    (*dest)[count] = substring(str, start_index, end_index);
     count++;
     return count;
 }
