@@ -18,6 +18,7 @@
  * Most simple: CREATE TABLE BAZZLE( baz double PRIMARYKEY );
  * 
  */
+
 int parse_create_table_stmt( char* input_statement ) {
     printf("Parsing Create STMT: '%s'\n", input_statement);
 

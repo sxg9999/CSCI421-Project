@@ -1,4 +1,4 @@
-//
+// Hash table functions involving a string key and int value
 // Created by SGuan on 3/18/2021.
 //
 
