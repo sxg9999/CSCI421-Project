@@ -7,19 +7,20 @@
 #include "ht_structs.h"
 
 /**
- * Add the <String,void*> pair to the hashtable
- * @param ht
+ * Add the <String,void*> pair to the hashtable ht
+ * @param ht : the hashtable struct
  * @param key
  * @param value
- * @return
+ * @return : 0 for success and -1 for failed
  */
 int sv_ht_add(struct hashtable* ht, char* key, void* value);
 
+
 /**
- * Get the value of the key
+ * Get the value of the key from the hashtable
  * @param ht
  * @param key
- * @return
+ * @return : the value of the key (warning: it is a void ptr so you have to cast to use it)
  */
 void* sv_ht_get(struct hashtable* ht, char* key);
 
@@ -27,7 +28,7 @@ void* sv_ht_get(struct hashtable* ht, char* key);
  * remove the key and its value from the hash table
  * @param ht
  * @param key
- * @return the value of the key
+ * @return the value of the key (warning: it is a void ptr so you have to cast to use it)
  */
 void* sv_ht_remove(struct  hashtable* ht, char* key);
 
@@ -40,10 +41,16 @@ void* sv_ht_remove(struct  hashtable* ht, char* key);
 int sv_ht_contains(struct hashtable* ht, char* key);
 
 
+/**
+ * Just prints the hash table's content (testing purposes only)
+ * @param ht
+ */
 void sv_ht_print(struct hashtable* ht);
 
+
 /**
- * Free the hashtable
+ * Free the hashtable from memory
+ *
  * @param ht
  */
 void destroy_sv_ht(struct hashtable* ht);
@@ -52,6 +59,8 @@ void destroy_sv_ht(struct hashtable* ht);
 /**
  * gets all the values of the hashtable and store it in
  * value_ptrs and return the number of values
+ *
+ * value_ptrs : a pointer that points to an array of values (void ptrs in this case)
  * @param ht
  * @return
  */
