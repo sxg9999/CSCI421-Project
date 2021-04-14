@@ -9,7 +9,7 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
-
+#include "catalog_structs.h"
 
 
 int init_catalog(char* db_path);
@@ -17,7 +17,7 @@ int init_catalog(char* db_path);
 
 int catalog_get_next_table_num();
 
-int catalog_add_table(int table_num, char* table_name, char* data_str);
+int catalog_add_table(struct catalog_table_data* t_data);
 
 /**
  * gets the table number of the table with the table_name
@@ -42,9 +42,11 @@ int catalog_remove_table(char* table_name);
 int catalog_contains(char* table_name);
 
 
+struct hashtable* catalog_get_ht();
+
 void catalog_close();
 
-int write_catalog();
+//int write_catalog();
 
 void catalog_print_tables();
 

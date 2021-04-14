@@ -8,6 +8,8 @@
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/database_util/db_exec_ddl.h"
 #include "../../include/catalog/catalog.h"
+#include "../../include/catalog/catalog_parsing.h"
+#include "../../include/storage_mediator/storage_mediator.h"
 
 
 static enum db_type type;
@@ -143,7 +145,9 @@ int execute_ddl_statement(){
 }
 
 int execute_create_table(){
-    catalog_add_table(0, table_name, data_str);
+    struct catalog_table_data* t_data = catalog_get_table_data_struct(0, table_name, data_str);
+    sm_add_table(t_data);
+//    catalog_add_table(0, table_name, data_str);
 }
 
 int execute_drop_table(){

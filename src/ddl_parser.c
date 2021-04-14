@@ -15,7 +15,8 @@
 int parse_ddl_statement( char* input_statement ) {
     char* statement = (char* )malloc( strlen( input_statement ) + 1);
     strcpy(statement, input_statement); 
-    enum statement_type stmt_type;
+//    enum statement_type stmt_type;
+    enum db_type stmt_type;
     char* token;
     const char delimiter[] = " ";
     printf("Parsing: '%s'\n", input_statement);
