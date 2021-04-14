@@ -13,16 +13,18 @@
 #include "../include/keywords.h"
 
 int parse_ddl_statement( char* input_statement ) {
-    char* statement = strdup(input_statement);
+    char* statement = (char* )malloc( strlen( input_statement ) + 1);
+    strcpy(statement, input_statement); 
     enum statement_type stmt_type;
     char* token;
-    const char delimiter[2] = " ";
+    const char delimiter[] = " ";
+    printf("Parsing: '%s'\n", input_statement);
     
     // get first word in statement
     token = strtok(statement, delimiter);
     if (token == NULL) {
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement", input_statement);
+            "Invalid DDL statement, empty", input_statement);
         return -1;
     }
     char* first_word = (char *)malloc(strlen(token));
@@ -35,6 +37,8 @@ int parse_ddl_statement( char* input_statement ) {
         }
     }
     first_word[strlen(first_word)] = '\0';
+    // printf("First word lower: %s\n", token);
+
 
     // check for statement type 
     char* check_type;
@@ -49,17 +53,16 @@ int parse_ddl_statement( char* input_statement ) {
         stmt_type = CREATE;
     } else {
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement", input_statement);
+            "Invalid DDL statement, invalid/missing statement type", input_statement);
         return -1;
     }
     int valid_first = strncmp(first_word, check_type, strlen(first_word));
     if (valid_first != 0) {
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement", input_statement);
+            "Invalid DDL statement, invalid/missing statement type", input_statement);
         return -1;
     }
-    free(first_word);
-    // printf("valid first word: %s\n", token);
+    printf("Valid statement type: '%s'\n", token);
 
     // check for table second word
     token = strtok(NULL, delimiter);
@@ -85,13 +88,16 @@ int parse_ddl_statement( char* input_statement ) {
             "Invalid DDL statement", input_statement);
         return -1;
     }
+    printf("%s\n", "Valid 'table' keyword present.");
+
+    free(first_word);
     free(second_word);
-    // printf("valid second word: %s\n", token);
     free(statement);
     
     // call one of the other parse funcs
     int result;
 
+    printf("\n\n\n");
     if (stmt_type == DROP) {
         result = parse_drop_table_stmt(input_statement);
     } else if (stmt_type == ALTER) {
