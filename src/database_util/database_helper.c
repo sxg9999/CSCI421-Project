@@ -97,4 +97,5 @@ void free_db_params(){
 void db_close(){
     free_db_params();
     db_exec_ddl_close();
+    catalog_close();
 }

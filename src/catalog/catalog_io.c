@@ -10,6 +10,7 @@
 #include "../../include/catalog/catalog_io_helper.h"
 
 int read_catalog(char* file_path, struct hashtable** table_ht){
+    printf("reading catalog ... \n");
     FILE* catalog_file = fopen(file_path, "rb");
 
     int num_of_tables;
@@ -35,19 +36,26 @@ int read_catalog(char* file_path, struct hashtable** table_ht){
         }
 
     }
+    fclose(catalog_file);
 
+    printf("reading catalog completed\n");
 
 }
 
 int write_catalog(char* file_path, struct hashtable* table_ht){
+    printf("writing catalog ...\n");
     FILE* catalog_file = fopen(file_path, "wb");
 
+    printf("table size is : %d\n", table_ht->size);
     /* write out the hashtable's size (amount of tables currently in the hashtable) */
     fwrite(&(table_ht->size), sizeof(int), 1, catalog_file);
 
     if(table_ht->size == 0){
+        printf("There are no tables ... writing nothing to file\n");
         return 0;
     }
+
+    printf("table size is : %d\n", table_ht->size);
 
     /* write out the hashtable's (table_ht) capacity*/
     fwrite(&(table_ht->capacity), sizeof(int), 1, catalog_file);
@@ -64,5 +72,6 @@ int write_catalog(char* file_path, struct hashtable* table_ht){
     }
 
     fclose(catalog_file);
+    printf("writing catalog completed...\n");
     return 0;
 }
