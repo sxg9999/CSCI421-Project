@@ -13,8 +13,8 @@
 
 struct catalog_table_data;
 struct attr_constraint;
-struct attr_node;
-struct foreign_key_node;
+
+
 
 /**
  * A union for storing the default values
@@ -96,6 +96,7 @@ struct catalog_table_data{
     char** primary_key_attrs;              // A array of attributes that makes up a primary key (in their string form)
 
     int num_of_f_key;                      // Number of foreign keys in the table
+    int f_key_arr_size;                    // The size of the array that contains the foreign keys
     struct foreign_key_data** f_keys;      // A array of foreign keys of the table
 
     int num_of_childs;                     // The number of tables that references this tables primary key as a foreign key
