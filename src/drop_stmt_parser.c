@@ -12,39 +12,35 @@
 #include "../include/ddl_parser_helper.h"
 #include "../include/keywords.h"
 #include "../include/error_printing.h"
+#include "../include/catalog/catalog.h"
 
+int execute_drop_stmt(char* table_name);
 
 int parse_drop_table_stmt( char* input_statement ) {
+    printf("Parsing Drop STMT: '%s'\n", input_statement);
+
     // copy string
-    char* statement = strdup(input_statement);
+    char* statement = (char* )malloc( strlen( input_statement ) + 1);
+    strcpy(statement, input_statement); 
     // move input string pointer to skip beginning
     statement += strlen(DROP_START) + 1 +
                         strlen(TABLE) + 1;
 
-    // printf("Drop STMT: %s\n", statement);
     const char delimiter[2] = " \n";
     char* table_name;
-    // whether or not ';' directly follows <NAME> '<NAME>; vs <NAME> ;'
-    // 1 = space between <NAME> and ';'
-    int name_space_semi = 1;
 
     // get table name parameter
     table_name = strtok(statement, delimiter);
     if (table_name[strlen(table_name)-1] == STMT_END_CHAR) {
         table_name[strlen(table_name)-1] = '\0';
-        name_space_semi = 0;
     }
 
     char lower_char;
-    // TODO: replace with str_lower func
     for(int i = 0; i < strlen(table_name); i++){
-        table_name[i] = tolower(table_name[i]);
+        if (isalpha(table_name[i]) ) {
+            table_name[i] = tolower(table_name[i]);
+        }
     }
-    /*
-    for (int i = 0; table_name[i] != '\0'; i++) {
-        lower_char = tolower(table_name[i]);
-        table_name[i] = lower_char;
-    }*/
 
     // check if table name is not a keyword
     if (is_keyword(table_name)) {
@@ -54,7 +50,7 @@ int parse_drop_table_stmt( char* input_statement ) {
     } 
 
     char* check_rest = strtok(NULL, delimiter);
-    if (check_rest != NULL && check_rest[0] != STMT_END_CHAR && name_space_semi) {
+    if (check_rest != NULL && check_rest[0] != STMT_END_CHAR) {
 
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid table name", table_name);
@@ -62,5 +58,21 @@ int parse_drop_table_stmt( char* input_statement ) {
     }
 
     printf("Valid Drop Table statement: '%s'\n", input_statement);
-    return 0;
+
+    int drop_success = execute_drop_stmt(table_name);
+
+    return drop_success;
+}
+
+int execute_drop_stmt(char* table_name) {
+    printf("\nDropping table: '%s'\n", table_name);
+    // table is not a keyword
+    // check if a table with name exists
+    int drop_success = catalog_remove_table(table_name);
+
+    // drop table with name
+    if ( drop_success ) {
+        printf("\ntable '%s' dropped successfully.\n", table_name);
+    }
+    return drop_success;
 }

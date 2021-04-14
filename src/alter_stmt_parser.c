@@ -13,8 +13,12 @@
 #include "../include/keywords.h"
 
 int parse_alter_table_stmt( char* input_statement ) {
+    printf("Parsing Alter STMT: '%s'\n", input_statement);
+
+
     //get statement, skip preamble
-    char *statement = strdup(input_statement);
+    char* statement = (char* )malloc( strlen( input_statement ) + 1);
+    strcpy(statement, input_statement); 
     statement += strlen(ALTER_START) + 1 + strlen(TABLE) + 1;
 
     //set up tools

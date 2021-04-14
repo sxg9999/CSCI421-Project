@@ -22,7 +22,9 @@
 int parse_create_table_stmt( char* input_statement ) {
     printf("Parsing Create STMT: '%s'\n", input_statement);
 
-    char* statement = strdup(input_statement);
+    char* statement = (char* )malloc( strlen( input_statement ) + 1);
+    strcpy(statement, input_statement); 
+    
     statement += strlen(CREATE_START) + 1 
                 + strlen(TABLE) + 1;
 
