@@ -6,19 +6,22 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../../include/database_util/database_helper.h"
+#include "../../include/database_util/db_exec_ddl.h"
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/file_sys/file_sys.h"
 #include "../../include/storagemanager.h"
 #include "../../include/catalog/catalog.h"
+#include "../../include/catalog/catalog_printer.h"
 #include "../../include/helper_module/multiline_input.h"
+
 
 
 void db_close();
 
-static db_loc_exist = false;
+static bool db_loc_exist = false;
 static struct database_params* db_params;
 
-void get_cl_args(int argc, int* argv[]){
+void get_cl_args(int argc, char* argv[]){
     /*first check if the command line is valid*/
     if(argc < 4 || argc > 4){
         fprintf(stderr, "Invalid Arguments!!!\nExpected: database <db_loc> <page_size> <buffer_size>\n");
@@ -29,7 +32,7 @@ void get_cl_args(int argc, int* argv[]){
     db_params = malloc(sizeof(struct database_params));
 
     //verify and store the db location path
-    char* db_loc = argv[1];
+    char* db_loc = (char*)argv[1];
     int db_loc_str_len = strlen(db_loc);
     char* db_loc_path = malloc(db_loc_str_len + 2);  //one extra character for '/', and another one for null
     db_loc_path[0] = 0;
@@ -54,7 +57,7 @@ void get_cl_args(int argc, int* argv[]){
     char* ptr;
 
 
-    char* page_size_str = argv[2];
+    char* page_size_str = (char*) argv[2];
     if(is_int(page_size_str) == 0){
         /* page_size_str is not a valid number str */
         fprintf(stderr, "page_size \"%s\" is not valid!\nExpected: database <db_loc> <page_size> <buffer_size>\n", page_size_str);
@@ -62,7 +65,7 @@ void get_cl_args(int argc, int* argv[]){
     }
     int page_size = strtol(page_size_str, &ptr, 10);
 
-    char* buffer_size_str = argv[3];
+    char* buffer_size_str = (char*) argv[3];
     if(is_int(buffer_size_str) == 0){
         /* page_size_str is not a valid number str */
         fprintf(stderr, "buffer_size \"%s\" is not valid!\nExpected: database <db_loc> <page_size> <buffer_size>\n", buffer_size_str);

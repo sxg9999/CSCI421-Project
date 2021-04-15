@@ -48,9 +48,10 @@ int execute_non_query(char * statement){
 
 }
 
-int execute_query(char * query, union record_item *** result){
-
-}
+int execute_query(char * query, union record_item *** result);
+//int execute_query(char * query, union record_item *** result){
+//    return 0;
+//}
 
 
 int execute(char* statement){
@@ -59,8 +60,8 @@ int execute(char* statement){
 
     if(query_type == QUERY){
         printf("it is an query statement\n");
-        union record_item** result;
-        exec_result = execute_query(statement, &result);
+//        union record_item** result;
+//        exec_result = execute_query(statement, &result);
         //print out the result
 
     }else if(query_type == NON_QUERY){

@@ -13,7 +13,7 @@
 
 
 static enum db_type type;
-static enum db_type sub_type;
+//static enum db_type sub_type;
 static char* keyword_str;
 static char* table_name;
 static char* data_str;
@@ -32,6 +32,8 @@ int init_ddl_exec_ddl(){
 
     data_str = malloc(data_str_len);
     data_str[0] = 0;
+
+    return 0;
 }
 
 
@@ -54,7 +56,7 @@ int get_create_stmt_parts(char* str){
     start_index = end_index + 2;        //ptr + start_index = "<attr> <attr> <others> );"
     end_index = strlen(str) - 2;   //the last char is ')' or a ' ';
 
-    if(data_str_len < (strlen(ptr) + 1)){
+    if(data_str_len < (int)(strlen(ptr) + 1)){
         data_str_len = strlen(ptr) + 1;
         data_str = realloc(data_str, data_str_len);
 
@@ -89,7 +91,7 @@ int get_drop_stmt_parts(char* str){
     int start_index = 0;
     int end_index = strlen(str) - 2;                            //"<table_name>" (without the semicolon)
 
-    if(t_name_len < strlen(str) + 1){
+    if(t_name_len < (int)(strlen(str) + 1)){
         t_name_len = strlen(str) +  1;
         table_name = realloc(table_name, t_name_len);
     }
@@ -141,17 +143,22 @@ int execute_ddl_statement(){
             break;
         case DROP:
             execute_drop_table();
+            break;
+        default:
+            break;
     }
+    return 0;
 }
 
 int execute_create_table(){
-    struct catalog_table_data* t_data = catalog_get_table_data_struct(0, table_name, data_str);
-    sm_add_table(t_data);
+    struct catalog_table_data* t_data = catalog_get_table_data_struct(table_name, data_str);
+    return sm_add_table(t_data);
 //    catalog_add_table(0, table_name, data_str);
 }
 
 int execute_drop_table(){
-    catalog_remove_table(table_name);
+    return sm_drop_table(table_name);
+
 }
 
 int execute_alter_table(enum db_type alter_type, char* data_str);

@@ -8,7 +8,9 @@
 #include "../db_types.h"
 #include "catalog_structs.h"
 
-struct catalog_table_data* catalog_get_table_data_struct(int table_num, char* table_name, char* data_str);
+struct catalog_table_data* catalog_get_table_data_struct(char* table_name, char* data_str);
+
+int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_arr, int data_str_size);
 
 union default_value* get_attr_constr_default_val(char** str, enum db_type attr_type);
 

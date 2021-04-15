@@ -131,7 +131,7 @@ int type_is_constr(enum db_type type){
 char* type_to_str(enum db_type type){
     for(int i = 0; i < num_of_types; i++){
         if(type_pairs[i].type == type){
-            return &(type_pairs[i].type_name);
+            return (char*) (&(type_pairs[i].type_name));
         }
     }
     return NULL;

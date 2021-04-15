@@ -160,6 +160,7 @@ int create_database( char * db_loc, int page_size, int buffer_size, bool restart
 	if(restart)
 		return restart_database( db_loc );
 	else
+	    printf("Creating a new database\n");
 		return new_database( db_loc, page_size, buffer_size );
 }
 
@@ -186,6 +187,8 @@ int new_database( char * db_loc, int page_size, int buffer_size ){
 	for(int i = 0; i < buffer_size; i++){
 		page_buffer[i] = NULL;
 	}
+
+	printf("Finish creating a new database\n");
 	return 0;
 }
 

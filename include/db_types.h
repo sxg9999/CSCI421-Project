@@ -91,10 +91,10 @@ struct type_func{
 };
 
 
-static struct type_func Type = {
-        .is_attr = type_is_attr,
-        .is_constr = type_is_constr,
-};
+//static struct type_func Type = {
+//        .is_attr = type_is_attr,
+//        .is_constr = type_is_constr,
+//};
 
 
 #endif

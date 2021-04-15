@@ -2,23 +2,21 @@
 // Created by SGuan on 4/3/2021.
 //
 
+
+//#define WINDOWS_OS 1
+//#define LINUX_OS 2
+//
+//#ifdef __WIN32
+//#define PLATFORM 1          //1 for windows platform
+//#elif __linux__
+//#define PLATFORM 2          //2 for linux platform
+//#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-
-
-//macros that determines which file_sys header file to use (for each platform)
-#define WINDOWS_OS 1
-#define LINUX_OS 2
-
-#ifdef __WIN32
-#define PLATFORM 1          //1 for windows platform
-#include "../../include/file_sys/win_file_sys.h"
-#elif __linux__
-#define PLATFORM 2          //2 for linux platform
-#include "../../include/file_sys/linux_file_sys.h"
-#endif
+#include <sys/types.h>
 
 static struct stat s;
 
@@ -26,11 +24,12 @@ static struct stat s;
  * print the os
  */
 void print_platform(){
-    if(PLATFORM == WINDOWS_OS){
-        printf("Windows os %d\n", WINDOWS_OS);
-    }else if(PLATFORM == LINUX_OS){
-        printf("Linux os %d\n", LINUX_OS);
-    }
+//    if(PLATFORM == WINDOWS_OS){
+//        printf("Windows os %d\n", WINDOWS_OS);
+//    }else if(PLATFORM == LINUX_OS){
+//        printf("Linux os %d\n", LINUX_OS);
+//    }
+    printf("Nothing\n");
 }
 
 
@@ -66,6 +65,7 @@ int dir_exist(char* path){
  */
 int make_dir(char* path){
     mkdir(path, 0777);
+    return 0;
 }
 
 

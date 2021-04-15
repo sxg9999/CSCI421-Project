@@ -12,6 +12,8 @@
 #ifndef STORAGE_MEDIATOR_H
 #define STORAGE_MEDIATOR_H
 
+#include <string.h>
+
 #include "../../include/catalog/catalog_structs.h"
 
 /**
@@ -25,7 +27,7 @@ int sm_add_table(struct catalog_table_data* t_data);
  * Drops a table and reflect the changes in both catalog and storagemanager
  * @return : 0 if it is successful and -1 if it failed
  */
-int sm_drop_table();
+int sm_drop_table(char* table_name);
 
 /**
  * Alter a table and reflect the changes in both catalog and storagemanager

@@ -7,11 +7,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../../include/hash_collection/hash_table.h"
+#include "../../include/hash_collection/hash_collection.h"
+
 #include "../../include/catalog/catalog_parsing.h"
 #include "../../include/catalog/catalog.h"
+#include "../../include/helper_module/helper_function.h"
 
 
-struct catalog_table_data* catalog_get_table_data_struct(int table_num, char* table_name, char* data_str){
+struct catalog_table_data* catalog_get_table_data_struct(char* table_name, char* data_str){
 //    int table_exist = sv_ht_contains(table_ht, table_name);
 //    if(table_exist){
 //        fprintf(stderr, "(catalog.c/catalog_add_table) Table already exists !!!\n");
@@ -856,40 +860,3 @@ int catalog_add_foreign_keys(struct catalog_table_data* t_data, char** data_str_
 //    return table_ht->size;
 //}
 
-
-int catalog_add_table_to_storage_manager(struct catalog_table_data* t_data){
-
-    int num_of_attrs = t_data->attr_ht->size;
-    int p_key_len = t_data->p_key_len;
-
-    int* data_types = malloc(sizeof(int)*num_of_attrs);
-    int* key_indices = malloc(sizeof(int)*p_key_len);
-
-    struct hashtable* attr_ht = t_data->attr_ht;
-    struct ht_node** attr_nodes = attr_ht->node_list;
-
-    for(int i = 0; i < num_of_attrs; i++){
-
-        struct attr_data* a_data = attr_nodes[i]->value->v_ptr;
-//        printf("attr name is : >%s<\n", a_data->attr_name);
-        enum db_type type = a_data->type;
-        int type_int_val = (int)type;
-
-        data_types[i] = type_int_val;
-
-//        int num_of_constr = a_data->
-    }
-
-//    printf("primary key len is : %d\n", p_key_len);
-    char** primary_key_attrs = t_data->primary_key_attrs;
-
-    for(int i = 0; i < p_key_len; i++){
-        struct attr_data* a_data = sv_ht_get(attr_ht, primary_key_attrs[i]);
-        enum db_type type = a_data->type;
-        int type_int_val = (int)type;
-
-        key_indices[i] = type_int_val;
-    }
-
-    add_table(data_types, key_indices, num_of_attrs, p_key_len);
-}

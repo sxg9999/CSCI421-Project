@@ -17,7 +17,7 @@ struct database_params{
  * if its valid.
  * @return
  */
-void get_cl_args(int argc, int* argv[]);
+void get_cl_args(int argc, char* argv[]);
 
 
 /**
