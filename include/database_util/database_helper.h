@@ -19,6 +19,11 @@ struct database_params{
  */
 void get_cl_args(int argc, char* argv[]);
 
+/**
+ *
+ * @param stmt
+ */
+void process_non_statements(char* stmt);
 
 /**
  * Initiates the database

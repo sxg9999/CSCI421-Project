@@ -107,10 +107,7 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
 
     for(int i = 0; i < p_key_len; i++){
         struct attr_data* a_data = sv_ht_get(attr_ht, p_key_attrs[i]);
-        enum db_type a_type = a_data->type;
-        int type_int_val = (int)a_type;
-
-        (*p_key_indices)[i] = type_int_val;
+        (*p_key_indices)[i] = a_data->index;
     }
     return p_key_len;
 }

@@ -5,6 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#include "../../include/storage_mediator/storage_mediator_printer.h"
+
 #include "../../include/database_util/database_helper.h"
 #include "../../include/database_util/db_exec_ddl.h"
 #include "../../include/helper_module/helper_function.h"
@@ -17,7 +20,6 @@
 
 
 void db_close();
-
 static bool db_loc_exist = false;
 static struct database_params* db_params;
 
@@ -89,7 +91,8 @@ void init_db(){
 
 
 void print_tables(){
-    catalog_print_tables();
+//    catalog_print_tables();
+    sm_print_all_table_meta_datas();
 }
 
 void free_db_params(){

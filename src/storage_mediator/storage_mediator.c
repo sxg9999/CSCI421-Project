@@ -21,7 +21,7 @@ int sm_add_table(struct catalog_table_data* t_data){
 
     /* Get primary key indices */
     int* p_key_indices = NULL;
-    int p_key_size = 0;
+    int p_key_size = catalog_get_p_key_indices(t_data, &p_key_indices);
 
     /* Add the table to storage manager */
     int table_num = add_table(data_types, p_key_indices, data_type_size, p_key_size);

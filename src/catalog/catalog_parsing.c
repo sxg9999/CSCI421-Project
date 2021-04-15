@@ -27,28 +27,41 @@ struct catalog_table_data* catalog_get_table_data_struct(char* table_name, char*
     struct hashtable* table_ht = catalog_get_ht();
     t_data->table_num = table_ht->size;
 
+
+
     int table_name_len = strlen(table_name);
-    t_data->table_name = malloc(sizeof(table_name_len));
+    t_data->table_name = malloc(table_name_len + 1);
     strncpy(t_data->table_name, table_name, table_name_len + 1);
+
+
 
     t_data->num_of_childs = 0;
     t_data->child_arr_size = 12;
+
     t_data->childs = malloc(sizeof(char*) * t_data->child_arr_size);
+
+
+
 
     char** data_str_arr;
     int count = split(&data_str_arr, data_str, ',');
 
+    printf("getting attributes\n");
     /*Add the attributes*/
     catalog_add_attributes(t_data, data_str_arr, count);
 
+    printf("getting primary keys\n");
     /*Add the primary key*/
     catalog_add_primary_key(t_data, data_str_arr, count);
 
+    printf("getting foreign keys\n");
     /*Add the foreign keys*/
     catalog_add_foreign_keys(t_data, data_str_arr, count);
 
+    printf("freeing up the 2d array\n");
     free_2d_char(data_str_arr, count);
 
+    printf("done with catalog parsing\n");
     return t_data;
 
 //    sv_ht_add(table_ht, table_name, t_data);
@@ -449,6 +462,8 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_ar
     char* key_word;
     enum db_type type;
 
+    int attr_index = 0;
+
     for(int i = 0; i < data_str_size; i++){
 
         char* kw_end_ptr = strchr(data_str_arr[i], '(');
@@ -464,7 +479,8 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_ar
             if(type == UNKNOWN) {
                 //if the keyword is UNKNOWN/invalid then it has to be a attribute
                 struct attr_data* a_data = get_attr(data_str_arr[i]);
-                a_data->index = 0;
+                a_data->index = attr_index;
+                attr_index += 1;
                 sv_ht_add(attr_ht, a_data->attr_name, a_data);
 //                printf("create attr_data\n");
 
@@ -472,6 +488,8 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_ar
         }else{
             //if there are no parentheses then it is an attribute
             struct attr_data* a_data = get_attr(data_str_arr[i]);
+            a_data->index = attr_index;
+            attr_index += 1;
 //            printf("create attr_data\n");
 //            struct attr_data* a_data = get_attr(str_arr[i]);
             sv_ht_add(attr_ht, a_data->attr_name, a_data);

@@ -81,7 +81,7 @@ int get_create_stmt_parts(char* str){
     remove_leading_spaces(data_str);
     remove_ending_spaces(data_str);
 
-
+    printf("finished getting all the create parts\n");
 
     return 0;
 
@@ -121,7 +121,7 @@ int get_ddl_stmt_parts(char* stmt){
     ptr = ptr + 7;
     switch(type){
         case CREATE:
-//            printf("in get stmt parts\n");
+            printf("in get stmt parts create\n");
             result = get_create_stmt_parts(ptr);
             break;
         case DROP:
@@ -151,9 +151,13 @@ int execute_ddl_statement(){
 }
 
 int execute_create_table(){
+    printf("Executing create table\n");
+    printf("table=%s, data_str=>%s<\n", table_name, data_str);
     struct catalog_table_data* t_data = catalog_get_table_data_struct(table_name, data_str);
+    printf("Got the table structs\n");
     return sm_add_table(t_data);
 //    catalog_add_table(0, table_name, data_str);
+//    return 0;
 }
 
 int execute_drop_table(){
