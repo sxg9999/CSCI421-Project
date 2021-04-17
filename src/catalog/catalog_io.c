@@ -40,6 +40,8 @@ int read_catalog(char* file_path, struct hashtable** table_ht){
 
     printf("reading catalog completed\n");
 
+    return 0;
+
 }
 
 int write_catalog(char* file_path, struct hashtable* table_ht){

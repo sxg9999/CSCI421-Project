@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 
+struct table_data;
 /*
  * Used to store attribute values in the database.
  * A tuple in the database will be a 1d array of these unions.
@@ -167,12 +168,12 @@ int terminate_database();
 
 
 /**
- * Below are test functions
+ * Below are functions related to debugging and test
  */
 
-/**
- * prints all the tables and its records
+/** Returns the array of table meta datas that is stored in
+ * storagemanager
  */
-void storage_print_tables();
+struct table_data** storage_get_table_meta_datas();
 
 #endif

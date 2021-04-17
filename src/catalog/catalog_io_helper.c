@@ -30,7 +30,7 @@ int catalog_write_table(FILE* catalog_file, struct catalog_table_data* t_data){
     /* write the child tables*/
     catalog_write_childs(catalog_file, t_data->num_of_childs,  t_data->child_arr_size, t_data->childs);
 
-
+    return 0;
 }
 
 int catalog_write_attr_constr(FILE* catalog_file, int num_of_constr, struct attr_constraint** constr){
@@ -41,7 +41,7 @@ int catalog_write_attr_constr(FILE* catalog_file, int num_of_constr, struct attr
     for(int i = 0; i < num_of_constr; i++){
         enum db_type type = constr[i]->type;
         int type_int_val = (int)type;
-        char* type_str = type_to_str(type);
+//        char* type_str = type_to_str(type);
 
         /* write out the int val of the data type */
         fwrite(&(type_int_val), sizeof(int), 1, catalog_file);
@@ -50,6 +50,7 @@ int catalog_write_attr_constr(FILE* catalog_file, int num_of_constr, struct attr
 //
 //        }
     }
+    return 0;
 }
 
 
@@ -84,6 +85,8 @@ int catalog_write_attr(FILE* catalog_file, struct hashtable* attr_ht){
 //
         catalog_write_attr_constr(catalog_file, a_data->num_of_constr, a_data->constr);
     }
+
+    return 0;
 }
 
 
@@ -143,6 +146,7 @@ int catalog_write_foreign_keys(FILE* catalog_file, int num_of_keys, int f_key_ar
             fwrite(p_key_attr_j, sizeof(char), strlen(p_key_attr_j), catalog_file);
         }
     }
+    return 0;
 }
 
 int catalog_write_childs(FILE* catalog_file, int num_of_childs, int child_arr_size, char** childs){
@@ -156,7 +160,7 @@ int catalog_write_childs(FILE* catalog_file, int num_of_childs, int child_arr_si
 
     for(int i = 0; i < num_of_childs; i++){
         int c_name_len = strlen(childs[i]);
-        fwrite(c_name_len, sizeof(int), 1, catalog_file);
+        fwrite(&c_name_len, sizeof(int), 1, catalog_file);
         fwrite(childs[i], sizeof(char), c_name_len, catalog_file);
     }
     return 0;
@@ -209,7 +213,7 @@ int catalog_read_table(FILE* catalog_file, struct catalog_table_data** t_data){
     (*t_data)->child_arr_size = child_arr_size;
     (*t_data)->childs = childs;
 
-    return 0;
+    return result;
 
 }
 
@@ -394,11 +398,11 @@ int catalog_read_childs(FILE* catalog_file, int* num_of_childs, int* child_arr_s
 
     *childs = malloc(sizeof(char*) * (*child_arr_size));
 
-    if(*num_of_childs == 0){
+    if((int)(*num_of_childs) == 0){
         return 0;
     }
 
-    for(int i = 0; i < num_of_childs; i++){
+    for(int i = 0; i < (int)(*num_of_childs); i++){
         int c_name_len;
         fread(&c_name_len, sizeof(int), 1, catalog_file);
         (*childs)[i] = malloc(c_name_len + 1);

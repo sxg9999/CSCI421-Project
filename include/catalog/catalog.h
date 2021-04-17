@@ -9,7 +9,7 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
-
+#include "catalog_structs.h"
 
 
 int init_catalog(char* db_path);
@@ -17,7 +17,7 @@ int init_catalog(char* db_path);
 
 int catalog_get_next_table_num();
 
-int catalog_add_table(int table_num, char* table_name, char* data_str);
+int catalog_add_table(struct catalog_table_data* t_data);
 
 /**
  * gets the table number of the table with the table_name
@@ -41,10 +41,30 @@ int catalog_remove_table(char* table_name);
 
 int catalog_contains(char* table_name);
 
+/**
+ * Gets the data/attr types of the attributes in the table
+ *
+ * @param t_data : a struct that contains the table data
+ * @param data_types : the data types of the attributes in the table
+ * @return the size of the array that stores the data types (data_types)
+ */
+int catalog_get_data_types(struct catalog_table_data* t_data, int** data_types);
+
+/**
+ * Gets the primary key indices of the table
+ *
+ * @param t_data : a struct that contains the table data
+ * @param p_key_indices : an array of attribute indices that make up the primary key
+ * @return the size of the array that stores the primary key indices
+ */
+int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_indices);
+
+
+struct hashtable* catalog_get_ht();
 
 void catalog_close();
 
-int write_catalog();
+//int write_catalog();
 
 void catalog_print_tables();
 

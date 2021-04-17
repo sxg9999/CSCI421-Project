@@ -8,10 +8,12 @@
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/database_util/db_exec_ddl.h"
 #include "../../include/catalog/catalog.h"
+#include "../../include/catalog/catalog_parsing.h"
+#include "../../include/storage_mediator/storage_mediator.h"
 
 
 static enum db_type type;
-static enum db_type sub_type;
+//static enum db_type sub_type;
 static char* keyword_str;
 static char* table_name;
 static char* data_str;
@@ -30,6 +32,8 @@ int init_ddl_exec_ddl(){
 
     data_str = malloc(data_str_len);
     data_str[0] = 0;
+
+    return 0;
 }
 
 
@@ -52,7 +56,7 @@ int get_create_stmt_parts(char* str){
     start_index = end_index + 2;        //ptr + start_index = "<attr> <attr> <others> );"
     end_index = strlen(str) - 2;   //the last char is ')' or a ' ';
 
-    if(data_str_len < (strlen(ptr) + 1)){
+    if(data_str_len < (int)(strlen(ptr) + 1)){
         data_str_len = strlen(ptr) + 1;
         data_str = realloc(data_str, data_str_len);
 
@@ -77,7 +81,7 @@ int get_create_stmt_parts(char* str){
     remove_leading_spaces(data_str);
     remove_ending_spaces(data_str);
 
-
+    printf("finished getting all the create parts\n");
 
     return 0;
 
@@ -87,7 +91,7 @@ int get_drop_stmt_parts(char* str){
     int start_index = 0;
     int end_index = strlen(str) - 2;                            //"<table_name>" (without the semicolon)
 
-    if(t_name_len < strlen(str) + 1){
+    if(t_name_len < (int)(strlen(str) + 1)){
         t_name_len = strlen(str) +  1;
         table_name = realloc(table_name, t_name_len);
     }
@@ -117,7 +121,7 @@ int get_ddl_stmt_parts(char* stmt){
     ptr = ptr + 7;
     switch(type){
         case CREATE:
-//            printf("in get stmt parts\n");
+            printf("in get stmt parts create\n");
             result = get_create_stmt_parts(ptr);
             break;
         case DROP:
@@ -139,15 +143,26 @@ int execute_ddl_statement(){
             break;
         case DROP:
             execute_drop_table();
+            break;
+        default:
+            break;
     }
+    return 0;
 }
 
 int execute_create_table(){
-    catalog_add_table(0, table_name, data_str);
+    printf("Executing create table\n");
+    printf("table=%s, data_str=>%s<\n", table_name, data_str);
+    struct catalog_table_data* t_data = catalog_get_table_data_struct(table_name, data_str);
+    printf("Got the table structs\n");
+    return sm_add_table(t_data);
+//    catalog_add_table(0, table_name, data_str);
+//    return 0;
 }
 
 int execute_drop_table(){
-    catalog_remove_table(table_name);
+    return sm_drop_table(table_name);
+
 }
 
 int execute_alter_table(enum db_type alter_type, char* data_str);

@@ -7,12 +7,13 @@
 #ifndef DDL_PARSER_HELPER_H
 #define DDL_PARSER_HELPER_H
 
-enum statement_type {
-    ADD = 3,
-    DROP = 4,
-    ALTER = 5,
-    CREATE = 6,
-};
+#include "db_types.h"
+//enum statement_type {
+//    ADD = 3,
+//    DROP = 4,
+//    ALTER = 5,
+//    CREATE = 6,
+//};
 
 /*
   * This function handles the parsing of create table statments

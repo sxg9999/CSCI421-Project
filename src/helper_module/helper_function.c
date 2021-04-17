@@ -71,7 +71,7 @@ void sub_cpy(char** dest, char* src, int start_index, int end_index){
     }
 
     int src_len = end_index - start_index + 1;
-    int dest_len = strlen(*dest);
+//    int dest_len = strlen(*dest);
 
     (*dest)[0] = 0;
     strncpy(*dest, src+start_index, src_len);
