@@ -25,10 +25,10 @@ int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is
  */
 
 int parse_create_table_stmt( char* input_statement ) {
-    printf("Parsing Create STMT: '%s'\n", input_statement);
 
     char* statement = (char* )malloc( strlen( input_statement ) + 1);
     strcpy(statement, input_statement); 
+    printf("Parsing Create STMT: '%s'\n", statement);
     
     // skip "create table " part of the create stmt
     statement += strlen(CREATE_START) + 1 
@@ -47,6 +47,7 @@ int parse_create_table_stmt( char* input_statement ) {
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
     if ( null_check_str_create_stmt(table_name, input_statement) ) {
+        fprintf(stderr, "Invalid statement\n");
         return -1;
     }
     printf("Trying to create table with name: '%s'\n", table_name);
@@ -54,7 +55,7 @@ int parse_create_table_stmt( char* input_statement ) {
     // get all attributes
     int attr_success = get_attrs_from_stmt(statement, attributes, &attrCount);
     if ( attr_success == -1 ) {
-        fprintf("Failed to get attributes from create statement: '%s'\n", statement);
+        fprintf(stderr, "Failed to get attributes from create statement: '%s'\n", statement);
         return -1;
     }
 
@@ -93,7 +94,7 @@ int get_attrs_from_stmt(char* stmt, char** attributes, int* attrCount) {
         newAtrribute = strtok(NULL, ",");
         // check if there is any attributes
         if ( null_check_str_create_stmt(newAtrribute, stmt) ) {
-            fprintf(stderr, "Invalid token '%s' in stmt '%s'.\n");
+            fprintf(stderr, "Invalid token '%s' in stmt '%s'.\n", newAtrribute, stmt);
             return -1;
         }
         // check if last attribute
@@ -143,6 +144,10 @@ int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is
             printf("Attribute is a foreign constraint: '%s'\n", token);
             // check for key attribute names
             int valid_constraint_name = contraint_check(attr_names, token, name_count);
+            if ( valid_constraint_name == -1 ) {
+                fprintf(stderr, "Invalid constraint '%s'\n", token);
+                return -1;
+            }
             // check for 'references'
             token = strtok(NULL, " ");
             // printf("Token: '%s'\n", token);
@@ -251,7 +256,8 @@ int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is
                         return -1;
                     }
                 }
-                constraints_used[constraints_count] = strdup(token);
+                constraints_used[constraints_count] = (char*)malloc( strlen( token ) + 1 );
+                strcpy(constraints_used[constraints_count], token);
                 constraints_count += 1;
             }
         }
