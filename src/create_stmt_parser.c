@@ -16,6 +16,8 @@
 int contraint_check(char** attr_names, char* contraint_name, int name_count);
 int get_attrs_from_stmt(char* stmt, char** attributes, int* attr_count);
 int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is_first_attr);
+int attribute_check(char* currentAttr, char* token, char** attr_names, int name_count);
+
 
 
 
@@ -205,61 +207,10 @@ int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is
         }
     } 
     else { // for attributes
-        printf("Checking if '%s' is an attribute...\n", currentAttr);
-        attr_names[name_count] = (char*)malloc( strlen( token ) + 1);
-        strcpy(attr_names[name_count], token);
-        printf("Attribute name: '%s'\n", attr_names[name_count]);
-        
-        name_count += 1;
-        if (name_count%10 == 0) { 
-            // resize attr_name, add 10 slots
-            attr_names = realloc(attr_names, (name_count+10)* sizeof(int*));
-        }
-        
-        token = strtok(NULL, " "); // get type of attribute
-        for (int i = 0; token[i] != '\0'; i++) {
-            if ( isalpha(token[i]) ) {
-                token[i] = tolower(token[i]);
-            }
-        }
-        
-        // check if valid attribute type
-        printf("Checking if type attribute '%s' is valid...\n", token);
-        if ( !is_attr_type(token) ) {
-            fprintf(stderr, "%s: '%s'\n", 
-                "Invalid attribute definition. Attribute type is invalid", token);
+        int attribute_success = attribute_check(currentAttr, token, attr_names, name_count);
+        if (attribute_success == -1) {
+            fprintf( stderr, "Invalid attribute: '%s'\n", currentAttr);
             return -1;
-        } else {
-            printf("'%s' is a valid attribute type.", token);
-        }
-        // check for constraints on attribute
-        char* constraints_used[3];
-        int constraints_count = 0;
-        while ( (token = strtok(NULL, " ")) ) {
-            for (int i = 0; token[i] != '\0'; i++) {
-                if ( isalpha(token[i]) ) {
-                    token[i] = tolower(token[i]);
-                }
-            }
-            if (token[0] == ')') {
-                break;
-            }
-            if ( !is_attr_con(token) ) {
-                fprintf(stderr, "%s: '%s'\n", 
-                "Invalid attribute definition. Attribute constraint is invalid", token);
-                return -1;
-            } else {
-                for (int i = 0; i < constraints_count; i++ ) {
-                    if (strcmp(token, constraints_used[i]) == 0) {
-                        fprintf(stderr, "%s: '%s'\n", 
-                        "Invalid attribute definition. Attribute constraint already used", token);
-                        return -1;
-                    }
-                }
-                constraints_used[constraints_count] = (char*)malloc( strlen( token ) + 1 );
-                strcpy(constraints_used[constraints_count], token);
-                constraints_count += 1;
-            }
         }
     } 
     printf("\n");
@@ -267,8 +218,70 @@ int attr_form_check(char* currentAttr, char** attr_names, int name_count, int is
 }
 
 
+int attribute_check(char* currentAttr, char* token, char** attr_names, int name_count) {
+    printf("Checking if '%s' is an attribute...\n", currentAttr);
+    attr_names[name_count] = (char*)malloc( strlen( token ) + 1);
+    strcpy(attr_names[name_count], token);
+    printf("Attribute name: '%s'\n", attr_names[name_count]);
+    
+    name_count += 1;
+    if (name_count%10 == 0) { 
+        // resize attr_name, add 10 slots
+        attr_names = realloc(attr_names, (name_count+10)* sizeof(int*));
+    }
+    
+    token = strtok(NULL, " "); // get type of attribute
+    for (int i = 0; token[i] != '\0'; i++) {
+        if ( isalpha(token[i]) ) {
+            token[i] = tolower(token[i]);
+        }
+    }
+    
+    // check if valid attribute type
+    printf("Checking if attribute type '%s' is valid...\n", token);
+    if ( !is_attr_type(token) ) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "Invalid attribute definition. Attribute type is invalid", token);
+        return -1;
+    } else {
+        printf("'%s' is a valid attribute type.", token);
+    }
+    // check for constraints on attribute
+    char* constraints_used[3];
+    int constraints_count = 0;
+    while ( (token = strtok(NULL, " ")) ) {
+        for (int i = 0; token[i] != '\0'; i++) {
+            if ( isalpha(token[i]) ) {
+                token[i] = tolower(token[i]);
+            }
+        }
+        if (token[0] == ')') {
+            break;
+        }
+        if ( !is_attr_con(token) ) {
+            fprintf(stderr, "%s: '%s'\n", 
+            "Invalid attribute definition. Attribute constraint is invalid", token);
+            return -1;
+        } else {
+            for (int i = 0; i < constraints_count; i++ ) {
+                if (strcmp(token, constraints_used[i]) == 0) {
+                    fprintf(stderr, "%s: '%s'\n", 
+                    "Invalid attribute definition. Attribute constraint already used", token);
+                    return -1;
+                }
+            }
+            constraints_used[constraints_count] = (char*)malloc( strlen( token ) + 1 );
+            strcpy(constraints_used[constraints_count], token);
+            constraints_count += 1;
+        }
+    }
+
+    // success
+    return 0;
+}
+
 /**
- * 
+ * Check if a contraint is valid
  */
 int contraint_check(char** attr_names, char* contraint_name, int name_count) {
     while ( (contraint_name = strtok(NULL, " ")) ) {
