@@ -35,7 +35,6 @@ int parse_drop_table_stmt( char* input_statement ) {
         table_name[strlen(table_name)-1] = '\0';
     }
 
-    char lower_char;
     for(int i = 0; i < strlen(table_name); i++){
         if (isalpha(table_name[i]) ) {
             table_name[i] = tolower(table_name[i]);

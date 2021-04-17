@@ -28,44 +28,43 @@ int parse_ddl_statement( char* input_statement ) {
             "Invalid DDL statement, empty", input_statement);
         return -1;
     }
-    char* first_word = (char *)malloc(strlen(token));
-    char a;
+    char* first_word = (char *)malloc(strlen(token)+1);
+    strcpy(first_word, token);
     // make the token all lowercase
-    for (int i = 0; token[i] != '\0'; i++) {
-        if ( isalpha(token[i]) ) {
-            a = tolower(token[i]);
-            first_word[i] = a;
+    for (int i = 0; first_word[i] != '\0'; i++) {
+        if ( isalpha(first_word[i]) ) {
+            first_word[i] = tolower(first_word[i]);
         }
     }
     first_word[strlen(first_word)] = '\0';
-    // printf("First word lower: %s\n", token);
+    //printf("First word lower: '%s'\n", first_word);
 
 
     // check for statement type 
     char* check_type;
-    if (strlen(first_word) == DROP) {
+    if (strlen(first_word) == strlen(DROP_START)) {
         check_type = DROP_START;
         stmt_type = DROP;
-    } else if (strlen(first_word) == ALTER) {
+    } else if (strlen(first_word) == strlen(ALTER_START)) {
         check_type = ALTER_START;
         stmt_type = ALTER;
-    } else if (strlen(first_word) == CREATE) {
+    } else if (strlen(first_word) == strlen(CREATE_START)) {
         check_type = CREATE_START;
         stmt_type = CREATE;
     } else {
-        fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement, invalid/missing statement type", input_statement);
+        fprintf(stderr, "%s: '%s' in '%s'\n", 
+            "Invalid DDL statement, invalid/missing statement type", first_word, input_statement);
         return -1;
     }
     int valid_first = strncmp(first_word, check_type, strlen(first_word));
     if (valid_first != 0) {
-        fprintf(stderr, "%s: '%s'\n", 
-            "Invalid DDL statement, invalid/missing statement type", input_statement);
+        fprintf(stderr, "%s: '%s' in '%s'\n", 
+            "Invalid DDL statement, invalid/missing statement type", first_word, input_statement);
         return -1;
     }
-    printf("Valid statement type: '%s'\n", token);
+    printf("Valid statement type: '%s'\n", first_word);
 
-    // check for table second word
+    // check for 'table' as second word
     token = strtok(NULL, delimiter);
 
     if ( strlen(token) != strlen(TABLE)) {
