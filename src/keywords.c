@@ -26,10 +26,10 @@ int is_keyword(char* word) {
         for (int i = 0; i < KEYWORD_COUNT; i++) {
                 result = strncmp(KEYWORDS[i], word, strlen(KEYWORDS[i]) );
                 if (result == 0) {
-                        return 1;
+                        return 0;
                 }
         }
-        return 0;
+        return -1;
 }
 
 int is_constraint(char* word) {
@@ -37,10 +37,10 @@ int is_constraint(char* word) {
         for (int i = 0; i < CONSTRAINT_COUNT; i++) {
                 result = strncmp(CONSTRAINTS[i], word, strlen(CONSTRAINTS[i]));
                 if (result == 0) {
-                        return 1;
+                        return 0;
                 }
         }
-        return 0;
+        return -1;
 }
 
 int is_attr_con(char* word) {
@@ -48,10 +48,10 @@ int is_attr_con(char* word) {
         for (int i = 0; i < ATTR_CON_COUNT; i++) {
                 result = strncmp(ATTR_CON[i], word, strlen(ATTR_CON[i]));
                 if (result == 0) {
-                        return 1;
+                        return 0;
                 }
         }
-        return 0;
+        return -1;
 }
 
 int is_attr_type(char* word) {
@@ -60,9 +60,9 @@ int is_attr_type(char* word) {
                 result = strncmp(ATTR_TYPES[i], word, 
                         strlen(ATTR_TYPES[i]));
                 if (result == 0) {
-                        return 1;
+                        return 0;
                 }
         }
-        return 0;
+        return -1;
 }
 

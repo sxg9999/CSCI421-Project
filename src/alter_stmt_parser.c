@@ -35,7 +35,7 @@ int parse_alter_table_stmt( char* input_statement ) {
         table_name[i] = lower_char;
     }
     // Check if table name is not a keyword
-    if (is_keyword(table_name)) {
+    if (is_keyword(table_name) == -1) {
         fprintf(stderr, "%s: '%s'\n",
                 "Invalid table name; table name is a keyword", table_name);
         return -1;
@@ -56,7 +56,7 @@ int parse_alter_table_stmt( char* input_statement ) {
 
         char* attName = strtok(NULL, delimiter);
         //Check if attribute name is a keyword.
-        if (is_keyword(attName)) {
+        if (is_keyword(attName) == -1) {
             fprintf(stderr, "%s: '%s'\n",
                     "Invalid attribute name; attribute name is a keyword", attName);
             return -1;

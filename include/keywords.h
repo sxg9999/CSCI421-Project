@@ -30,7 +30,7 @@
 // TYPES
 #define INTEGER_TYPE "integer"
 #define DOUBLE_TYPE "double"
-#define BOOLEAN_TYPE "boolean"
+#define BOOLEAN_TYPE "bool"
 #define CHAR_TYPE "char"
 #define VARCHAR_TYPE "varchar"
 
@@ -38,18 +38,31 @@
 #define STMT_END_STR ";"
 #define STMT_END_CHAR ';'
 
-/*
+/**
  * Checks if a provided word is a keyword.
- * @param word - The string check is a keyword
- * @return 0 if `word` is not a keyword, 1 if `word` is a keyword 
+ * @param word - The string to check
+ * @return -1 if `word` is not a keyword, 0 if `word` is a keyword 
  */   
 int is_keyword(char* word);
 
-
+/**
+ * Checks if a provided word is a constraint keyword.
+ * @param word The string to check
+ * @return -1 if `word` is not a keyword, 0 if `word` is a keyword 
+ */ 
 int is_constraint(char* word);
 
+/**
+ * Checks if a provided word is a attribute constraint keyword.
+ * @param word - The string to check
+ * @return -1 if `word` is not a keyword, 0 if `word` is a keyword 
+ */ 
 int is_attr_con(char* word);
 
-
+/**
+ * Checks if a provided word is a attribute type keyword.
+ * @param word - The string check is a keyword
+ * @return -1 if `word` is not a keyword, 0 if `word` is a keyword 
+ */ 
 int is_attr_type(char* word);
 #endif

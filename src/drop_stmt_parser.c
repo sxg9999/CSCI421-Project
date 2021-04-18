@@ -35,14 +35,14 @@ int parse_drop_table_stmt( char* input_statement ) {
         table_name[strlen(table_name)-1] = '\0';
     }
 
-    for(int i = 0; i < strlen(table_name); i++){
+    for(unsigned i = 0; i < strlen(table_name); i++){
         if (isalpha(table_name[i]) ) {
             table_name[i] = tolower(table_name[i]);
         }
     }
 
     // check if table name is not a keyword
-    if (is_keyword(table_name)) {
+    if (is_keyword(table_name) == 0) {
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid table name; table name is a keyword", table_name);
         return -1;
