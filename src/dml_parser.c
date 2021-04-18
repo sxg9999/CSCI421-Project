@@ -8,6 +8,7 @@
 #include "../include/dml_parser.h"
 
 int parse_dml_statement( char* statement) {
+    printf("Parsing DML statement: '%s'\n", statement);
     return 0;
 }
 
