@@ -89,24 +89,52 @@ union ht_node_value* ht_get(struct hashtable* ht, char* key){
     return NULL;
 }
 
+int ht_list_index_of(struct hashtable* ht, char* key){
+    unsigned long long hash_code = hash_str(key);
+    int index = hash_compute_index(hash_code, ht->capacity);
+
+    if(ht->table[index]==NULL){
+        return -1;
+    }
+
+    struct ht_node* curr = ht->table[index];
+
+    while(curr!=NULL){
+        if(curr->hash_code == hash_code){
+            return curr->list_index;
+        }
+        curr = curr->next_node;
+    }
+
+    return -1;
+
+}
 
 union ht_node_value* ht_remove(struct hashtable* ht, char* key){
     unsigned long long hash_code = hash_str(key);
     int index = hash_compute_index(hash_code, ht->capacity);
     union ht_node_value* ret_val = NULL;
 
+//    int value_found = 1;    //1 for false and 0 for true;
 
     if(ht->table[index]!=NULL){
 //        printf("key is not null\n");
         struct ht_node* curr = ht->table[index];
         struct ht_node* prev = NULL;
 
-        if(curr->hash_code != hash_code){
-            curr = curr->next_node;
+        if(curr->hash_code == hash_code){
+            ret_val = curr->value;
+            ht->table[index] = curr->next_node;
+
+        }else if(curr->hash_code != hash_code){
             prev = curr;
+            curr = curr->next_node;
+
 
             while(curr!=NULL){
                 if(curr->hash_code == hash_code){
+                    ret_val = curr->value;
+                    prev->next_node = curr->next_node;
                     break;
                 }
                 prev = curr;
@@ -114,28 +142,36 @@ union ht_node_value* ht_remove(struct hashtable* ht, char* key){
             }
         }
 
-        if(prev == NULL){
-            ht->table[index] = curr->next_node;
+//        if(prev == NULL){
+//            ht->table[index] = curr->next_node;
+//
+//        }else{
+//            prev->next_node = curr->next_node;
+//        }
 
-        }else{
-            prev->next_node = curr->next_node;
+        if(ret_val != NULL){
+            //remove the node from node_list
+            int removed_index = curr->list_index;
+            int last_index = ht->size - 1;
+
+            if(removed_index != last_index){
+                struct ht_node* last_node = ht->node_list[last_index];
+                last_node->list_index = removed_index;
+                ht->node_list[removed_index] = last_node;
+                ht->node_list[last_index] = NULL;
+            }else if(removed_index == last_index){
+                ht->node_list[removed_index] = NULL;
+            }
+
+
+            free(curr->key);
+            free(curr);
+
+
+            ht->size--;
         }
 
-        ret_val = curr->value;
 
-
-        //remove the node from node_list
-        int removed_index = curr->list_index;
-        int last_index = ht->size - 1;
-        struct ht_node* last_node = ht->node_list[last_index];
-        last_node->list_index = removed_index;
-        ht->node_list[removed_index] = last_node;
-        ht->node_list[last_index] = NULL;
-        free(curr->key);
-        free(curr);
-
-
-        ht->size--;
     }
     return ret_val;
 }

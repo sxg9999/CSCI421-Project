@@ -38,6 +38,7 @@ int init_ddl_exec_ddl(){
 
 
 int get_create_stmt_parts(char* str){
+    char func_str[] = "(db_exec_ddl.c/get_create_stmt_parts)";
     int start_index = 0;
     int end_index = 0;
 
@@ -65,6 +66,9 @@ int get_create_stmt_parts(char* str){
     data_str[0] = 0;
     sub_cpy(&data_str, str, start_index, end_index);
 
+//    printf("%s %s",func_str, "Printing data_str\n");
+//    printf("...data_str = \"%s\"\n", data_str);
+
 
     start_index = 0;
     end_index = strlen(data_str) - 1;
@@ -81,7 +85,7 @@ int get_create_stmt_parts(char* str){
     remove_leading_spaces(data_str);
     remove_ending_spaces(data_str);
 
-    printf("finished getting all the create parts\n");
+//    printf("finished getting all the create parts\n");
 
     return 0;
 
@@ -100,7 +104,9 @@ int get_drop_stmt_parts(char* str){
     sub_cpy(&table_name, str, start_index, end_index);
     remove_ending_spaces(table_name);
 
+    printf("---------------------------------------------------\n");
     printf("(drop table) table name is : >%s<\n", table_name);
+
     return 0;
 }
 
@@ -121,7 +127,7 @@ int get_ddl_stmt_parts(char* stmt){
     ptr = ptr + 7;
     switch(type){
         case CREATE:
-            printf("in get stmt parts create\n");
+//            printf("in get stmt parts create\n");
             result = get_create_stmt_parts(ptr);
             break;
         case DROP:
@@ -137,27 +143,35 @@ int get_ddl_stmt_parts(char* stmt){
 }
 
 int execute_ddl_statement(){
+    int err;
     switch(type){
         case CREATE:
-            execute_create_table();
+            err = execute_create_table();
             break;
         case DROP:
-            execute_drop_table();
+            err = execute_drop_table();
             break;
         default:
             break;
     }
-    return 0;
+    return err;
 }
 
 int execute_create_table(){
-    printf("Executing create table\n");
-    printf("table=%s, data_str=>%s<\n", table_name, data_str);
+    char func_str[] = "(db_exec_ddl.c/execute_create_table)";
+//    printf("Executing create table\n");
+//    printf("table=%s, data_str=>%s<\n", table_name, data_str);
     struct catalog_table_data* t_data = catalog_get_table_data_struct(table_name, data_str);
-    printf("Got the table structs\n");
+//    printf("Got the table structs\n");
+
+    if(t_data == NULL){
+        printf(stderr, "(db_exec_ddl.c/execute_create_table) %s\n", "Table data struct is NULL.\n");
+        return -1;
+    }else{
+        printf("%s %s\n",func_str, "Not NULL");
+    }
     return sm_add_table(t_data);
-//    catalog_add_table(0, table_name, data_str);
-//    return 0;
+
 }
 
 int execute_drop_table(){

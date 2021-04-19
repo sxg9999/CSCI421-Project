@@ -278,6 +278,7 @@ int catalog_read_attr(FILE* catalog_file, struct hashtable** attr_ht){
         int a_name_len;
         fread(&a_name_len, sizeof(int), 1, catalog_file);
         char* a_name = malloc(a_name_len + 1);
+        a_name[0] = 0;
         fread(a_name, sizeof(char), a_name_len, catalog_file);
         a_name[a_name_len] = 0;
         a_data->attr_name = a_name;
@@ -372,7 +373,9 @@ int catalog_read_foreign_keys(FILE* catalog_file, int* num_of_keys, int* f_key_a
             fread(&p_key_attr_j_len, sizeof(int), 1, catalog_file);
 
             char* f_key_attr_j = malloc(f_key_attr_j_len + 1);
+            f_key_attr_j[0] = 0;
             char* p_key_attr_j = malloc(p_key_attr_j_len + 1);
+            p_key_attr_j[0] = 0;
 
             fread(f_key_attr_j, sizeof(char), f_key_attr_j_len, catalog_file);
             f_key_attr_j[f_key_attr_j_len] = 0;
@@ -405,8 +408,11 @@ int catalog_read_childs(FILE* catalog_file, int* num_of_childs, int* child_arr_s
     for(int i = 0; i < (int)(*num_of_childs); i++){
         int c_name_len;
         fread(&c_name_len, sizeof(int), 1, catalog_file);
-        (*childs)[i] = malloc(c_name_len + 1);
-        fread((*childs)[i], sizeof(char), c_name_len, catalog_file);
+        char* child_table_name = malloc(c_name_len + 1);
+        child_table_name[0] = 0;
+        fread(child_table_name, sizeof(char), c_name_len, catalog_file);
+        child_table_name[c_name_len] = 0;
+        (*childs)[i] = child_table_name;
     }
 
     return 0;

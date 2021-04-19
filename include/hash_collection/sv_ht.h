@@ -24,6 +24,7 @@ int sv_ht_add(struct hashtable* ht, char* key, void* value);
  */
 void* sv_ht_get(struct hashtable* ht, char* key);
 
+
 /**
  * remove the key and its value from the hash table
  * @param ht

@@ -392,7 +392,7 @@ int remove_record( int table_id, union record_item * key_values ){
 					for(int k = i; k < t_data->num_pages; k++){
 						t_data->pages[k] = t_data->pages[k+1];
 					}
-					t_data->pages = realloc(t_data->pages, t_data->num_pages);
+					t_data->pages = realloc(t_data->pages,sizeof(struct page_data*) * t_data->num_pages);
 					t_data->num_pages--;
 				}
 				else{
@@ -432,6 +432,7 @@ int add_table( int * data_types, int * key_indices,
 }
 
 int drop_table( int table_id ){
+    char func_str[] = "(storagemanager.c/drop_table)";
 	if(table_id >= num_tables){
         fprintf(stderr, "Invalid table number: %d\n", table_id);
         return -1;
@@ -448,9 +449,18 @@ int drop_table( int table_id ){
 	}
 	//modified
 	//old: table_data[table_id] = NULL;
-	table_data[table_id] = table_data[num_tables-1];
-	table_data[num_tables-1]=NULL;
+	if(table_id == num_tables - 1){
+	    table_data[table_id] = NULL;
+	}else{
+        table_data[table_id] = table_data[num_tables-1];
+        table_data[table_id]->table_num = table_id;
+        table_data[num_tables-1]=NULL;
+	}
+
 	num_tables--;
+
+    printf("%s %s %d\n", func_str, "Dropped table_id:", table_id);
+
 	return 0;
 }
 
@@ -1003,11 +1013,23 @@ static int read_metadata(){
 	return 0; 
  }
 
-/**
- * prints all the tables content
- */
+
 
 struct table_data** storage_get_table_meta_datas(){
     return table_data;
 }
+
+int storage_get_num_of_tables(){
+    return num_tables;
+}
+
+void storage_print_t_datas(){
+    char func_str[] = "(storagemanager.c/storage_print_t_datas)";
+    printf("%s %s\n", func_str, "Printing storagemanager's table metadata's content");
+
+    for(int i = 0; i < num_tables; i++){
+        printf("...Table: %d, num_arr = %d\n", table_data[i]->table_num, table_data[i]->num_attr);
+    }
+}
+
 	

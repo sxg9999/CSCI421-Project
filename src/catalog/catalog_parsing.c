@@ -16,6 +16,8 @@
 
 
 struct catalog_table_data* catalog_get_table_data_struct(char* table_name, char* data_str){
+
+    char func_str[] = "(catalog_parsing.c/catalog_get_table_data_struct)";
 //    int table_exist = sv_ht_contains(table_ht, table_name);
 //    if(table_exist){
 //        fprintf(stderr, "(catalog.c/catalog_add_table) Table already exists !!!\n");
@@ -28,46 +30,45 @@ struct catalog_table_data* catalog_get_table_data_struct(char* table_name, char*
     t_data->table_num = table_ht->size;
 
 
-
     int table_name_len = strlen(table_name);
     t_data->table_name = malloc(table_name_len + 1);
     strncpy(t_data->table_name, table_name, table_name_len + 1);
 
 
-
     t_data->num_of_childs = 0;
     t_data->child_arr_size = 12;
-
     t_data->childs = malloc(sizeof(char*) * t_data->child_arr_size);
-
 
 
 
     char** data_str_arr;
     int count = split(&data_str_arr, data_str, ',');
+    printf("%s %s %d\n", func_str, "Number of components(attributes, primary key, etc) =", count);
 
-    printf("getting attributes\n");
+    printf("%s %s\n", func_str, "Printing statement components(attributes, primary key, etc)");
+    for(int i = 0; i < count; i++){
+        printf("...component %d = %s\n", i, data_str_arr[i]);
+    }
+
+//    printf("getting attributes\n");
     /*Add the attributes*/
     catalog_add_attributes(t_data, data_str_arr, count);
+    printf("%s %s\n", func_str, "Printing ");
 
-    printf("getting primary keys\n");
+
+//    printf("getting primary keys\n");
     /*Add the primary key*/
     catalog_add_primary_key(t_data, data_str_arr, count);
 
-    printf("getting foreign keys\n");
+//    printf("getting foreign keys\n");
     /*Add the foreign keys*/
-    catalog_add_foreign_keys(t_data, data_str_arr, count);
+//    catalog_add_foreign_keys(t_data, data_str_arr, count);
 
-    printf("freeing up the 2d array\n");
+//    printf("freeing up the 2d array\n");
     free_2d_char(data_str_arr, count);
 
-    printf("done with catalog parsing\n");
+//    printf("done with catalog parsing\n");
     return t_data;
-
-//    sv_ht_add(table_ht, table_name, t_data);
-
-//    printf("finished adding table %s\n", table_name);
-//    catalog_add_table_to_storage_manager(t_data);
 
 }
 
@@ -431,7 +432,7 @@ struct attr_data* get_attr(char* attr_data_str){
     struct attr_constraint** constr;
 
     char* ptr;
-    printf("attr_data_str is : %s\n", attr_data_str);
+//    printf("attr_data_str is : %s\n", attr_data_str);
     ptr = get_attr_name(attr_data_str, &attr_name);       //returned ptr should point to the begining of the data type
     ptr = get_attr_type_n_size(ptr, &type, &attr_size);   //can return NULL or a pointer to the head of the constraints
 
@@ -457,15 +458,17 @@ struct attr_data* get_attr(char* attr_data_str){
 }
 
 int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_arr, int data_str_size){
+    char func_str[] = "(catalog_parsing.c/catalog_add_attribute)";
+
     struct hashtable* attr_ht = ht_create(12, 0.75);
 
     char* key_word;
     enum db_type type;
-
     int attr_index = 0;
 
-    for(int i = 0; i < data_str_size; i++){
+    printf("%s %s\n", func_str, "Adding attributes");
 
+    for(int i = 0; i < data_str_size; i++){
         char* kw_end_ptr = strchr(data_str_arr[i], '(');
 
         if(kw_end_ptr != NULL){
@@ -479,6 +482,8 @@ int catalog_add_attributes(struct catalog_table_data* t_data, char** data_str_ar
             if(type == UNKNOWN) {
                 //if the keyword is UNKNOWN/invalid then it has to be a attribute
                 struct attr_data* a_data = get_attr(data_str_arr[i]);
+                printf("%s %d %s \"%s\" \n", "...attr", attr_index, "=", a_data->attr_name);
+
                 a_data->index = attr_index;
                 attr_index += 1;
                 sv_ht_add(attr_ht, a_data->attr_name, a_data);
@@ -585,9 +590,12 @@ int catalog_add_primary_key(struct catalog_table_data* t_data, char** data_str_a
  * @return
  */
 int compare_attr_data(struct attr_data* a_data_1, struct attr_data* a_data_2){
-    if(a_data_1->type != a_data_2->type){
-        return 0;
-    }
+
+//    if(a_data_1->type != a_data_2->type){
+//
+//        return 0;
+//    }
+//    printf("here two\n");
     return 1;
 }
 
@@ -595,15 +603,18 @@ int compare_attr_data(struct attr_data* a_data_1, struct attr_data* a_data_2){
 int check_if_attr_matches(int count, struct hashtable* attr_ht, struct hashtable* ref_attr_ht,
                           char** foreign_key_attrs, char** ref_table_attrs){
 
+//    printf("count is : %d\n", count);
     for(int i = 0; i < count; i++){
         struct attr_data* a_data_1 = sv_ht_get(attr_ht, foreign_key_attrs[i]);
         struct attr_data* a_data_2 = sv_ht_get(ref_attr_ht, ref_table_attrs[i]);
 
+
         if(compare_attr_data(a_data_1, a_data_2) == 0){
-            fprintf(stderr, "(catalog.c/get_foreign_key) a_data_1=%s, a_data_2=%s does not match!!!\n", a_data_1->attr_name, a_data_2->attr_name);
+            fprintf(stderr, "(catalog_parsing.c/get_foreign_key) a_data_1=%s, a_data_2=%s does not match!!!\n", a_data_1->attr_name, a_data_2->attr_name);
             return 0;
         }
     }
+
 
     return 1;
 }
@@ -651,11 +662,13 @@ struct foreign_key_data* get_foreign_key(int num_of_f_key_attr, int num_of_ref_a
         return NULL;
     }
 
+    printf("foreign key len = %d, ref table p_key_len = %d\n", num_of_f_key_attr, num_of_ref_attr);
     if(num_of_ref_attr != num_of_f_key_attr){
         fprintf(stderr, "(catalog.c/get_foreign_key) len of foreign key attr does not match len of ref attrs\n");
         *result = -1;
         return NULL;
     }
+
 
     struct catalog_table_data* ref_table = sv_ht_get(table_ht, ref_table_name);
     struct hashtable* ref_table_attr_ht = ref_table->attr_ht;
@@ -664,6 +677,7 @@ struct foreign_key_data* get_foreign_key(int num_of_f_key_attr, int num_of_ref_a
 /* check if f_key_attr match the corresponding ref attr*/
     int attr_match = check_if_attr_matches(num_of_f_key_attr, table_attr_ht, ref_table_attr_ht,
                                            foreign_key_attrs, ref_table_attrs);
+
 
     if(attr_match == 0){
         *result = -1;
@@ -675,6 +689,8 @@ struct foreign_key_data* get_foreign_key(int num_of_f_key_attr, int num_of_ref_a
     *result = 1;
     struct foreign_key_data* f_key = create_foreign_key(num_of_f_key_attr, ref_table_name,
                                                         foreign_key_attrs, ref_table_attrs);
+
+
 
     return f_key;
 
@@ -713,6 +729,9 @@ char* get_foreign_key_attrs(char* data_str, char*** foreign_key_attrs, int* num_
 
     *num_of_f_key_attr = split(&(*foreign_key_attrs), foreign_key_attr_str, ' ');
 
+    printf("The foreign key attr string is >%s<\n", foreign_key_attr_str);
+    printf("Num of f_key_attr is : %d", *num_of_f_key_attr);
+    printf("Last attr is : >%s<\n", (*foreign_key_attrs)[(*num_of_f_key_attr) - 1]);
 
     return ptr + 2;  //ptr + 2 points to "references <r_name>( <r_attr> <r_attr> ... <r_attr>)
 }
@@ -782,6 +801,7 @@ int table_add_child(char* parent_name, char* child_name){
 
     int current_index = parent_table->num_of_childs;
     parent_table->childs[current_index] = malloc(strlen(child_name) + 1);
+    printf("child name is : >%s<\n", child_name);
     strncpy(parent_table->childs[current_index], child_name, strlen(child_name) + 1);
 
     parent_table->num_of_childs += 1;

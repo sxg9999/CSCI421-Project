@@ -15,6 +15,8 @@
 #include "../include/helper_module/helper_function.h"
 #include "../include/database_util/database_helper.h"
 #include "../include/database_util/db_exec_ddl.h"
+#include "../include/example.h"
+#include "../include/storage_mediator/storage_mediator.h"
 
 
 
@@ -30,7 +32,7 @@ int execute_non_query(char * statement){
     enum db_type stmt_type = typeof_s(statement);
 
     if(stmt_type == DDL){
-        printf("statement is a ddl!!!\n");
+//        printf("statement is a ddl!!!\n");
         error = get_ddl_stmt_parts(statement);
 
         if(error != 0){
@@ -65,7 +67,8 @@ int execute(char* statement){
         //print out the result
 
     }else if(query_type == NON_QUERY){
-        printf("it is an non query statement\n");
+//        printf("it is an non query statement\n");
+//        printf("here\n");
         exec_result = execute_non_query(statement);
 
     }else{
@@ -105,8 +108,14 @@ int main(int argc, char* argv[] ) {
         }else if(strncmp(statement, "tables", 6) == 0){
             print_tables();
             continue;
+        }else if(strncmp(statement, "add department", 14) == 0){
+            sm_add_table(get_department_table_data());
+            continue;
+        }else if(strncmp(statement, "add student", 11) == 0){
+            sm_add_table(get_student_table_data());
+            continue;
         }
-        printf("%s\n", statement);
+//        printf("%s\n", statement);
 
         result = execute(statement);
 

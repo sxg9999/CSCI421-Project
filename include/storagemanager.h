@@ -176,4 +176,15 @@ int terminate_database();
  */
 struct table_data** storage_get_table_meta_datas();
 
+/**
+ * Returns the number of tables in the array of table meta datas
+ * @return
+ */
+int storage_get_num_of_tables();
+
+/**
+ * Prints the table_data content
+ */
+void storage_print_t_datas();
+
 #endif

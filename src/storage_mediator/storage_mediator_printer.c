@@ -33,13 +33,45 @@ void sm_print_catalog_attr_data(struct hashtable* attr_ht);
 void sm_print_catalog_constr(int constr_count, struct attr_constraint** constr);
 void sm_print_catalog_p_keys(int p_key_len, char** p_key_attrs);
 void sm_print_catalog_f_keys(int f_key_count, struct foreign_key_data** f_keys);
-void sm_print_storage_manager_t_data(struct table_data* t_data);
+int sm_print_storage_manager_t_data(struct table_data* t_data);
 void sm_print_storage_manager_attr_types(int num_attr, int* attr_types);
 void sm_print_key_attrs_indices(int num_key_attr, int* key_indices);
 
+/**
+ * Verifies that the catalog table meta data have a counter part in storagemanager
+ */
+int sm_verify_tables(struct hashtable* table_ht, struct table_data** storagemanager_t_data, int storagemanager_t_data_size){
+    char func_str[] = "(storage_mediator_printer.c/sm_verify_tables)";
+    printf("%s %s\n", func_str, "Verifying catalog's table metadata and storagemanager's metadata");
+    printf("%s %s %d\n", func_str, "Catalog's table metadata size:", table_ht->size);
+    printf("%s %s %d\n", func_str, "Storagemanager's table metadata size:", storagemanager_t_data_size);
+
+    if(table_ht->size != storagemanager_t_data_size){
+        printf("%s %s\n", func_str, "Catalog's table metadata size does not match Storagemanager's table metadata size");
+        return -1;
+    }
+
+    printf("%s %s\n", func_str, "Printing storagemanager's table metadata's content");
+
+    for(int i = 0; i < storagemanager_t_data_size; i++){
+        printf("...Table: %d, num_arr = %d\n", storagemanager_t_data[i]->table_num, storagemanager_t_data[i]->num_attr);
+    }
+
+    return 0;
+}
+
 void sm_print_all_table_meta_datas(){
+    char func_str[] = "(storage_mediator_printer.c/sm_print_all_table_meta_datas)";
     struct hashtable* table_ht = catalog_get_ht();                          //catalog's hashtable that contains table meta data
     struct table_data** table_data = storage_get_table_meta_datas();        //storage managers table meta datas
+    int storagemanager_t_data_size = storage_get_num_of_tables();
+
+    int verification_err = sm_verify_tables(table_ht, table_data, storagemanager_t_data_size);
+
+    if(verification_err == -1){
+        printf("%s %s\n", func_str, "Table metadata verification failed");
+        return;
+    }
 
     struct ht_node** val_nodes = table_ht->node_list;
     printf("\n");
@@ -53,12 +85,27 @@ void sm_print_all_table_meta_datas(){
         sm_print_catalog_p_keys(c_t_data->p_key_len, c_t_data->primary_key_attrs);
         sm_print_catalog_f_keys(c_t_data->num_of_f_key, c_t_data->f_keys);
         printf("\n");
-        sm_print_storage_manager_t_data(table_data[c_t_data->table_num]);
+        printf("Table num is : %d\n", c_t_data->table_num);
+
+        int error_code = sm_print_storage_manager_t_data(table_data[c_t_data->table_num]);
+
+        if(error_code == -1){
+            printf("%s %s \"%s\"\n", func_str, "Cannot print storage managers table data:", c_t_data->table_name);
+        }
+
+
         printf("\n\n");
     }
 }
 
-void sm_print_storage_manager_t_data(struct table_data* t_data){
+int sm_print_storage_manager_t_data(struct table_data* t_data){
+
+    if(t_data == NULL){
+        printf("(storage_mediator_printer.c/storage_manager_t_data) %s\n",
+                "t_data is NULL!!!");
+        return -1;
+    }
+
     printf("(storage manager)\n");
     printf("table_size = %d\n", t_data->table_size);
     printf("num_attr = %d\n", t_data->num_attr);
@@ -66,6 +113,7 @@ void sm_print_storage_manager_t_data(struct table_data* t_data){
     printf("num_key_attr = %d\n", t_data->num_key_attr);
     sm_print_key_attrs_indices(t_data->num_key_attr, t_data->key_indices);
 
+    return 0;
 }
 
 void sm_print_storage_manager_attr_types(int num_attr, int* attr_types){
@@ -101,6 +149,9 @@ void sm_print_table_childs(int num_of_childs, char** childs){
 }
 
 void sm_print_catalog_attr_data(struct hashtable* attr_ht){
+
+    sv_ht_print(attr_ht);
+
     int num_of_attrs = attr_ht->size;
     struct ht_node** val_nodes = attr_ht->node_list;
     printf("attributes(%d):\n", num_of_attrs);
@@ -115,8 +166,8 @@ void sm_print_catalog_attr_data(struct hashtable* attr_ht){
             printf("- %s %s(%d) ", a_data->attr_name, type_str, a_data->attr_size);
         }
 
-        sm_print_catalog_constr(a_data->num_of_constr, a_data->constr);
-
+//        sm_print_catalog_constr(a_data->num_of_constr, a_data->constr);
+        printf("\n");
     }
 }
 
@@ -127,7 +178,7 @@ void sm_print_catalog_constr(int constr_count, struct attr_constraint** constr){
 
         printf("%s, ", constr_type_str);
     }
-    printf("\n");
+
 }
 
 void sm_print_catalog_p_keys(int p_key_len, char** p_key_attrs){
@@ -153,13 +204,13 @@ void sm_print_catalog_f_keys(int f_key_count, struct foreign_key_data** f_keys){
             struct ht_node** f_key_attrs = f_keys_mapping->node_list;
 
 
-            printf("- (foreign_key_%d) ref_table=%s", i, referenced_table_name);
+            printf("- (foreign_key_%d) ref_table=%s : ( ", i, referenced_table_name);
 
             for(int j = 0; j < num_of_mapping; j++){
-                printf(", %s=%s", f_key_attrs[i]->key, (char*)(f_key_attrs[i]->value->v_ptr));
+                printf("%s=%s, ", f_key_attrs[j]->key, (char*)(f_key_attrs[j]->value->v_ptr));
             }
 
-            printf("\n");
+            printf(" )\n");
 
         }
     }

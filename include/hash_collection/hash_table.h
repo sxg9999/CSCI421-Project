@@ -13,6 +13,14 @@ union ht_node_value* ht_get(struct hashtable* ht, char* key);
 
 union ht_node_value* ht_remove(struct hashtable* ht, char* key);
 
+/**
+ * Return the index of the node in the node_list
+ * @param ht : the hashtable
+ * @param key : the key
+ * @return index of the node in the node_list or -1 for no such key
+ */
+int ht_list_index_of(struct hashtable* ht, char* key);
+
 int ht_resize(struct hashtable* ht);
 
 /**
