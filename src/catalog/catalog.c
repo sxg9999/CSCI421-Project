@@ -274,6 +274,110 @@ int catalog_remove_table_ref(char* parent_table_name){
 
 }
 
+int catalog_table_drop_child(char* parent_table_name, char* child_table_name){
+    char func_loc_str[] = "(catalog.c/catalog_table_drop_child)";
+
+    struct catalog_table_data* parent_table = sv_ht_get(table_ht, parent_table_name);
+    if(parent_table_name == NULL){
+        printf("%s %s \"%s\"\n", func_loc_str, "Unexpected Error: Cannot get parent table",
+               parent_table_name);
+        printf("%s %s\n", func_loc_str, "Exiting database");
+        exit(0);
+    }
+    if(parent_table->num_of_childs == 0){
+        printf("%s %s \"%s\"\n", func_loc_str, "Unexpected Error: No child exist for parent table",
+               parent_table_name);
+        printf("%s %s\n", func_loc_str, "Exiting database");
+        exit(0);
+    }else if(parent_table->num_of_childs > 0){
+        if(parent_table->childs == NULL){
+            printf("%s %s \"%s\" %s\n", func_loc_str,
+                   "Unexpected Error: Expect parent table",
+                   parent_table_name, "to have a child but the child array is NULL");
+            printf("%s %s\n", func_loc_str, "Exiting database");
+            exit(0);
+        }
+    }
+
+
+    char** child_arr = parent_table->childs;
+
+    printf("%s %s \"%s\" \n", func_loc_str, "Finding the index of the child table",
+           child_table_name);
+
+    int index_of_child = -1;
+    for(int i = 0; i < parent_table->num_of_childs; i++){
+        if(strncmp(child_arr[i], child_table_name, strlen(child_table_name)) == 0){
+            index_of_child = i;
+            break;
+        }
+    }
+
+    if(index_of_child == -1){
+        printf("%s %s \"%s\" \n", func_loc_str, "Index not found for the child table",
+               child_table_name);
+        printf("%s %s\n", func_loc_str, "Exiting database");
+        exit(0);
+    }
+
+    printf("%s %s \"%s\" \n", func_loc_str, "Found the index of the child table",
+           child_table_name);
+
+    printf("%s %s \"%s\" %s \"%s\"\n", func_loc_str, "Dropping child table",
+           child_table_name, "from parent table", parent_table_name);
+
+    if( (parent_table->num_of_childs == 1) || (parent_table->num_of_childs == parent_table->child_arr_size)){
+        free(child_arr[index_of_child]);
+        child_arr[index_of_child] = NULL;
+    }else{
+        free(child_arr[index_of_child]);
+        int last_child_index = parent_table->child_arr_size - 1;
+        child_arr[index_of_child] = child_arr[last_child_index];
+        child_arr[last_child_index] = NULL;
+    }
+    parent_table->num_of_childs -= 1;
+    printf("%s %s \"%s\" %s \"%s\"\n", func_loc_str, "Successfully dropped child table",
+           child_table_name, "from parent table", parent_table_name);
+
+    return 0;
+
+}
+
+int catalog_rm_table_from_child_list(char* table_name){
+    char func_loc_str[] = "(catalog.c/catalog_rm_table_from_child_list)";
+
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+
+    if(t_data->num_of_f_key == 0){
+        printf("%s %s \"%s\" %s\n", func_loc_str, "Table", t_data->table_name,
+               "does not have any foreign keys. No child dropped\n");
+        return 0;
+    }else if(t_data->num_of_f_key > 0){
+        if(t_data->f_keys == NULL){
+            printf("%s %s \"%s\" %s\n", func_loc_str, "Unexpected error: Table", t_data->table_name,
+                   "expected to have foreign keys but the foreign key array is NULL\n");
+            printf("%s %s\n", func_loc_str, "Exiting database");
+            exit(0);
+        }else{
+            printf("%s %s \"%s\" %s\n", func_loc_str, "Dropping child table",
+                   t_data->table_name, "in all its parent table");
+            struct foreign_key_data** f_key_arr = t_data->f_keys;
+            for(int i = 0; i < t_data->num_of_f_key; i++){
+                catalog_table_drop_child(f_key_arr[i]->parent_table_name, t_data->table_name);
+            }
+            printf("%s %s \"%s\" %s\n", func_loc_str, "Successfully dropped child table",
+                   t_data->table_name, "from all its parent table");
+        }
+
+        return 0;
+    }
+
+    return -1;
+
+
+//    printf("%s ")
+}
+
 int catalog_remove_table(char* table_name){
     char func_str[] = "(catalog.c/catalog_remove_table)";
 
@@ -285,11 +389,20 @@ int catalog_remove_table(char* table_name){
     }
     printf("%s %s \"%s\"\n", func_str, "Found table", table_name);
 
+    int child_drop_err = catalog_rm_table_from_child_list(table_name);
+    if(child_drop_err == -1){
+        printf("%s %s \"%s\" %s\n", func_str, "Attempted to drop child table",
+               table_name, "but failed");
+        printf("%s %s\n", func_str, "Exiting database");
+        exit(0);
+    }
+
     int ref_removal_err = catalog_remove_table_ref(table_name);
     if(ref_removal_err == -1){
         printf("%s %s \"%s\"\n", func_str, "Cannot remove table", table_name);
         return -1;
     }
+
 
     printf("%s %s \"%s\"\n", func_str, "Removing table", table_name);
     int list_index = ht_list_index_of(table_ht, table_name);
@@ -299,8 +412,6 @@ int catalog_remove_table(char* table_name){
         printf("%s %s \"%s\" %s %d\n", func_str, "List index for table", table_name,
                "is:", list_index);
     }
-
-
 
 
     if((table_ht->size == 1) || (list_index == (table_ht->size) - 1)){
