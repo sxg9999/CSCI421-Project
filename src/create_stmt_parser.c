@@ -355,14 +355,14 @@ int attribute_constraint_check(char* token, char* attribute, struct attr_data* n
                 sizeof(struct attr_constraint*) * MAX_CONSTRAINT_COUNT);
 
     while ( (token = strtok(NULL, " ")) ) {
+        if (token[0] == ')') { // end of create statement
+            break;
+        }
         printf("Checking if '%s' is a valid constraint on an attribute...\n", token);
         for (int i = 0; token[i] != '\0'; i++) {
             if ( isalpha(token[i]) ) {
                 token[i] = tolower(token[i]);
             }
-        }
-        if (token[0] == ')') { // end of create statement
-            break;
         }
         if ( is_attr_con(token) == -1 ) { // check is it is an attribute constraint
             fprintf(stderr, "%s: '%s'\n", 
