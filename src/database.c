@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include "../include/database.h"
+
+
 #include "../include/helper_module/multiline_input.h"
 #include "../include/ddl_parser.h"
 #include "../include/helper_module/helper_function.h"
@@ -17,6 +19,8 @@
 #include "../include/database_util/db_exec_ddl.h"
 #include "../include/example.h"
 #include "../include/storage_mediator/storage_mediator.h"
+#include "../include/db_types.h"
+#include "../include/dml_parser.h"
 
 
 
@@ -27,26 +31,26 @@
  * @return 0 if successful and -1 if failed
  */
 int execute_non_query(char * statement){
+    char func_loc_str[] = "(database.c/execute_non_query)";
     int exec_result = -1;
     int error;
+
+    error = 0;
     enum db_type stmt_type = typeof_s(statement);
 
     if(stmt_type == DDL){
-//        printf("statement is a ddl!!!\n");
-        error = get_ddl_stmt_parts(statement);
-
-        if(error != 0){
-            fprintf(stderr, "(database.c/execute_non_query) cannot parse ddl statement parts!!!\n");
-            fprintf(stderr, "Statement given : >%s<", statement);
-            exit(0);
-        }
-
-        exec_result = execute_ddl_statement();
-    }else if(stmt_type == DML) {
-        printf("statement is a dml\n!!!");
+        printf("%s %s\n", func_loc_str, "Statement is of type DDL");
+    }else if(stmt_type == DML){
+        printf("%s %s\n", func_loc_str, "Statement is of type DML");
+        parse_dml_statement(statement);
+    }else{
+        fprintf(stderr, "%s %s\n", func_loc_str,
+                "Expected either DDL or DML but received neither");
+        exit(0);
     }
 
-    return exec_result;
+
+    return error;
 
 }
 
@@ -64,13 +68,9 @@ int execute(char* statement){
         printf("it is an query statement\n");
 //        union record_item** result;
 //        exec_result = execute_query(statement, &result);
-        //print out the result
 
     }else if(query_type == NON_QUERY){
-//        printf("it is an non query statement\n");
-//        printf("here\n");
         exec_result = execute_non_query(statement);
-
     }else{
         exec_result = -1;
     }

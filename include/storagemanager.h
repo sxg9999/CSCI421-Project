@@ -58,7 +58,7 @@ int new_database( char * db_loc, int page_size, int buffer_size );
 /*
  * Returns all of the records in the table with the provided id.
  * The records must be in order that they are stored on hardware.
- * The user of this function is responsible for freeing the data.
+ * ``````The user of this function is responsible for freeing the data.``````
  * @param table_id - the id of the table to get the records for.
  * @param table - a 2d array of record_item (output variable)
  *                this will be used to output the values in the table.
