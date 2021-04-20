@@ -19,7 +19,7 @@ int parse_dml_statement( char* statement) {
         return -1;
     }
     int end_index = ptr - statement - 1;
-    char* keyword_str = strdup(statement, end_index);
+    char* keyword_str = strndup(statement, end_index);
 
     enum db_type kw_type = typeof_kw(keyword_str);
     switch(kw_type){
