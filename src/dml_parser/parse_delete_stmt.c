@@ -1,9 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
+#include "../../include/parse_delete_stmt.h"
 int parse_delete_stmt(char* delete_stmt);
 
-
-int parse_delete_stmt(char* delete_stmt) {
+int parse_delete_stmt(char* input_stmt) {
+    printf("Attempting to parse '%s' as a delete statement...\n", input_stmt);
+    // copy the string locally for strtok
+    char* delete_stmt = (char *)malloc( strlen(input_stmt) );
+    strcpy(delete_stmt, input_stmt);
+    printf("TEST: '%s'\n", delete_stmt);
+    
     // get delete keyword
+
     
     // get from keyword
     // get table name

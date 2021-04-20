@@ -165,7 +165,7 @@ int execute_create_table(){
 //    printf("Got the table structs\n");
 
     if(t_data == NULL){
-        printf(stderr, "(db_exec_ddl.c/execute_create_table) %s\n", "Table data struct is NULL.\n");
+        fprintf(stderr, "(db_exec_ddl.c/execute_create_table) %s\n", "Table data struct is NULL.\n");
         return -1;
     }else{
         printf("%s %s\n",func_str, "Not NULL");
