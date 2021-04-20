@@ -1,9 +1,16 @@
 
-int parse_insert_stmt(char* insert_stmt);
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "../../include/parse_insert_stmt.h"
 
 
 int parse_insert_stmt(char* insert_stmt) {
-    //     parse the insert key word
+    //parse the insert key word
+    char* stmt_cpy = strdup(insert_stmt);
+
+
 
     // parse the into keyword
     
