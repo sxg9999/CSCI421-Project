@@ -42,7 +42,7 @@ int execute_non_query(char * statement){
         printf("%s %s\n", func_loc_str, "Statement is of type DDL");
     }else if(stmt_type == DML){
         printf("%s %s\n", func_loc_str, "Statement is of type DML");
-        parse_dml_statement(statement);
+        error = parse_dml_statement(statement);
     }else{
         fprintf(stderr, "%s %s\n", func_loc_str,
                 "Expected either DDL or DML but received neither");
