@@ -4,9 +4,12 @@
  * Implements the public functionality for the DML Parser
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "../include/dml_parser.h"
-#include "../include/db_types.h"
+
+#include "../../include/dml_parser.h"
+#include "../../include/db_types.h"
+#include "../../include/helper_module/helper_function.h"
 
 int parse_dml_statement( char* statement) {
     char func_loc_str[] = "(dml_parser.c/parse_dml_statement)";
@@ -19,7 +22,7 @@ int parse_dml_statement( char* statement) {
         return -1;
     }
     int end_index = ptr - statement - 1;
-    char* keyword_str = strndup(statement, end_index);
+    char* keyword_str = substring(statement, 0, end_index);
 
     enum db_type kw_type = typeof_kw(keyword_str);
     switch(kw_type){
@@ -37,7 +40,7 @@ int parse_dml_statement( char* statement) {
     }
 
 
-
+    free(keyword_str);
     return error_code;
 }
 

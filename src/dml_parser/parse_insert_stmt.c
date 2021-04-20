@@ -11,6 +11,7 @@ int parse_insert_stmt(char* insert_stmt) {
     char* stmt_cpy = strdup(insert_stmt);
 
 
+
     // parse the into keyword
     
     // parse the table name
