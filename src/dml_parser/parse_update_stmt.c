@@ -52,7 +52,18 @@ int parse_update_stmt(char* input_stmt) {
     // parse the sets to get the list of changes
     
     // get the where keyword (if there)
-    
+    bool where_clause;
+    token = strtok(NULL, " ");
+    if (token == NULL) {
+        printf("No where clause\n");
+        where_clause = false;
+    }
+    else {
+        printf("Where clause present\n");
+        where_clause = true;
+    }
+
+
     // parse the where clause and make the tree
     
     // get all the records for the table

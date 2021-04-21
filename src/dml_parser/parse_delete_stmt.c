@@ -44,15 +44,26 @@ int parse_delete_stmt(char* input_stmt) {
     int table_exists = catalog_contains(token);
     if (catalog_contains(token) != 1) {
         fprintf(stderr, "Catalog does not contain table '%s'!\n", token);
-        return -1;
+        //return -1;
     }
+
     // get storagemanager table num
-    int table_num = catalog_get_table_num(token);
-    printf("Table '%s': table id '%d'\n", token, table_num);
+    //int table_num = catalog_get_table_num(token);
+    //printf("Table '%s': table id '%d'\n", token, table_num);
 
 
     // get where keyword (if there)
-    
+    bool where_clause;
+    token = strtok(NULL, " ");
+    if (token == NULL) {
+        printf("No where clause\n");
+        where_clause = false;
+    }
+    else {
+        printf("Where clause present\n");
+        where_clause = true;
+    }
+
     // parse where clause and make tree
     
     // get all records for the table
