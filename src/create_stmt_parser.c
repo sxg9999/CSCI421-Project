@@ -19,15 +19,16 @@
 
 int contraint_check(char** attr_names, char* contraint_name, int name_count);
 int get_attrs_from_stmt(char* stmt, char** attributes, int* attr_count);
-int attr_form_check(char* currentAttr, char** attr_names, int* name_count, int is_first_attr,
-                    struct catalog_table_data* new_table);
+int attr_form_check(char* currentAttr, char** attr_names, int* name_count, 
+                int is_first_attr, struct catalog_table_data* new_table);
 int attribute_check(char* currentAttr, char* token, char** attr_names, int* name_count,
-                    struct catalog_table_data* new_table);
+                struct catalog_table_data* new_table);
 int char_type_check(char* char_attr, enum db_type attr_type);
 int attribute_type_size(enum db_type attribute_type, char* token, char* currentAttr);
-int attribute_constraint_check(char* token, char* attribute, struct attr_data* new_attribute);
+int attribute_constraint_check(char* token, char* attribute, 
+                struct attr_data* new_attribute, struct catalog_table_data* new_table);
 int add_attr_constraints(char** constraints, enum db_type* constraint_types, 
-                        struct attr_data* attribute);
+                struct attr_data* attribute, struct catalog_table_data* new_table);
 
 
 
@@ -57,10 +58,17 @@ int parse_create_table_stmt( char* input_statement ) {
     // new table struct
     struct catalog_table_data* new_table = 
             (struct catalog_table_data*) malloc(sizeof(struct catalog_table_data));
-    // set table number
+    // initialize the table
     new_table->table_num = catalog_ht->size;
     new_table->attr_ht = ht_create(12, 0.75);
-
+    new_table->p_key_len = 0;
+    new_table->primary_key_attrs = (char **) malloc( sizeof(char*));
+    new_table->num_of_f_key = 0;
+    new_table->f_key_arr_size = 0;
+    //new_table->f_keys = ;
+    new_table->num_of_childs = 0;
+    new_table->child_arr_size = 0;
+    //new_table->childs = 0;
 
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
@@ -68,7 +76,10 @@ int parse_create_table_stmt( char* input_statement ) {
         fprintf(stderr, "Invalid statement\n");
         return -1;
     }
-    printf("Trying to create table with name: '%s'\n", table_name);
+    printf("Table '%s' doesn't already exists!\n", table_name);
+    // set table name 
+    new_table->table_name = (char *)malloc( strlen(table_name) + 1 );
+    strcpy(new_table->table_name, table_name); 
 
     // get all attributes
     int attr_success = get_attrs_from_stmt(statement, attributes, &attrCount);
@@ -91,9 +102,7 @@ int parse_create_table_stmt( char* input_statement ) {
     }
     printf("Valid Create Table statement: '%s'\n", input_statement);
 
-    // set table name 
-    new_table->table_name = (char *)malloc( strlen(table_name) + 1 );
-    strcpy(new_table->table_name, table_name); 
+    // print table
 
     // add table to catalog
     printf("Adding table '%s' to catalog...\n", new_table->table_name);
@@ -102,6 +111,9 @@ int parse_create_table_stmt( char* input_statement ) {
         fprintf( stderr, "Error trying to add table '%s' to the catalog.\n", new_table->table_name);
         return -1;
     }
+
+    catalog_print_tables();
+
 
     free(attributes);
     return 0;
@@ -313,7 +325,8 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
     new_attribute->attr_size = attribute_size;
 
     // check for constraints on attribute
-    int contraint_check = attribute_constraint_check(token, currentAttr, new_attribute);
+    int contraint_check = attribute_constraint_check(token, currentAttr, 
+            new_attribute, new_table);
     if (contraint_check == -1) {
         fprintf( stderr, "Constraint check on attribute '%s' failed \n", currentAttr);
         return -1;
@@ -330,7 +343,14 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
             new_attribute->constr[i]->type,
             type_to_str(new_attribute->constr[i]->type));
     }
-    // TODO: add attribute to catalog table's hashtable
+    // add attribute to catalog table's hashtable
+    int attr_add_success = sv_ht_add(new_table->attr_ht, new_attribute->attr_name, new_attribute);
+    if (attr_add_success == -1) {
+        fprintf(stderr, "Error adding attribute '%s' to table '%s'\n", 
+            new_attribute->attr_name, new_table->table_name);
+        return -1;
+    }
+    sv_ht_print(new_table->attr_ht);
 
     // success
     return 0;
@@ -344,7 +364,8 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
  * @return 0 if success, -1 if failure
  * 
  */
-int attribute_constraint_check(char* token, char* attribute, struct attr_data* new_attribute) {
+int attribute_constraint_check(char* token, char* attribute, 
+            struct attr_data* new_attribute, struct catalog_table_data* new_table) {
     printf("Checking for constraints on '%s'\n", attribute);
     int MAX_CONSTRAINT_COUNT = 3;
     char* constraints_used[3];
@@ -391,7 +412,7 @@ int attribute_constraint_check(char* token, char* attribute, struct attr_data* n
     // set constraint count
     new_attribute->num_of_constr = constraints_count;
     // add attribute constraints to attribute struct
-    add_attr_constraints(constraints_used, constraint_types, new_attribute);
+    add_attr_constraints(constraints_used, constraint_types, new_attribute, new_table);
 
     return 0;
 }
@@ -402,7 +423,8 @@ int attribute_constraint_check(char* token, char* attribute, struct attr_data* n
  * @param attribute the attribute struct
  * @return 0 if all constraints were validated and added successfully, else -1 for failure
  */
-int add_attr_constraints(char** constraints, enum db_type* constraint_types, struct attr_data* attribute) {
+int add_attr_constraints(char** constraints, enum db_type* constraint_types, 
+            struct attr_data* attribute, struct catalog_table_data* table) {
     printf("Adding constraints to attribute '%s'...\n", attribute->attr_name);
     for (int i = 0; i < attribute->num_of_constr; i++) {
         printf("Adding constraint '%s' '%d'...\n", constraints[i], constraint_types[i]);
@@ -425,6 +447,12 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types, str
             primary_key_constraint->type = PRIMARY_KEY;
             // add attr_constraint to attribute struct
             attribute->constr[i] = primary_key_constraint;
+            table->p_key_len += 1;
+            table->primary_key_attrs = (char **) realloc(
+                    table->primary_key_attrs, (table->p_key_len) * sizeof(char *) ); 
+            strcpy(table->primary_key_attrs[table->p_key_len - 1], attribute->attr_name);
+            printf("Added primary key '%s' to table '%s' \n", 
+                    table->primary_key_attrs[table->p_key_len - 1], table->table_name);
         }
         else if (constraint_types[i] == UNIQUE) { // unique
             // create attr_constraint struct
