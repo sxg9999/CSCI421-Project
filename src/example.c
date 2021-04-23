@@ -32,8 +32,15 @@ struct catalog_table_data* get_department_table_data(){
     id_attr->type = INT;
     id_attr->attr_name = malloc(3);
     strncpy(id_attr->attr_name, "id", 3);
-    id_attr->num_of_constr = 0;
-    id_attr->constr = NULL;
+    id_attr->num_of_constr = 2;
+    id_attr->constr = malloc(sizeof(struct attr_constraint*) * 5);
+    id_attr->constr[0] = malloc(sizeof(struct attr_constraint));
+    id_attr->constr[0]->type = NOT_NULL;
+    id_attr->constr[0]->value = NULL;
+    id_attr->constr[1] = malloc(sizeof(struct attr_constraint));
+    id_attr->constr[1]->type = UNIQUE;
+    id_attr->constr[1]->value = NULL;
+
 
     struct attr_data* dept_name_attr = malloc(sizeof(struct attr_data));
     dept_name_attr->index = 1;
@@ -42,8 +49,16 @@ struct catalog_table_data* get_department_table_data(){
     char dept_name_str[] = "dept_name";
     dept_name_attr->attr_name = malloc(strlen(dept_name_str) + 1);
     strncpy(dept_name_attr->attr_name, dept_name_str, strlen(dept_name_str) + 1);
-    dept_name_attr->num_of_constr = 0;
-    dept_name_attr->constr = NULL;
+    dept_name_attr->num_of_constr = 2;
+    dept_name_attr->constr = malloc(sizeof(struct attr_constraint*) * 5);
+    dept_name_attr->constr[0] = malloc(sizeof(struct attr_constraint));
+    dept_name_attr->constr[0]->type = NOT_NULL;
+    dept_name_attr->constr[0]->value = NULL;
+    dept_name_attr->constr[1] = malloc(sizeof(struct attr_constraint));
+    dept_name_attr->constr[1]->type = UNIQUE;
+    dept_name_attr->constr[1]->value = NULL;
+
+
 
     sv_ht_add(attr_ht, "id", id_attr);
     sv_ht_add(attr_ht, "dept_name", dept_name_attr);
@@ -78,6 +93,7 @@ struct catalog_table_data* get_student_table_data(){
     char t_name[] = "student";
     char s_id[] = "s_id";
     char s_name[] = "s_name";
+    char s_gpa[] = "gpa";
     char s_dept_id[] = "s_dept_id";
     char s_dept_name[] = "s_dept_name";
 
@@ -92,20 +108,46 @@ struct catalog_table_data* get_student_table_data(){
     s_id_attr->type = INT;
     s_id_attr->attr_name = malloc(strlen(s_id) + 1);
     strncpy(s_id_attr->attr_name, s_id, strlen(s_id) + 1);
-    s_id_attr->num_of_constr = 0;
-    s_id_attr->constr = NULL;
+    s_id_attr->num_of_constr = 2;
+    struct attr_constraint** s_id_attr_constrs = malloc(sizeof(struct attr_constraint*) * 5);
+    struct attr_constraint* s_id_attr_constr_1 = malloc(sizeof(struct attr_constraint));
+    s_id_attr_constr_1->type = NOT_NULL;
+    s_id_attr_constr_1->value = NULL;
+    s_id_attr_constrs[0] = s_id_attr_constr_1;
+    struct attr_constraint* s_id_attr_constr_2 = malloc(sizeof(struct attr_constraint));
+    s_id_attr_constr_2->type = UNIQUE;
+    s_id_attr_constr_2->value = NULL;
+    s_id_attr_constrs[1] = s_id_attr_constr_2;
+    s_id_attr->constr = s_id_attr_constrs;
+
+
 
     struct attr_data* s_name_attr = malloc(sizeof(struct attr_data));
     s_name_attr->index = 1;
-    s_name_attr->attr_size = strlen(s_name);
+    s_name_attr->attr_size = 22;
     s_name_attr->type = CHAR;
     s_name_attr->attr_name = malloc(strlen(s_name) + 1);
     strncpy(s_name_attr->attr_name, s_name, strlen(s_name) + 1);
-    s_name_attr->num_of_constr = 0;
-    s_name_attr->constr = NULL;
+    s_name_attr->num_of_constr = NULL;
+
+
+    struct attr_data* s_gpa_attr = malloc(sizeof(struct attr_data));
+    s_gpa_attr->index = 2;
+    s_gpa_attr->attr_size = sizeof(double);
+    s_gpa_attr->type = DOUBLE;
+    s_gpa_attr->attr_name = strdup(s_gpa);
+    s_gpa_attr->num_of_constr = 1;
+    struct attr_constraint** s_gpa_attr_constrs = malloc(sizeof(struct attr_constraint*) * 5);
+    struct attr_constraint* gpa_constr_1 = malloc(sizeof(struct attr_constraint));
+    gpa_constr_1->type = NOT_NULL;
+    gpa_constr_1->value = NULL;
+    s_gpa_attr_constrs[0] = gpa_constr_1;
+    s_gpa_attr->constr = s_gpa_attr_constrs;
+
+
 
     struct attr_data* s_dept_id_attr = malloc(sizeof(struct attr_data));
-    s_dept_id_attr->index = 2;
+    s_dept_id_attr->index = 3;
     s_dept_id_attr->attr_size = sizeof(int);
     s_dept_id_attr->type = INT;
     s_dept_id_attr->attr_name = malloc(strlen(s_dept_id) + 1);
@@ -114,8 +156,8 @@ struct catalog_table_data* get_student_table_data(){
     s_dept_id_attr->constr = NULL;
 
     struct attr_data* s_dept_name_attr = malloc(sizeof(struct attr_data));
-    s_dept_name_attr->index = 3;
-    s_dept_name_attr->attr_size = strlen(s_dept_name);
+    s_dept_name_attr->index = 4;
+    s_dept_name_attr->attr_size = 20;
     s_dept_name_attr->type = CHAR;
     s_dept_name_attr->attr_name = malloc(strlen(s_dept_name) + 1);
     strncpy(s_dept_name_attr->attr_name, s_dept_name, strlen(s_dept_name) + 1);
@@ -125,6 +167,7 @@ struct catalog_table_data* get_student_table_data(){
 
     sv_ht_add(attr_ht, s_id, s_id_attr);
     sv_ht_add(attr_ht, s_name, s_name_attr);
+    sv_ht_add(attr_ht, s_gpa, s_gpa_attr);
     sv_ht_add(attr_ht, s_dept_id, s_dept_id_attr);
     sv_ht_add(attr_ht, s_dept_name, s_dept_name_attr);
 

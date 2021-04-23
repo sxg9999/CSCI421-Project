@@ -42,6 +42,7 @@ void* sv_ht_remove(struct  hashtable* ht, char* key);
 int sv_ht_contains(struct hashtable* ht, char* key);
 
 
+
 /**
  * Just prints the hash table's content (testing purposes only)
  * @param ht
@@ -61,10 +62,10 @@ void destroy_sv_ht(struct hashtable* ht);
  * gets all the values of the hashtable and store it in
  * value_ptrs and return the number of values
  *
- * value_ptrs : a pointer that points to an array of values (void ptrs in this case)
+ * value_arr : a pointer that points to an array of values (void ptrs in this case)
  * @param ht
  * @return
  */
-int sv_ht_values(struct hashtable* ht, void*** value_ptrs);
+int sv_ht_values(struct hashtable* ht, void*** value_arr);
 
 #endif

@@ -99,3 +99,8 @@ int sm_drop_table(char* table_name){
 }
 
 int sm_alter_table();
+
+int sm_insert_records(char* table_name, union record_item** records, int num_of_records){
+    //to be done
+    return 0;
+}

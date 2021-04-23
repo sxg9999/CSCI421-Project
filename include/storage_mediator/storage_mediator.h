@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "../../include/catalog/catalog_structs.h"
+#include "../../include/storagemanager.h"
 
 /**
  * Adds a table to both catalog and storage manager
@@ -34,6 +35,12 @@ int sm_drop_table(char* table_name);
  * @return : 0 if it is successful and -1 if it failed
  */
 int sm_alter_table();
+
+/**
+ * Inserts records to the table
+ * @return
+ */
+int sm_insert_records(char* table_name, union record_item** records, int num_of_records);
 
 
 #endif

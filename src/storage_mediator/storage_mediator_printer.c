@@ -84,8 +84,8 @@ void sm_print_all_table_meta_datas(){
         sm_print_catalog_attr_data(c_t_data->attr_ht);
         sm_print_catalog_p_keys(c_t_data->p_key_len, c_t_data->primary_key_attrs);
         sm_print_catalog_f_keys(c_t_data->num_of_f_key, c_t_data->f_keys);
-        printf("\n");
-        printf("Table num is : %d\n", c_t_data->table_num);
+//        printf("\n");
+//        printf("Table num is : %d\n", c_t_data->table_num);
 
         int error_code = sm_print_storage_manager_t_data(table_data[c_t_data->table_num]);
 
@@ -150,7 +150,7 @@ void sm_print_table_childs(int num_of_childs, char** childs){
 
 void sm_print_catalog_attr_data(struct hashtable* attr_ht){
 
-    sv_ht_print(attr_ht);
+//    sv_ht_print(attr_ht);
 
     int num_of_attrs = attr_ht->size;
     struct ht_node** val_nodes = attr_ht->node_list;
@@ -166,12 +166,13 @@ void sm_print_catalog_attr_data(struct hashtable* attr_ht){
             printf("- %s %s(%d) ", a_data->attr_name, type_str, a_data->attr_size);
         }
 
-//        sm_print_catalog_constr(a_data->num_of_constr, a_data->constr);
+        sm_print_catalog_constr(a_data->num_of_constr, a_data->constr);
         printf("\n");
     }
 }
 
 void sm_print_catalog_constr(int constr_count, struct attr_constraint** constr){
+
     for(int i = 0; i < constr_count; i++){
         struct attr_constraint* a_constr = constr[i];
         char* constr_type_str = type_to_str(a_constr->type);

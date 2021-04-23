@@ -136,6 +136,10 @@ int catalog_get_table_num(char* table_name){
     return t_data->table_num;
 }
 
+struct catalog_table_data* catalog_get_table_metadata(char* table_name){
+    return sv_ht_get(table_ht, table_name);
+}
+
 /**
  * Remove all the foreign key attribute reference to the parent table
  * @param t_data : child table data
@@ -512,6 +516,62 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
         (*p_key_indices)[i] = a_data->index;
     }
     return p_key_len;
+}
+
+int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
+    char func_loc_str[] = "(catalog.c/catalog_get_attr_types)";
+
+    /* Verify that the table exist */
+    if(catalog_contains(table_name) == 0){
+        printf("%s Error: Table \"%s\" does not exist\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Get the table meta data */
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+    if(t_data == NULL){
+        printf("%s Unexpected Error: Cannot get table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Get the hashtable that stores the attribute */
+    struct hashtable* attr_ht = t_data->attr_ht;
+    if(attr_ht == NULL){
+        printf("%s Unexpected Error: Cannot get attr_ht (a hashtable that stores attribute) for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    int arr_size = attr_ht->size;
+    if(arr_size <= 0){
+        printf("%s Unexpected Error: There exist no attributes for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Allocate memory for the array that is storing the attribute types */
+    *attr_types = malloc(sizeof(enum db_type) * arr_size);
+
+    /* Get all the attribute value nodes from the attribute hashtable */
+    struct ht_node** val_nodes = attr_ht->node_list;
+    if(val_nodes == NULL){
+        printf("%s Unexpected Error: attr_ht->node_list is NULL for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+
+    /* Add all the attribute types to the attr_types array in order of insertion */
+    for(int i = 0; i < arr_size; i++){
+        struct attr_data* a_data = val_nodes[i]->value->v_ptr;
+        if(a_data == NULL){
+            printf("%s Unexpected Error: Cannot retrieve attribute data from attribute node for table \"%s\"\n", func_loc_str, table_name);
+
+            /* Free the array that was allocated */
+            free(attr_types);
+            return -1;
+        }
+        (*attr_types)[i] = a_data->type;
+    }
+
+    return arr_size;
 }
 
 struct hashtable* catalog_get_ht(){
