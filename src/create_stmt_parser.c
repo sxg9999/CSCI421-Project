@@ -17,12 +17,14 @@
 #include "../include/hash_collection/hash_collection.h"
 #include "../include/db_types.h"
 
-int contraint_check(char** attr_names, char* contraint_name, int name_count);
+int contraint_name_check(char** attr_names, char* contraint_name, int name_count);
 int get_attrs_from_stmt(char* stmt, char** attributes, int* attr_count);
 int attr_form_check(char* currentAttr, char** attr_names, int* name_count, 
                 int is_first_attr, struct catalog_table_data* new_table);
 int attribute_check(char* currentAttr, char* token, char** attr_names, int* name_count,
                 struct catalog_table_data* new_table);
+int constraint_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
+                int attr_num, struct catalog_table_data* new_table);
 int char_type_check(char* char_attr, enum db_type attr_type);
 int attribute_type_size(enum db_type attribute_type, char* token, char* currentAttr);
 int attribute_constraint_check(char* token, char* attribute, 
@@ -100,9 +102,12 @@ int parse_create_table_stmt( char* input_statement ) {
         } 
         printf("\n");
     }
-    printf("Valid Create Table statement: '%s'\n", input_statement);
 
-    // print table
+    // check if table has a primarykey
+    if (new_table->p_key_len == 0) {
+        fprintf(stderr, "No primarykey specified in '%s'\n", input_statement);
+        return -1;
+    }
 
     // add table to catalog
     printf("Adding table '%s' to catalog...\n", new_table->table_name);
@@ -113,6 +118,7 @@ int parse_create_table_stmt( char* input_statement ) {
     }
 
     catalog_print_tables();
+    printf("Valid Create Table statement: '%s'\n", input_statement);
 
 
     free(attributes);
@@ -166,7 +172,7 @@ int get_attrs_from_stmt(char* stmt, char** attributes, int* attrCount) {
  * @param is_first_attr whether or not this is the first attribute
  * @return 0 on success, -1 on failure
  */
-int attr_form_check(char* currentAttr, char** attr_names, int* name_count, int is_first_attr,
+int attr_form_check(char* currentAttr, char** attr_names, int* name_count, int attr_num,
         struct catalog_table_data* new_table) 
 {
     printf("Checking if attribute/contraint '%s' is valid...\n", currentAttr);
@@ -183,76 +189,11 @@ int attr_form_check(char* currentAttr, char** attr_names, int* name_count, int i
     }
     // check if valid attribute name
     if ( is_keyword(token) == 0) { // for constraints 
-        printf("Checking if '%s' is a constraint...\n", currentAttr);
-        // if it is check if attribute is constraint
-        if ( is_constraint(token) == 0 && is_first_attr == 0) {
-            fprintf(stderr, "%s: '%s'\n", 
-                "Invalid attribute definition. Attribute name is a keyword", token);
+        int constraint_success = constraint_check(currentAttr, token, attr_names, name_count, 
+                attr_num, new_table);
+        if (constraint_success == -1) {
+            fprintf(stderr, "Invalid constraint: '%s'\n", currentAttr);
             return -1;
-        }
-        // check if foreignkey
-        if ( strncmp(FOREIGN_CON, token, strlen(FOREIGN_CON)) == 0 ) {
-            printf("Attribute is a foreign constraint: '%s'\n", token);
-            // check for key attribute names
-            int valid_constraint_name = contraint_check(attr_names, token, *name_count);
-            if ( valid_constraint_name == -1 ) {
-                fprintf(stderr, "Invalid constraint '%s'\n", token);
-                return -1;
-            }
-            // check for 'references'
-            token = strtok(NULL, " ");
-            // printf("Token: '%s'\n", token);
-            if ( strcmp(REFERENCES_CON, token) != 0) {
-                    fprintf(stderr, "%s: '%s'\n", 
-                    "Invalid constraint definition. Missing 'references' keyword", token);
-                    return -1;
-            }
-
-            // <relation>( check
-            token = strtok(NULL, " ");
-            // printf("Token: '%s'\n", token);
-            if ( token[strlen(token) - 1] != '(' ) {
-                fprintf(stderr, "%s: '%s'\n", 
-                    "Invalid constraint definition. Missing '('", token);
-                    return -1;
-            }
-
-            // <r_1> ... <r_n>
-            while ( (token = strtok(NULL, " ")) ) {
-                if (token[0] == ')') {
-                    break;
-                }
-                // printf("<r_n>: %s\n", token);
-                if ( is_keyword(token) == 0) {
-                    fprintf(stderr, "%s: '%s'\n", 
-                    "Invalid constraint definition. Constraint name is a keyword", token);
-                    return -1;
-                }
-            }
-        } else {
-            // check if valid constraint def
-            while ( (token = strtok(NULL, " ")) ) {
-                if (token[0] == ')') {
-                    break;
-                }
-                if ( is_keyword(token) == 0) {
-                    fprintf(stderr, "%s: '%s'\n", 
-                    "Invalid constraint definition. Constraint name is a keyword", token);
-                    return -1;
-                }
-                int is_defined = 0;
-                for (int i = 0; i < *name_count; i++){
-                    if ( strcmp(attr_names[i], token) == 0 ) {
-                        is_defined = 1;
-                        break;
-                    }
-                }
-                if ( is_defined == 0 ) {
-                    fprintf(stderr, "%s: '%s'\n", 
-                    "Invalid constraint parameter. Attribute name undefined", token);
-                    return -1;
-                }
-            }
         }
     } 
     else { // for attributes
@@ -267,6 +208,134 @@ int attr_form_check(char* currentAttr, char** attr_names, int* name_count, int i
     return 0;
 }
 
+int constraint_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
+        int attr_num, struct catalog_table_data* new_table) {
+    printf("Checking if '%s' is a valid constraint...\n", currentAttr);
+    // if it is check if attribute is constraint
+    for (int i = 0; token[i] != '\0'; i++) {
+        if ( isalpha(token[i]) ) {
+            token[i] = tolower(token[i]);
+        }
+    }
+    if ( is_constraint(token) == 0 && attr_num == 0) {
+        fprintf(stderr, "%s: '%s'\n", 
+            "INVALID: Constraint is defined before attributes", token);
+        return -1;
+    }
+    enum db_type type = typeof_kw(token);
+    printf("Constraint '%s' type: '%d'\n", token, type);
+    // check if foreignkey
+    if ( type == FOREIGN_KEY ) {
+        printf("Attribute is a foreign constraint: '%s'\n", token);
+
+        // initialize a new foreign_key struct
+        struct foreign_key_data* new_foreign_key = (struct foreign_key_data*) malloc( 
+            sizeof(struct foreign_key_data));
+        new_foreign_key->f_keys = ht_create(12, 0.75);
+
+        // check for key attribute names
+        int valid_constraint_name = contraint_name_check(attr_names, token, *name_count);
+        if ( valid_constraint_name == -1 ) {
+            fprintf(stderr, "Invalid constraint '%s'\n", token);
+            return -1;
+        }
+        // check for 'references'
+        token = strtok(NULL, " ");
+        // printf("Token: '%s'\n", token);
+        if ( strcmp(REFERENCES_CON, token) != 0) {
+                fprintf(stderr, "%s: '%s'\n", 
+                "Invalid constraint definition. Missing 'references' keyword", token);
+                return -1;
+        }
+
+        // <relation>( check
+        token = strtok(NULL, " ");
+        // printf("Token: '%s'\n", token);
+        if ( token[strlen(token) - 1] != '(' ) {
+            fprintf(stderr, "%s: '%s'\n", 
+                "Invalid constraint definition. Missing '('", token);
+                return -1;
+        }
+
+        // <r_1> ... <r_n>
+        while ( (token = strtok(NULL, " ")) ) {
+            if (token[0] == ')') {
+                break;
+            }
+            // printf("<r_n>: %s\n", token);
+            if ( is_keyword(token) == 0) {
+                fprintf(stderr, "%s: '%s'\n", 
+                "Invalid constraint definition. Constraint name is a keyword", token);
+                return -1;
+            }
+        }
+
+        // add the new foreignkey struct to table
+        new_table->num_of_f_key += 1;
+        new_table->f_keys = (struct foreign_key_data**) realloc(new_table->f_keys,
+                new_table->num_of_f_key * sizeof(struct foreign_key_data*));
+    } 
+    else { // either a primarykey, unqiue, or invalid
+        printf("Attribute is a primarykey/unique constraint: '%s'\n", token);
+        // check if valid constraint def
+        if ( type != PRIMARY_KEY && type != UNIQUE) {
+            fprintf(stderr, "Invalid constraint type: '%s'\n", token);
+            return -1;
+        }
+        while ( (token = strtok(NULL, " ")) ) {
+            if (token[0] == ')') {
+                break;
+            }
+            for (int i = 0; token[i] != '\0'; i++) {
+                if ( isalpha(token[i]) ) {
+                    token[i] = tolower(token[i]);
+                }
+            }
+            if ( is_keyword(token) == 0) {
+                fprintf(stderr, "%s: '%s'\n", 
+                "Invalid constraint definition. Constraint attribute is a keyword", token);
+                return -1;
+            }
+
+            if ( !sv_ht_contains(new_table->attr_ht, token) ) {
+                fprintf(stderr, "Attribute '%s' undefined used in constraint '%s'\n", 
+                        token, currentAttr);
+                return -1;
+            }
+            printf("Attribute '%s' valid in constraint '%s'\n", 
+                    token, currentAttr);
+            // add constraint to attr_struct
+            struct attr_data* attribute = (struct attr_data*) sv_ht_get(new_table->attr_ht, token);
+            struct attr_constraint* new_constraint = (struct attr_constraint*) malloc( 
+                    sizeof(struct attr_constraint));
+            new_constraint->type = type;
+            attribute->constr[attribute->num_of_constr] = new_constraint;
+            attribute->num_of_constr += 1;
+
+            // if primarykey, update catalog_table_data struct
+            if (type == PRIMARY_KEY) {
+                new_table->p_key_len += 1;
+                new_table->primary_key_attrs = (char **) realloc(
+                        new_table->primary_key_attrs, (new_table->p_key_len) * sizeof(char *) ); 
+                strcpy(new_table->primary_key_attrs[new_table->p_key_len - 1], attribute->attr_name);
+            }
+
+            int is_defined = 0;
+            for (int i = 0; i < *name_count; i++){
+                if ( strcmp(attr_names[i], token) == 0 ) {
+                    is_defined = 1;
+                    break;
+                }
+            }
+            if ( is_defined == 0 ) {
+                fprintf(stderr, "%s: '%s'\n", 
+                "Invalid constraint parameter. Attribute name undefined", token);
+                return -1;
+            }
+        }
+    }    
+    return 0;
+}
 
 int attribute_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
         struct catalog_table_data* new_table) 
@@ -284,7 +353,6 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
     new_attribute->attr_name = attr_names[*name_count];
     // set default num of constraints on attribute to 0
     new_attribute->num_of_constr = 0;
-    // TODO: check for constraint on attribute
 
 
     *name_count += 1;
@@ -560,10 +628,10 @@ int char_type_check(char* token, enum db_type attribute_type)
 /**
  * Check if a contraint is valid
  */
-int contraint_check(char** attr_names, char* constraint_name, int name_count) {
+int contraint_name_check(char** attr_names, char* constraint_name, int name_count) {
     while ( (constraint_name = strtok(NULL, " ")) ) {
         if (constraint_name[0] == ')') {
-            break;
+            return 0;
         }
         if ( is_keyword(constraint_name) == 0) {
             fprintf(stderr, "%s: '%s'\n", 
