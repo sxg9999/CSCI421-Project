@@ -18,7 +18,18 @@
  * @param current_attr current attr in foreignkey constraint being check
  * @param attr_count count of attr already defined
  */
-int foreign_contraint_name_check(char** attr_names, char* constraint_name, int attr_count);
+int foreign_contraint_name_check(char** attr_names, int attr_count, char* constraint_line,
+            char** foreign_attr, int* foreign_attr_count);
+
+/**
+ * Check if an attributes specified in a foreignkey constraint defined in the parent table.
+ * @param parent_name name of parent the attribute belongs to
+ * @param constraint_line current constraint line in the create stmt
+ * @param parent_attrs list of attributes beloning to the parent
+ * @param pa_count count of attributes belonging to the parent
+ */
+int foreign_parent_attr_check(char* parent_name, char* constraint_line, 
+            char** parent_attrs, int* pa_count);
 
 /**
  * Get the attributes/contraints from a create stmt.
