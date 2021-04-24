@@ -97,7 +97,6 @@ int parse_ddl_statement( char* input_statement ) {
     // call one of the other parse funcs
     int result;
 
-    printf("\n\n\n");
     if (stmt_type == DROP) {
         result = parse_drop_table_stmt(input_statement);
     } else if (stmt_type == ALTER) {
@@ -115,5 +114,6 @@ int parse_ddl_statement( char* input_statement ) {
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid DDL statement", input_statement);
     }
+    printf("\n\n");
     return result;
 }
