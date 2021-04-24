@@ -18,7 +18,6 @@
 int constraint_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
         int attr_num, struct catalog_table_data* new_table) {
     printf("Checking if '%s' is a valid constraint...\n", currentAttr);
-    printf("TABLE NAME: '%s'\n", new_table->table_name);
 
     // if it is check if attribute is constraint
     for (int i = 0; token[i] != '\0'; i++) {
@@ -27,8 +26,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         }
     }
     if ( is_constraint(token) == 0 && attr_num == 0) {
-        fprintf(stderr, "%s: '%s'\n", 
-            "INVALID: Constraint is defined before attributes", token);
+        fprintf(stderr, "Invalid: Constraint is defined before attributes: '%s'\n", token);
         return -1;
     }
     enum db_type type = typeof_kw(token);
@@ -39,10 +37,10 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
 
         // foreignkey( <a 1> ... <a N> ) references <r name>( <r 1> ... <r N> ):
         // track attrs in foreignkey( <a 1> ... <a N> ) - <a N>
-        char** foreign_attr;
+        char** foreign_attr = (char **) malloc( sizeof(char*));
         int fa_count = 0;
         // track attrs in <r name>( <r 1> ... <r N> ) - <r N>
-        char** parent_attr;
+        char** parent_attr = (char **) malloc( sizeof(char*));
         int pa_count = 0; 
         // initialize a new foreign_key struct
         struct foreign_key_data* new_foreign_key = (struct foreign_key_data*) malloc( 
@@ -50,9 +48,11 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         new_foreign_key->f_keys = ht_create(12, 0.75);
         new_foreign_key->parent_table_name = NULL;
 
+
         // check for key attribute names
-        int valid_constraint_name = foreign_contraint_name_check(attr_names, token, *name_count);
-        if ( valid_constraint_name == -1 ) {
+        int valid_constraint_line = foreign_contraint_name_check(attr_names, *name_count, token,
+                    foreign_attr, &fa_count);
+        if ( valid_constraint_line == -1 ) {
             fprintf(stderr, "Invalid constraint '%s'\n", token);
             return -1;
         }
@@ -60,38 +60,37 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         token = strtok(NULL, " ");
         // printf("Token: '%s'\n", token);
         if ( strcmp(REFERENCES_CON, token) != 0) {
-                fprintf(stderr, "%s: '%s'\n", 
-                "Invalid constraint definition. Missing 'references' keyword", token);
+                fprintf(stderr, 
+                    "Invalid constraint definition. Missing 'references' keyword: '%s'\n", token);
                 return -1;
         }
+        printf("Valid 'reference' keyword present\n");
 
         // <relation>( check
         token = strtok(NULL, " ");
         // printf("Token: '%s'\n", token);
         if ( token[strlen(token) - 1] != '(' ) {
-            fprintf(stderr, "%s: '%s'\n", 
-                "Invalid constraint definition. Missing '('", token);
+            fprintf(stderr, "Invalid constraint definition. Missing '(': '%s'\n", token);
                 return -1;
         }
         token[strlen(token) - 1] = '\0';
+        printf("Parent table name: '%s'\n", token);
         // check if parent table is defined
         if (catalog_contains(token) == 0) {
             fprintf(stderr, "Invalid: table '%s' not defined\n", token);
             return -1;
         }
-        printf("Table '%s' being referenced exists!", token);
+        new_foreign_key->parent_table_name = (char *) malloc( strlen(token) );
+        strcpy(new_foreign_key->parent_table_name, token);
+        printf("Foreign table '%s' being referenced exists!\n", new_foreign_key->parent_table_name);
 
         // <r_1> ... <r_n>
-        while ( (token = strtok(NULL, " ")) ) {
-            if (token[0] == ')') {
-                break;
-            }
-            // printf("<r_n>: %s\n", token);
-            if ( is_keyword(token) == 0) {
-                fprintf(stderr, "%s: '%s'\n", 
-                "Invalid constraint definition. Constraint name is a keyword", token);
-                return -1;
-            }
+        int valid_parent_attr = foreign_parent_attr_check(new_foreign_key->parent_table_name, token, 
+                parent_attr, &pa_count);
+        if (valid_parent_attr == -1) {
+            fprintf(stderr, "Invalid attribute names for parent table '%s': '%s'\n", 
+                    new_foreign_key->parent_table_name, currentAttr);
+            return -1;
         }
 
         // add the new foreignkey struct to table
@@ -125,7 +124,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
             }
             if ( is_keyword(token) == 0) {
                 fprintf(stderr, "%s: '%s'\n", 
-                "Invalid constraint definition. Constraint attribute is a keyword", token);
+                "Invalid constraint definition. Constraint attribute is a keyword\n", token);
                 return -1;
             }
 
@@ -144,7 +143,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
             attribute->constr[attribute->num_of_constr] = new_constraint;
             attribute->num_of_constr += 1;
 
-            // if primarykey, update catalog_table_data struct
+            // update catalog_table_data struct for constraint primarykey/unique
             if (type == PRIMARY_KEY) {
                 new_table->p_key_len += 1;
                 new_table->primary_key_attrs = (char **) realloc(
@@ -152,6 +151,14 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 new_table->primary_key_attrs[new_table->p_key_len - 1] = (char *) malloc(
                         strlen(attribute->attr_name) ); 
                 strcpy(new_table->primary_key_attrs[new_table->p_key_len - 1], attribute->attr_name);
+            }
+            else if (type == UNIQUE) {
+                new_table->num_of_unique += 1;
+                new_table->unique_attrs = (char **) realloc(
+                        new_table->unique_attrs, (new_table->num_of_unique) * sizeof(char *) ); 
+                new_table->unique_attrs[new_table->num_of_unique - 1] = (char *) malloc(
+                        strlen(attribute->attr_name) ); 
+                strcpy(new_table->unique_attrs[new_table->num_of_unique - 1], attribute->attr_name);
             }
 
             int is_defined = 0;
@@ -163,8 +170,8 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
             }
 
             if ( is_defined == 0 ) {
-                fprintf(stderr, "%s: '%s'\n", 
-                "Invalid constraint parameter. Attribute name undefined", token);
+                fprintf(stderr, 
+                        "Invalid constraint parameter. Attribute name undefine: '%s'\n", token);
                 return -1;
             }
         }
@@ -174,31 +181,79 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
 }
 
 
-int foreign_contraint_name_check(char** attr_names, char* constraint_name, int attr_count) {
-    while ( (constraint_name = strtok(NULL, " ")) ) {
-        if (constraint_name[0] == ')') {
-            return 0;
+int foreign_contraint_name_check(char** attr_names, int attr_count, char* constraint_line, 
+            char** foreign_attrs, int* fa_count) {
+    while ( (constraint_line = strtok(NULL, " ")) ) {
+        if (constraint_line[0] == ')') {
+            break;
         }
-        if ( is_keyword(constraint_name) == 0) {
-            fprintf(stderr, "%s: '%s'\n", 
-            "Invalid constraint definition. Constraint name is a keyword", constraint_name);
+        printf("Checking if attribute '%s' is defined...\n", constraint_line);
+
+        if ( is_keyword(constraint_line) == 0) {
+            fprintf(stderr, "Invalid attribute '%s' not defined in table.\n", constraint_line);
             return -1;
         }
         // check if attribute is already defined
         int is_defined = 0;
         for (int i = 0; i < attr_count; i++){
-            if ( strcmp(attr_names[i], constraint_name) == 0 ) {
+            if ( strcmp(attr_names[i], constraint_line) == 0 ) {
                 is_defined = 1;
                 break;
             }
         }
         if ( is_defined == 0 ) {
-            fprintf(stderr, "%s: '%s'\n", 
-            "Invalid constraint parameter. Attribute name undefined", constraint_name);
+            fprintf(stderr, 
+                    "Invalid constraint parameter. Attribute name undefined: '%s'\n", constraint_line);
             return -1;
         }
+        printf("Foreignkey attr '%s' is defined!\n", constraint_line);
+        *fa_count += 1;
+        foreign_attrs = (char**) realloc(foreign_attrs, *fa_count * sizeof(char *));
+        foreign_attrs[ *fa_count - 1] = (char*) malloc( strlen(constraint_line) );
+        strcpy(foreign_attrs[ *fa_count - 1], constraint_line);
+
     }
-    printf("Constraint '%s' is valid!", constraint_name);
+
     return 0;
 }
 
+int foreign_parent_attr_check(char* parent_name, char* constraint_line, 
+            char** parent_attrs, int* pa_count) {
+    while ( (constraint_line = strtok(NULL, " ")) ) {
+        if (constraint_line[0] == ')') {
+            break;
+        }
+        printf("Checking if attribute '%s' is defined in parent...\n", constraint_line);
+
+        if ( is_keyword(constraint_line) == 0) {
+            fprintf(stderr, "Invalid attribute '%s' not defined in table '%s'.\n", 
+                    constraint_line, parent_name);
+            return -1;
+        }
+        // check if attribute is already defined
+        int is_defined = 0;
+        // check if parent table exists
+        if (catalog_contains(parent_name) != 1) {
+            fprintf(stderr, "Catalog does not contain table '%s'\n", parent_name);
+            return -1;
+        }
+        // get parent table
+        struct catalog_table_data* parent_table = sv_ht_get( catalog_get_ht(), parent_name);
+        // check for attr in parent table hashtable
+        printf("Table name: '%s'\n", parent_table->table_name);
+        // check error code
+        if ( is_defined == 0 ) {
+            fprintf(stderr, 
+                    "Invalid constraint parameter. Attribute name undefined: '%s'\n", constraint_line);
+            return -1;
+        }
+        printf("Foreignkey attr '%s' is defined in parent!\n", constraint_line);
+        *pa_count += 1;
+        parent_attrs = (char**) realloc(parent_attrs, *pa_count * sizeof(char *));
+        parent_attrs[ *pa_count - 1] = (char*) malloc( strlen(constraint_line) );
+        strcpy(parent_attrs[ *pa_count - 1], constraint_line);
+
+    }
+
+    return 0;
+}
