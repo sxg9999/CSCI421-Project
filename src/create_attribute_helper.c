@@ -186,6 +186,18 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             not_null_constraint->type = NOT_NULL;
             // add attr_constraint to attribute struct
             attribute->constr[i] = not_null_constraint;
+
+            // update table
+            table->num_of_notnull += 1;
+            // allot space for notnull attribute string
+            table->notnull_attrs= (char **) realloc(
+                    table->notnull_attrs, (table->num_of_notnull) * sizeof(char *) ); 
+            table->notnull_attrs[table->num_of_notnull - 1] = (char*) malloc(
+                strlen(attribute->attr_name));
+
+            strcpy(table->notnull_attrs[table->num_of_notnull - 1], attribute->attr_name);
+            printf("Added notnull constraint '%s' to table '%s' \n", 
+                    table->notnull_attrs[table->num_of_notnull - 1], table->table_name);
         }
         else if (constraint_types[i] == PRIMARY_KEY) { // primarykey
             // check if primarykey constraint was already used
@@ -196,9 +208,15 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             primary_key_constraint->type = PRIMARY_KEY;
             // add attr_constraint to attribute struct
             attribute->constr[i] = primary_key_constraint;
+
+            // update table
             table->p_key_len += 1;
+            // allot space for primarykey string
             table->primary_key_attrs = (char **) realloc(
                     table->primary_key_attrs, (table->p_key_len) * sizeof(char *) ); 
+            table->primary_key_attrs[table->p_key_len - 1] = (char*) malloc(
+                strlen(attribute->attr_name));
+
             strcpy(table->primary_key_attrs[table->p_key_len - 1], attribute->attr_name);
             printf("Added primary key '%s' to table '%s' \n", 
                     table->primary_key_attrs[table->p_key_len - 1], table->table_name);
@@ -211,6 +229,18 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             unique_constraint->type = UNIQUE;
             // add attr_constraint to attribute struct
             attribute->constr[i] = unique_constraint;
+
+            //update table
+            table->num_of_unique += 1;
+            // allot space for unique attribute string
+            table->unique_attrs = (char **) realloc(
+                    table->unique_attrs, (table->num_of_unique) * sizeof(char *) ); 
+            table->unique_attrs[table->num_of_unique - 1] = (char*) malloc(
+                strlen(attribute->attr_name));
+
+            strcpy(table->unique_attrs[table->num_of_unique - 1], attribute->attr_name);
+            printf("Added unique constraint '%s' to table '%s' \n", 
+                    table->unique_attrs[table->num_of_unique - 1], table->table_name);
         }
         else {
             fprintf( stderr, "Invalid constraint type '%d': '%s'\n", 
@@ -218,7 +248,7 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             return -1;
         }
     }
-
+    //printf("TABLE NAME: '%s'\n", table->table_name);
     return 0;
 }
 

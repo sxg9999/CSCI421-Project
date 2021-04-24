@@ -91,6 +91,12 @@ struct catalog_table_data{
     char* table_name;                      // The name of the table
     struct hashtable* attr_ht;             //A hashtable that stores the attributes data (attr_data struct) of the table
 
+    int num_of_unique;                     // the total number of attributes with unique constraint
+    char** unique_attrs;                   // list of names of attributes that have unique constraint on them
+
+    int num_of_notnull;                     // the total number of attributes with notnull constraint
+    char** notnull_attrs;                   // list of names of attributes that have notnull constraint on them
+
 
     int p_key_len;                         // Size of the primary key (amount of attributes that makes up a primary key)
     char** primary_key_attrs;              // A array of attributes that makes up a primary key (in their string form)

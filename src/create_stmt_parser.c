@@ -51,14 +51,16 @@ int parse_create_table_stmt( char* input_statement ) {
     // initialize the table
     new_table->table_num = catalog_ht->size;
     new_table->attr_ht = ht_create(12, 0.75);
+    // unique constraint fields
+    new_table->num_of_unique = 0;
+    // primary key fields
     new_table->p_key_len = 0;
-    new_table->primary_key_attrs = (char **) malloc( sizeof(char*));
+    // foreign key fields
     new_table->num_of_f_key = 0;
     new_table->f_key_arr_size = 0;
-    //new_table->f_keys = ;
+    // foreign table fields
     new_table->num_of_childs = 0;
     new_table->child_arr_size = 0;
-    //new_table->childs = 0;
 
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
