@@ -13,6 +13,7 @@
 #include "../include/catalog/catalog.h"
 #include "../include/hash_collection/hash_collection.h"
 #include "../include/db_types.h"
+#include "../include/catalog/catalog_printer.h"
 
 
 int constraint_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
@@ -30,10 +31,10 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         return -1;
     }
     enum db_type type = typeof_kw(token);
-    printf("Constraint '%s' type: '%d'\n", token, type);
+    //printf("Constraint '%s' type: '%d'\n", token, type);
     // check if foreignkey
     if ( type == FOREIGN_KEY ) {
-        printf("Attribute is a foreign constraint: '%s'\n", token);
+        //printf("Attribute is a foreign key constraint: '%s'\n", token);
 
         // foreignkey( <a 1> ... <a N> ) references <r name>( <r 1> ... <r N> ):
         // track attrs in foreignkey( <a 1> ... <a N> ) - <a N>
@@ -64,7 +65,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                     "Invalid constraint definition. Missing 'references' keyword: '%s'\n", token);
                 return -1;
         }
-        printf("Valid 'reference' keyword present\n");
+        //printf("Valid 'reference' keyword present\n");
 
         // <relation>( check
         token = strtok(NULL, " ");
@@ -74,7 +75,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 return -1;
         }
         token[strlen(token) - 1] = '\0';
-        printf("Parent table name: '%s'\n", token);
+        //printf("Parent table name: '%s'\n", token);
         // check if parent table is defined
         if (catalog_contains(token) == 0) {
             fprintf(stderr, "Invalid: table '%s' not defined\n", token);
@@ -82,7 +83,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         }
         new_foreign_key->parent_table_name = (char *) malloc( strlen(token) );
         strcpy(new_foreign_key->parent_table_name, token);
-        printf("Foreign table '%s' being referenced exists!\n", new_foreign_key->parent_table_name);
+        //printf("Foreign table '%s' being referenced exists!\n", new_foreign_key->parent_table_name);
 
         // <r_1> ... <r_n>
         int valid_parent_attr = foreign_parent_attr_check(new_foreign_key->parent_table_name, token, 
@@ -94,21 +95,26 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         }
 
         // compare <a 1> ... <a N> and <r_1> ... <r_n>
-        //int compare_success = compare_new_to_parent_attr_types();
+        int compare_success = compare_new_to_parent_attr_types(
+                new_table, foreign_attr, fa_count, 
+                new_foreign_key->parent_table_name, parent_attr, pa_count
+        );
+        if (compare_success == -1) {
+            fprintf(stderr, "Foreignkey declaration type mismatch: '%s'\n", currentAttr);
+            return -1;
+        } 
+        //printf("Types align in foreignkey!\n");
 
         // add the new foreignkey struct to table
         if (new_foreign_key->parent_table_name == NULL) {
             fprintf(stderr, "Invalid: foreign key parent name not specified: '%s'\n", currentAttr);
             return -1;
         }
-        new_table->num_of_f_key += 1;
-        new_table->f_key_arr_size += 1;
-        new_table->f_keys = (struct foreign_key_data**) realloc(new_table->f_keys,
-                new_table->num_of_f_key * sizeof(struct foreign_key_data*));
-        new_table->f_keys[new_table->num_of_f_key] = new_foreign_key;
+        printf("Constraint '%s' is a valid  foreign key constraint!\n", currentAttr);
+
     } 
     else { // either a primarykey, unqiue, or invalid
-        printf("Attribute is a primarykey/unique constraint: '%s'\n", token);
+        //printf("Attribute is a primarykey/unique constraint: '%s'\n", token);
 
         // check if valid constraint def
         if ( type != PRIMARY_KEY && type != UNIQUE) {
@@ -142,8 +148,8 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                         token, currentAttr);
                 return -1;
             }
-            printf("Attribute '%s' valid in constraint '%s'\n", 
-                    token, currentAttr);
+            //printf("Attribute '%s' valid in constraint '%s'\n", 
+            //        token, currentAttr);
             // add constraint to attr_struct
             struct attr_data* attribute = (struct attr_data*) sv_ht_get(new_table->attr_ht, token);
             struct attr_constraint* new_constraint = (struct attr_constraint*) malloc( 
@@ -194,6 +200,8 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 return -1;
             }
         }
+        printf("Constraint '%s' is a valid  primary key/unique constraint!\n", currentAttr);
+
     }    
     
     return 0;
@@ -209,6 +217,49 @@ int compare_new_to_parent_attr_types(
                 n_count, parent_table_name, p_count);
         return -1;
     }
+    struct catalog_table_data* parent_table = sv_ht_get(catalog_get_ht(), parent_table_name);
+    
+    // create a new foreign key
+    struct foreign_key_data* new_f_key = (struct foreign_key_data*) malloc(
+            sizeof(struct foreign_key_data));
+    new_f_key->parent_table_name = (char*) malloc( strlen(parent_table_name));
+    new_f_key->parent_table_name = parent_table_name;
+    new_f_key->f_keys = (struct hashtable*) malloc( sizeof(struct hashtable));
+    new_f_key->f_keys = ht_create(12, 0.75);
+
+    for( int i = 0; i < n_count; i++ ) {
+        char* n_attr = new_attributes[0];
+        char* p_attr = parent_attributes[0];
+        /*printf("Checking if attribute '%s' in table '%s' is same type as \
+attribute '%s' in table '%s'\n", 
+            n_attr, new_table->table_name, p_attr, parent_table_name);*/
+        enum db_type n_type = ((struct attr_data*)sv_ht_get(new_table->attr_ht, n_attr))->type;
+        enum db_type p_type = ((struct attr_data*)sv_ht_get(parent_table->attr_ht, p_attr))->type;
+        if( n_type != p_type ) {
+            fprintf(stderr, "Attribute mismatch types:\
+             '%s' in table '%s' is type '%d'. '%s' in table '%s' is type '%d'\n", 
+            n_attr, new_table->table_name, n_type,
+            p_attr, parent_table_name, p_type);
+            return -1;
+        }
+        //printf("Adding foreign key pairing...\n");
+        
+        // add pair to f key hashtable
+        sv_ht_add(new_f_key->f_keys, n_attr, p_attr);
+
+        
+    }
+    // add new f key to new table
+    new_table->num_of_f_key += 1;
+    new_table->f_key_arr_size += 1;
+    new_table->f_keys = (struct foreign_key_data**) realloc(
+        new_table->f_keys, new_table->num_of_f_key * sizeof(struct foreign_key_data*)
+    );
+    new_table->f_keys[new_table->num_of_f_key - 1] = (struct foreign_key_data*) malloc(
+        sizeof(struct foreign_key_data)
+    );
+    new_table->f_keys[new_table->num_of_f_key - 1] = new_f_key;
+
     return 0;
 }
 
@@ -271,7 +322,6 @@ int foreign_parent_attr_check(char* parent_name, char* constraint_line,
         // get parent table
         struct catalog_table_data* parent_table = sv_ht_get( catalog_get_ht(), parent_name);
         // check for attr in parent table hashtable
-        printf("Table name: '%s'\n", parent_table->table_name);
         int parent_contains_attr = sv_ht_contains(parent_table->attr_ht, constraint_line);
         // check error code
         if ( parent_contains_attr != 1 ) {
