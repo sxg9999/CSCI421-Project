@@ -18,7 +18,7 @@
 #include "../include/hash_collection/hash_collection.h"
 #include "../include/db_types.h"
 #include "../include/catalog/catalog_printer.h"
-
+#include "../include/storage_mediator/storage_mediator.h"
 
 
 
@@ -122,7 +122,7 @@ int parse_create_table_stmt( char* input_statement ) {
     }
     strcpy(new_table->table_name, table_name); 
     printf("Adding table '%s' to catalog...\n", new_table->table_name);
-    int add_to_catalog_success = catalog_add_table(new_table);
+    int add_to_catalog_success = sm_add_table(new_table);
     if (add_to_catalog_success == -1) {
         fprintf( stderr, "Error trying to add table '%s' to the catalog.\n", new_table->table_name);
         return -1;
