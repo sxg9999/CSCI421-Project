@@ -53,6 +53,8 @@ int parse_create_table_stmt( char* input_statement ) {
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
     new_table->num_of_unique = 0;
+    // notnull constraint fields
+    new_table->num_of_notnull = 0;
     // primary key fields
     new_table->p_key_len = 0;
     // foreign key fields

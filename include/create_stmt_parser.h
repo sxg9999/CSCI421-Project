@@ -13,6 +13,22 @@
 #include "../include/db_types.h"
 
 /**
+ * Compare the types of attributes defined as foreign to their corresponding attribute
+ * in their parent table.
+ * @param new_table the new table being constructed
+ * @param new_attributes list of foreign attributes in new table
+ * @param n_count number of foreign attributes in new table
+ * @param parent_table_name the name of parent table foreign keys belong to
+ * @param parent_attributes list of attributes foreign attributes correspond to
+ * @param p_count number of attributes in parent table being referenced
+ * @return 0 if successful, valid one-to-one correspondance, else -1 for failure
+ */
+ int compare_new_to_parent_attr_types(
+    struct catalog_table_data* new_table, char** new_attributes, int n_count,
+    char* parent_table_name, char** parent_attributes, int p_count);
+
+
+/**
  * Check if an attributes specified in a foreignkey constraint is already defined.
  * @param attr_names list of attr names already defined
  * @param current_attr current attr in foreignkey constraint being check
