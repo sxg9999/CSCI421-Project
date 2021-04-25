@@ -19,10 +19,10 @@
 int attribute_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
         struct catalog_table_data* new_table) 
 {
-    printf("Checking if '%s' is a valid attribute...\n", currentAttr);
+    //printf("Checking if '%s' is a valid attribute...\n", currentAttr);
     attr_names[*name_count] = (char*)malloc( strlen( token ) + 1);
     strcpy(attr_names[*name_count], token);
-    printf("Attribute name: '%s'\n", attr_names[*name_count]);
+    //printf("Attribute name: '%s'\n", attr_names[*name_count]);
     // attribute struct
     struct attr_data* new_attribute = 
             (struct attr_data*) malloc(sizeof(struct attr_data));
@@ -48,13 +48,13 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
     }
     
     // check if valid attribute type
-    printf("Checking if attribute type '%s' is valid...\n", token);
+    //printf("Checking if attribute type '%s' is valid...\n", token);
     if ( is_attr_type(token) == -1 ) {
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid attribute definition. Attribute type is invalid", token);
         return -1;
     } 
-    printf("'%s' is a valid attribute type.\n", token);
+    //printf("'%s' is a valid attribute type.\n", token);
     // get attribute type of attribute
     enum db_type attribute_type = typeof_kw(token);
     int attribute_size = attribute_type_size(attribute_type, token, currentAttr);
@@ -148,8 +148,8 @@ int attribute_constraint_check(char* token, char* attribute,
         strcpy(constraints_used[constraints_count], token);
         // add constraint type
         constraint_types[constraints_count] = typeof_kw(constraints_used[constraints_count]);
-        printf("Constraint on attribute found: '%s' '%d'\n", 
-                constraints_used[constraints_count], constraint_types[constraints_count]);
+        //printf("Constraint on attribute found: '%s' '%d'\n", 
+        //        constraints_used[constraints_count], constraint_types[constraints_count]);
         constraints_count += 1;
         
 
@@ -176,7 +176,7 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             struct attr_data* attribute, struct catalog_table_data* table) {
     printf("Adding constraints to attribute '%s'...\n", attribute->attr_name);
     for (int i = 0; i < attribute->num_of_constr; i++) {
-        printf("Adding constraint '%s' '%d'...\n", constraints[i], constraint_types[i]);
+        //printf("Adding constraint '%s' '%d'...\n", constraints[i], constraint_types[i]);
 
         if (constraint_types[i] == NOT_NULL) { // not null
             // create attr_constraint struct
@@ -323,20 +323,17 @@ int char_type_check(char* token, enum db_type attribute_type)
     // skip '('
     char_attr += 1;
 
-    printf("Attribute '%s' is a vchar/char! Getting length of vchar/char...\n", token);
+    //printf("Attribute '%s' is a vchar/char! Getting length of vchar/char...\n", token);
     length = 0;
     char* text_part;
-
     length = strtol(char_attr, &text_part, 10);
-
-
 
     if ( length < 1) {
         fprintf( stderr, "Invalid varchar/char length speicifed: '%d' in '%s'. Length must be >= 1\n",
                 length, token );
         return -1;
     }
-    printf("Length of '%s' found: '%d'.\n", token, length);
+    //printf("Length of '%s' found: '%d'.\n", token, length);
 
     return length;
 }

@@ -17,6 +17,7 @@
 #include "../include/catalog/catalog.h"
 #include "../include/hash_collection/hash_collection.h"
 #include "../include/db_types.h"
+#include "../include/catalog/catalog_printer.h"
 
 
 
@@ -50,25 +51,36 @@ int parse_create_table_stmt( char* input_statement ) {
             (struct catalog_table_data*) malloc(sizeof(struct catalog_table_data));
     // initialize the table
     new_table->table_num = catalog_ht->size;
+    new_table->table_name = NULL;
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
     new_table->num_of_unique = 0;
+    new_table->unique_group_sizes = NULL;
     // notnull constraint fields
     new_table->num_of_notnull = 0;
+    new_table->notnull_attrs = NULL;
     // primary key fields
     new_table->p_key_len = 0;
+    new_table->primary_key_attrs = NULL;
     // foreign key fields
     new_table->num_of_f_key = 0;
     new_table->f_key_arr_size = 0;
+    new_table->f_keys = NULL;
     // foreign table fields
     new_table->num_of_childs = 0;
     new_table->child_arr_size = 0;
+    new_table->childs = NULL;
 
     //get everything to left of first open parenthesis
     table_name = strtok(statement, "(");
     if ( null_check_str_create_stmt(table_name, input_statement) ) {
         fprintf(stderr, "Invalid statement\n");
         return -1;
+    }
+    for (int i = 0; table_name[i] != '\0'; i++) {
+        if ( isalpha(table_name[i]) ) {
+            table_name[i] = tolower(table_name[i]);
+        }
     }
     // set table name 
     new_table->table_name = (char *)malloc( strlen(table_name) + 1 );
@@ -115,7 +127,7 @@ int parse_create_table_stmt( char* input_statement ) {
         fprintf( stderr, "Error trying to add table '%s' to the catalog.\n", new_table->table_name);
         return -1;
     }
-    printf("Successful Create Table statement: '%s'\n", input_statement);
+    printf("Successfully created table '%s'!\n", input_statement);
 
     free(attributes);
     return 0;
