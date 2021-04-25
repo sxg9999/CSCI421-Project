@@ -19,4 +19,13 @@ int attr_has_notnull(struct attr_data* a_data){
     return 0;
 }
 
-int attr_has_unique(struct attr_data* a_data);
+int attr_has_unique(struct attr_data* a_data){
+    if(a_data->num_of_constr > 0){
+        for(int i = 0; i < a_data->num_of_constr; i++){
+            if(a_data->constr[i]->type == UNIQUE){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}

@@ -9,7 +9,6 @@
 #include "../../include/storage_mediator/storage_mediator_printer.h"
 
 #include "../../include/database_util/database_helper.h"
-#include "../../include/database_util/db_exec_ddl.h"
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/file_sys/file_sys.h"
 #include "../../include/storagemanager.h"
@@ -86,7 +85,6 @@ void init_db(){
     create_database(db_params->db_loc_path, db_params->page_size, db_params->buffer_size, db_loc_exist);
     create_multiline_input();
     init_catalog(db_params->db_loc_path);
-    init_ddl_exec_ddl();
 }
 
 
@@ -102,6 +100,5 @@ void free_db_params(){
 
 void db_close(){
     free_db_params();
-    db_exec_ddl_close();
     catalog_close();
 }

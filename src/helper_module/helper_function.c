@@ -71,6 +71,7 @@ void str_lower(char* buffer, char* str, int length){
             buffer[i] = tolower(str[i]);
         }
     }
+    buffer[length] = 0;
 }
 
 /**

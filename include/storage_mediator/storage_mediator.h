@@ -43,4 +43,13 @@ int sm_alter_table();
 int sm_insert_records(char* table_name, union record_item** records, int num_of_records);
 
 
+/**
+ * Checks if a record with the given key exist
+ * @param table_id : the table_id
+ * @param key_values : the primary key values
+ * @return 1 for true, 0 for false
+ */
+int sm_record_exist(int table_id, union record_item* key_values);
+
+
 #endif

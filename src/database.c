@@ -16,7 +16,6 @@
 #include "../include/ddl_parser.h"
 #include "../include/helper_module/helper_function.h"
 #include "../include/database_util/database_helper.h"
-#include "../include/database_util/db_exec_ddl.h"
 #include "../include/example.h"
 #include "../include/storage_mediator/storage_mediator.h"
 #include "../include/db_types.h"
