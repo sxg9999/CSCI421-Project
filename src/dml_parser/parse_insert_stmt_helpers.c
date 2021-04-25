@@ -75,7 +75,7 @@ int build_records(char* table_name, char** tuple_str_arr, int num_of_tuple,
 
     printf("%s %s\n", func_loc_str, "Finished converting tuple strings to records");
 
-    test_print_records(*record_arr, *num_of_records);
+//    test_print_records(*record_arr, *num_of_records);
 
     char** record_str_arr = record_to_str_n(attr_data_arr, *record_arr, num_of_attr, *num_of_records);
     if(record_str_arr == NULL){

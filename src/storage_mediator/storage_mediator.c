@@ -12,6 +12,7 @@
 
 #include "../../include/storage_mediator/storage_mediator.h"
 #include "../../include/storage_mediator/storage_mediator_helper.h"
+#include "../../include/stringify_record.h"
 
 
 int sm_add_table(struct catalog_table_data* t_data){
@@ -101,7 +102,24 @@ int sm_drop_table(char* table_name){
 int sm_alter_table();
 
 int sm_insert_records(char* table_name, union record_item** records, int num_of_records){
-    //to be done
+    char func_loc_str[] = "(storage_mediator.c/sm_insert_records)";
+
+    if(records == NULL || num_of_records <= 0){
+        printf("Error: Invalid number of records to insert. %s", func_loc_str);
+        exit(0);
+    }
+
+    int table_id = catalog_get_table_num(table_name);
+    int insert_error = 0;
+
+    for(int record_index = 0; record_index <= num_of_records; record_index++){
+        printf("Inserting record_%d. %s", record_index, func_loc_str);
+        insert_error = insert_record(table_id, records[record_index]);
+        if(insert_error == -1){
+            printf("Error: Cannot insert record_%d. %s", record_index,  func_loc_str);
+            return -1;
+        }
+    }
     return 0;
 }
 

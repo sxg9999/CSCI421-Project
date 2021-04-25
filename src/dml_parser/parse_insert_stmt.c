@@ -10,6 +10,7 @@
 #include "../../include/catalog/catalog_attr_helper.h"
 #include "../../include/storagemanager.h"
 #include "../../include/helper_module/helper_function.h"
+#include "../../include/storage_mediator/storage_mediator.h"
 
 
 
@@ -53,6 +54,10 @@ int parse_insert_stmt(char* insert_stmt) {
         printf("%s %s\n", func_loc_str, "Failed to convert tuples to records");
         return -1;
     }
+
+    sm_insert_records(table_name, records, num_of_records);
+
+    //got to free everything used for inserting
 
     return 0;
 }
