@@ -27,6 +27,13 @@ int catalog_add_table(struct catalog_table_data* t_data);
 int catalog_get_table_num(char* table_name);
 
 /**
+ * Gets the table metadata
+ * @param table_name : name of the table
+ * @return
+ */
+struct catalog_table_data* catalog_get_table_metadata(char* table_name);
+
+/**
  * remove the table with the table_name
  * @param table_name
  * @return return the table number of the removed table
@@ -59,6 +66,22 @@ int catalog_get_data_types(struct catalog_table_data* t_data, int** data_types);
  */
 int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_indices);
 
+
+/**
+ * Returns an array of the attribute types in enums
+ * @param table_name : name of the table
+ * @param attr_types : a array of attribute types
+ * @return the size of the array that stores the attribute types
+ */
+int catalog_get_attr_types(char* table_name, enum db_type** attr_types);
+
+
+/**
+ * Checks if the catalog's table metadata is valid
+ * @param t_data : the catalog's table metadata
+ * @return 1 for true, 0 for false
+ */
+int catalog_table_data_is_valid(struct catalog_table_data* t_data);
 
 struct hashtable* catalog_get_ht();
 

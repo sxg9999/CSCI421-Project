@@ -6,11 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <time.h>
 
 /**
- * checks if the the str is a valid number
+ * checks if the the str is a valid int
  * @param str
  * @return 1 for true, 0 for false
  */
@@ -31,6 +32,32 @@ int is_int(char* str){
 
 }
 
+/**
+ * checks if the str is a valid number
+ * @param str : string to be tested
+ * @return 1 for true, 0 for false
+ */
+
+int is_num(char* str){
+    if(str[0] == '-'){
+        str = str + 1;
+    }
+
+    bool decimal_exist = false;
+    for(int i = 0; str[i]!='\0'; i++){
+        if(str[i] < '0' || str[i] > '9'){
+
+            if(str[i] == '.' && decimal_exist == false){
+                decimal_exist = true;
+                continue;
+            }
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 
 void clear_buffer(char* buffer, int length){
     for(int i = 0; i < length; i++){
@@ -44,6 +71,7 @@ void str_lower(char* buffer, char* str, int length){
             buffer[i] = tolower(str[i]);
         }
     }
+    buffer[length] = 0;
 }
 
 /**

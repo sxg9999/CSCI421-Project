@@ -16,7 +16,6 @@
 #include "../include/ddl_parser.h"
 #include "../include/helper_module/helper_function.h"
 #include "../include/database_util/database_helper.h"
-#include "../include/database_util/db_exec_ddl.h"
 #include "../include/example.h"
 #include "../include/storage_mediator/storage_mediator.h"
 #include "../include/db_types.h"
@@ -42,7 +41,7 @@ int execute_non_query(char * statement){
         printf("%s %s\n", func_loc_str, "Statement is of type DDL");
     }else if(stmt_type == DML){
         printf("%s %s\n", func_loc_str, "Statement is of type DML");
-        parse_dml_statement(statement);
+        error = parse_dml_statement(statement);
     }else{
         fprintf(stderr, "%s %s\n", func_loc_str,
                 "Expected either DDL or DML but received neither");

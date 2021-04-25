@@ -34,9 +34,11 @@ int catalog_write_table(FILE* catalog_file, struct catalog_table_data* t_data){
 }
 
 int catalog_write_attr_constr(FILE* catalog_file, int num_of_constr, struct attr_constraint** constr){
-
+    char func_loc_str[] = "(catalog_io_helper.c/catalog_write_attr_constr)";
     /* write out the total number of constraints */
-    fwrite(&(num_of_constr), sizeof(int), 1, catalog_file);
+    printf("%s writing out %d constraint\n", func_loc_str, num_of_constr);
+    fwrite(&num_of_constr, sizeof(int), 1, catalog_file);
+
 
     for(int i = 0; i < num_of_constr; i++){
         enum db_type type = constr[i]->type;
@@ -47,6 +49,7 @@ int catalog_write_attr_constr(FILE* catalog_file, int num_of_constr, struct attr
         fwrite(&(type_int_val), sizeof(int), 1, catalog_file);
 //        if(type == DEFAULT){
 //            // if the type is default then write out the default value too
+//
 //
 //        }
     }
@@ -218,11 +221,14 @@ int catalog_read_table(FILE* catalog_file, struct catalog_table_data** t_data){
 }
 
 int catalog_read_attr_constr(FILE* catalog_file, int* num_of_constr, struct attr_constraint*** constr){
+    char func_loc_str[] = "(catalog_io_helper.c/catalog_read_attr_constr)";
 
     /* read in the number of constraint */
     int count;
     fread(&count, sizeof(int), 1, catalog_file);
     *num_of_constr = count;
+    printf("%s Read in %d constraints\n", func_loc_str, *num_of_constr);
+
 
     *constr = malloc(sizeof(struct attr_constraint*) * 5);
 
@@ -287,7 +293,7 @@ int catalog_read_attr(FILE* catalog_file, struct hashtable** attr_ht){
         struct attr_constraint** constr;
         catalog_read_attr_constr(catalog_file, &num_of_constr, &constr);
 
-        a_data->num_of_constr = 0;
+        a_data->num_of_constr = num_of_constr;
         a_data->constr = constr;
 
         sv_ht_add(*attr_ht, a_data->attr_name, a_data);

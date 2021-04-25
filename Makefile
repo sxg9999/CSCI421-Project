@@ -7,7 +7,7 @@
 
 # compiler flags for debugging and warnings
 CC = gcc
-CFLAGS = -g -Wall -Wextra -lm -std=c99
+CFLAGS = -g -Wall -Wextra -lm
 CFLAGS_LESS = -g -lm -std=c99
 SOURCE_FILES = src/*.c src/helper_module/*.c src/hash_collection/*.c src/catalog/*.c src/file_sys/*.c src/database_util/*.c src/storage_mediator/*.c src/dml_parser/*.c
 HEADER_FILES = include/*.h include/helper_module/*.h include/hash_collection/*.h include/catalog/*.h include/file_sys/*.h include/database_util/*.h include/storage_mediator/*.h

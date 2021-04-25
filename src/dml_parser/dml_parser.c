@@ -8,8 +8,11 @@
 #include <string.h>
 
 #include "../../include/dml_parser.h"
+#include "../../include/parse_insert_stmt.h"
+
 #include "../../include/db_types.h"
 #include "../../include/helper_module/helper_function.h"
+
 
 int parse_dml_statement( char* statement) {
     char func_loc_str[] = "(dml_parser.c/parse_dml_statement)";
@@ -27,6 +30,7 @@ int parse_dml_statement( char* statement) {
     enum db_type kw_type = typeof_kw(keyword_str);
     switch(kw_type){
         case INSERT:
+            error_code = parse_insert_stmt(statement);
             break;
         case DELETE:
             break;

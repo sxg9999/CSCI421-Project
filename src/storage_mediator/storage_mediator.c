@@ -12,10 +12,18 @@
 
 #include "../../include/storage_mediator/storage_mediator.h"
 #include "../../include/storage_mediator/storage_mediator_helper.h"
+#include "../../include/stringify_record.h"
 
 
 int sm_add_table(struct catalog_table_data* t_data){
     char func_str[] = "(storage_mediator.c/sm_add_table)";
+
+    if(catalog_table_data_is_valid(t_data)){
+        printf("Table meta data struct is valid\n");
+    }else{
+        printf("Table meta data is invalid\n");
+        exit(0);
+    }
 
     /* check if the table already exist */
     if(catalog_contains(t_data->table_name)){
@@ -99,3 +107,48 @@ int sm_drop_table(char* table_name){
 }
 
 int sm_alter_table();
+
+int sm_insert_records(char* table_name, union record_item** records, int num_of_records){
+    char func_loc_str[] = "(storage_mediator.c/sm_insert_records)";
+
+    if(records == NULL || num_of_records <= 0){
+        printf("Error: Invalid number of records to insert. %s", func_loc_str);
+        exit(0);
+    }
+
+    int table_id = catalog_get_table_num(table_name);
+    int insert_error = 0;
+
+    for(int record_index = 0; record_index < num_of_records; record_index++){
+        printf("Inserting record_%d. %s\n", record_index, func_loc_str);
+        insert_error = insert_record(table_id, records[record_index]);
+        if(insert_error == -1){
+            printf("Error: Cannot insert record_%d. %s\n", record_index,  func_loc_str);
+            return -1;
+        }
+    }
+    return 0;
+}
+
+int sm_record_exist(int table_id, union record_item* key_values){
+    char func_loc_str[] = "(storage_mediator.c/sm_record_exist)";
+    int rec_exist = 0;      //1 for true and 0 for false
+    union record_item* record = NULL;
+
+    printf("%s %s\n",func_loc_str, "Finding a record with the given key");
+    int get_record_err = get_record(table_id, key_values, &record);
+
+    if(record != NULL){
+        free(record);
+    }
+
+    if(get_record_err == -1){
+        printf("%s %s\n",func_loc_str, "Error: Cannot find a record with the given key");
+    }else if(get_record_err == 0){
+        //successfully found a record with the given key
+        printf("%s %s\n",func_loc_str, "Found record with the given key");
+        rec_exist = 1;
+    }
+
+    return rec_exist;
+}

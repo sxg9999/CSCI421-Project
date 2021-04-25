@@ -136,6 +136,10 @@ int catalog_get_table_num(char* table_name){
     return t_data->table_num;
 }
 
+struct catalog_table_data* catalog_get_table_metadata(char* table_name){
+    return sv_ht_get(table_ht, table_name);
+}
+
 /**
  * Remove all the foreign key attribute reference to the parent table
  * @param t_data : child table data
@@ -512,6 +516,156 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
         (*p_key_indices)[i] = a_data->index;
     }
     return p_key_len;
+}
+
+int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
+    char func_loc_str[] = "(catalog.c/catalog_get_attr_types)";
+
+    /* Verify that the table exist */
+    if(catalog_contains(table_name) == 0){
+        printf("%s Error: Table \"%s\" does not exist\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Get the table meta data */
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+    if(t_data == NULL){
+        printf("%s Unexpected Error: Cannot get table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Get the hashtable that stores the attribute */
+    struct hashtable* attr_ht = t_data->attr_ht;
+    if(attr_ht == NULL){
+        printf("%s Unexpected Error: Cannot get attr_ht (a hashtable that stores attribute) for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    int arr_size = attr_ht->size;
+    if(arr_size <= 0){
+        printf("%s Unexpected Error: There exist no attributes for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+    /* Allocate memory for the array that is storing the attribute types */
+    *attr_types = malloc(sizeof(enum db_type) * arr_size);
+
+    /* Get all the attribute value nodes from the attribute hashtable */
+    struct ht_node** val_nodes = attr_ht->node_list;
+    if(val_nodes == NULL){
+        printf("%s Unexpected Error: attr_ht->node_list is NULL for table \"%s\"\n", func_loc_str, table_name);
+        return -1;
+    }
+
+
+    /* Add all the attribute types to the attr_types array in order of insertion */
+    for(int i = 0; i < arr_size; i++){
+        struct attr_data* a_data = val_nodes[i]->value->v_ptr;
+        if(a_data == NULL){
+            printf("%s Unexpected Error: Cannot retrieve attribute data from attribute node for table \"%s\"\n", func_loc_str, table_name);
+
+            /* Free the array that was allocated */
+            free(attr_types);
+            return -1;
+        }
+        (*attr_types)[i] = a_data->type;
+    }
+
+    return arr_size;
+}
+
+int catalog_table_data_is_valid(struct catalog_table_data* t_data){
+    if(t_data == NULL){
+        printf("Error: t_data is NULL\n");
+        return 0;
+    }
+    int num_of_tables = storage_get_num_of_tables();
+    if(t_data->table_num < 0){
+        printf("Error: Invalid table number: %d\n", t_data->table_num);
+        return 0;
+    }
+
+    if(t_data->table_name[0] == '\0' || t_data->table_name == NULL || catalog_contains(t_data->table_name)){
+        printf("Error: Invalid table name: %s\n", t_data->table_name);
+        return 0;
+    }
+
+    /*Check if the attribute hashtable is valid*/
+    struct hashtable* attr_ht = t_data->attr_ht;
+    if(attr_ht == NULL || attr_ht->size <= 0){
+        printf("Error: Invalid attribute hashtable\n");
+        return 0;
+    }
+
+    if(t_data->p_key_len < 1){
+        printf("Error: Invalid amount of primary key attributes : %d\n", t_data->p_key_len);
+        return 0;
+    }
+
+    /*Check if primary_key_attrs is valid*/
+    if(t_data->primary_key_attrs == NULL){
+        printf("Error: Primary key attribute array is NULL\n");
+        return 0;
+    }
+
+    char** p_key_attrs_arr = t_data->primary_key_attrs;
+    for(int i = 0; i < t_data->p_key_len; i++){
+        if(p_key_attrs_arr[i] == NULL){
+            printf("Error: p_key_attr[%d] is NULL\n", i);
+            return 0;
+        }
+    }
+
+    if(t_data->num_of_f_key < 0){
+        printf("Error: Number of foreign keys cannot be less than zero\n");
+        return 0;
+    }
+
+    if(t_data->num_of_f_key > 0){
+        if(t_data->num_of_f_key > t_data->f_key_arr_size){
+            printf("Error: Number of foreign keys cannot be greater than its array size\n");
+            return 0;
+        }
+
+        if(t_data->f_keys == NULL){
+            printf("Error: Expected at least one foreign key but the foreign key array is NULL\n");
+            return 0;
+        }
+
+        for(int i = 0; i < t_data->num_of_f_key; i++){
+            if(t_data->f_keys[i] == NULL){
+                printf("Error: f_keys[%d] is NULL\n", i);
+                return 0;
+            }
+        }
+    }
+
+    if(t_data->num_of_childs < 0){
+        printf("Error: Number of child cannot be less than 0\n");
+        return 0;
+    }
+
+    if(t_data->num_of_childs > 0){
+        if(t_data->num_of_childs > t_data->child_arr_size){
+            printf("Error: Number of child cannot be greater than the array that stores it\n");
+            return 0;
+        }
+
+        if(t_data->childs == NULL){
+            printf("Error: Expected at least one child but array is NULL\n");
+            return 0;
+        }
+
+        for(int i = 0; i < t_data->num_of_childs; i++){
+            if(t_data->childs[i] == NULL){
+                printf("Error: childs[%d] is NULL\n", i);
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+
 }
 
 struct hashtable* catalog_get_ht(){

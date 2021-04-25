@@ -66,11 +66,11 @@ void destroy_sv_ht(struct hashtable* ht){
     ht_destroy(ht);
 }
 
-int sv_ht_values(struct hashtable* ht, void*** value_ptrs){
-    *value_ptrs = malloc(sizeof(void*)*ht->size);
+int sv_ht_values(struct hashtable* ht, void*** value_arr){
+    *value_arr = malloc(sizeof(void*)*ht->size);
     struct ht_node** node_list = ht->node_list;
     for(int i = 0; i < ht->size; i++){
-        (*value_ptrs)[i] = node_list[i]->value->v_ptr;
+        (*value_arr)[i] = node_list[i]->value->v_ptr;
     }
     return ht->size;
 }

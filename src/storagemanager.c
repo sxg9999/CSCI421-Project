@@ -1,4 +1,4 @@
-#include "../include/storagemanager.h"
+
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,6 +6,8 @@
 #include <math.h>
 #include <time.h>
 
+#include "../include/storagemanager.h"
+#include "../include/db_types.h"
 //struct to hold metadata about a table
 struct table_data{
     int table_num;
@@ -160,7 +162,6 @@ int create_database( char * db_loc, int page_size, int buffer_size, bool restart
 	if(restart)
 		return restart_database( db_loc );
 	else
-	    printf("Creating a new database\n");
 		return new_database( db_loc, page_size, buffer_size );
 }
 
@@ -171,6 +172,7 @@ int restart_database( char * db_loc ){
 		fprintf(stderr, "Failed to restart database\n");
 		return -1;
 	}
+	printf("Here1\n");
 	page_buffer = malloc(sizeof(struct page_data *) * db_buffer_size);
 	for(int i = 0; i < db_buffer_size; i++){
 		page_buffer[i] = NULL;
@@ -187,8 +189,6 @@ int new_database( char * db_loc, int page_size, int buffer_size ){
 	for(int i = 0; i < buffer_size; i++){
 		page_buffer[i] = NULL;
 	}
-
-	printf("Finish creating a new database\n");
 	return 0;
 }
 
@@ -392,7 +392,7 @@ int remove_record( int table_id, union record_item * key_values ){
 					for(int k = i; k < t_data->num_pages; k++){
 						t_data->pages[k] = t_data->pages[k+1];
 					}
-					t_data->pages = realloc(t_data->pages,sizeof(struct page_data*) * t_data->num_pages);
+					t_data->pages = realloc(t_data->pages, sizeof(int) * t_data->num_pages);
 					t_data->num_pages--;
 				}
 				else{
@@ -412,6 +412,7 @@ int remove_record( int table_id, union record_item * key_values ){
 
 int add_table( int * data_types, int * key_indices, 
                int data_types_size, int key_indices_size ){
+    printf("STORAGE MANAGER ADDING TABLE\n"); 
     int table_num = get_table_num();
     
     struct table_data * t_data = malloc(sizeof(struct table_data));
@@ -433,6 +434,8 @@ int add_table( int * data_types, int * key_indices,
 
 int drop_table( int table_id ){
     char func_str[] = "(storagemanager.c/drop_table)";
+
+    printf("STORAGE MANAGER DROPPING TABLE\n");
 	if(table_id >= num_tables){
         fprintf(stderr, "Invalid table number: %d\n", table_id);
         return -1;
@@ -447,21 +450,22 @@ int drop_table( int table_id ){
 		fprintf(stderr, "Failed to drop table\n");
 		return -1;
 	}
-	//modified
-	//old: table_data[table_id] = NULL;
-	if(table_id == num_tables - 1){
-	    table_data[table_id] = NULL;
-	}else{
+    //modified
+    //old: table_data[table_id] = NULL;
+    if(table_id == num_tables - 1){
+        table_data[table_id] = NULL;
+    }else{
         table_data[table_id] = table_data[num_tables-1];
         table_data[table_id]->table_num = table_id;
         table_data[num_tables-1]=NULL;
-	}
+    }
 
-	num_tables--;
+    num_tables--;
 
     printf("%s %s %d\n", func_str, "Dropped table_id:", table_id);
 
-	return 0;
+
+    return 0;
 }
 
 int clear_table( int table_id ){
@@ -569,34 +573,36 @@ static int compare_record(struct table_data * t_data,
                           union record_item * r1, union record_item * r2){
 	for(int j = 0; j < t_data->num_key_attr; j++){
 		int i = t_data->key_indices[j];
+		int rs1, rs2;
+		int attr_type_val = t_data->attr_types[i];
         switch(t_data->attr_types[i]){
-            case 0: //int
+            case INT: //int
                 if(r1[i].i < r2[i].i)
                     return -1;
 				else if(r1[i].i > r2[i].i)
 					return 1;
 				break;
-            case 1:; //double
+            case DOUBLE: //double
                 if(r1[i].d < r2[i].d)
                     return -1;
 				else if(r1[i].d > r2[i].d)
 					return 1;
 				break;
-            case 2:; //boolean
+            case BOOL: //boolean
                 if(r1[i].b < r2[i].b)
                     return -1;
 				else if(r1[i].b > r2[i].b)
 					return 1;
 				break;
-            case 3:; // char
-                int rs1 = strcmp(r1[i].c, r2[i].c);
+            case CHAR: // char
+                rs1 = strcmp(r1[i].c, r2[i].c);
                 if (rs1 < 0)
                     return -1;
 				else if(rs1 > 0)
 					return 1;
 				break;
-            case 4:; // varchar
-                int rs2 = strcmp(r1[i].v, r2[i].v);
+            case VARCHAR: // varchar
+                rs2 = strcmp(r1[i].v, r2[i].v);
                 if (rs2 < 0)
                     return -1;
 				else if(rs2 > 0)
@@ -1003,6 +1009,7 @@ static int read_metadata(){
 	
 	//read number of tables
 	fread(&num_tables, sizeof(int), 1, meta_file);
+
 	
 	//read in table metadata
 	table_data = malloc(sizeof(struct table_data *) * num_tables);
@@ -1011,9 +1018,7 @@ static int read_metadata(){
 		read_table_metadata(meta_file);
 	}
 	return 0; 
- }
-
-
+ }	
 
 struct table_data** storage_get_table_meta_datas(){
     return table_data;
@@ -1031,5 +1036,3 @@ void storage_print_t_datas(){
         printf("...Table: %d, num_arr = %d\n", table_data[i]->table_num, table_data[i]->num_attr);
     }
 }
-
-	
