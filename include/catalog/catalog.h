@@ -75,6 +75,14 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
  */
 int catalog_get_attr_types(char* table_name, enum db_type** attr_types);
 
+
+/**
+ * Checks if the catalog's table metadata is valid
+ * @param t_data : the catalog's table metadata
+ * @return 1 for true, 0 for false
+ */
+int catalog_table_data_is_valid(struct catalog_table_data* t_data);
+
 struct hashtable* catalog_get_ht();
 
 void catalog_close();

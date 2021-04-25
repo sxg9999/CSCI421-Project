@@ -1,4 +1,4 @@
-#include "storagemanager.h"
+
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 
+#include "../include/storagemanager.h"
 //struct to hold metadata about a table
 struct table_data{
     int table_num;
@@ -431,7 +432,9 @@ int add_table( int * data_types, int * key_indices,
 }
 
 int drop_table( int table_id ){
-	printf("STORAGE MANAGER DROPPING TABLE\n"); 
+    char func_str[] = "(storagemanager.c/drop_table)";
+
+    printf("STORAGE MANAGER DROPPING TABLE\n");
 	if(table_id >= num_tables){
         fprintf(stderr, "Invalid table number: %d\n", table_id);
         return -1;
@@ -446,8 +449,22 @@ int drop_table( int table_id ){
 		fprintf(stderr, "Failed to drop table\n");
 		return -1;
 	}
-	table_data[table_id] = NULL;
-	return 0;
+    //modified
+    //old: table_data[table_id] = NULL;
+    if(table_id == num_tables - 1){
+        table_data[table_id] = NULL;
+    }else{
+        table_data[table_id] = table_data[num_tables-1];
+        table_data[table_id]->table_num = table_id;
+        table_data[num_tables-1]=NULL;
+    }
+
+    num_tables--;
+
+    printf("%s %s %d\n", func_str, "Dropped table_id:", table_id);
+
+
+    return 0;
 }
 
 int clear_table( int table_id ){
@@ -928,7 +945,7 @@ static void write_table_metadata(struct table_data * t_data, FILE * meta_file){
 
 	
 static int write_metadata(){ 
-	int length = snprintf(NULL, 0, "%smetadata.dat", db_db_loc);
+	int length = snprintf(NULL, 0, "%smetadata.data", db_db_loc);
 	char * meta_loc = malloc(length+1);
 	snprintf(meta_loc, length+1, "%smetadata.data", db_db_loc);
 	

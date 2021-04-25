@@ -104,7 +104,6 @@ struct catalog_table_data{
     char** childs;                         // A array of child table names
 
 
-
 };
 
 //struct child_tables{

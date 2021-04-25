@@ -18,6 +18,12 @@
 int sm_add_table(struct catalog_table_data* t_data){
     char func_str[] = "(storage_mediator.c/sm_add_table)";
 
+    if(catalog_table_data_is_valid(t_data)){
+        printf("Table meta data struct is valid\n");
+    }else{
+        printf("Table meta data is invalid\n");
+    }
+
     /* check if the table already exist */
     if(catalog_contains(t_data->table_name)){
         printf("%s %s \"%s\" %s\n", func_str, "Table", t_data->table_name, "already exist.");
