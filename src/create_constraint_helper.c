@@ -93,6 +93,9 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
             return -1;
         }
 
+        // compare <a 1> ... <a N> and <r_1> ... <r_n>
+        //int compare_success = compare_new_to_parent_attr_types();
+
         // add the new foreignkey struct to table
         if (new_foreign_key->parent_table_name == NULL) {
             fprintf(stderr, "Invalid: foreign key parent name not specified: '%s'\n", currentAttr);
@@ -111,6 +114,12 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         if ( type != PRIMARY_KEY && type != UNIQUE) {
             fprintf(stderr, "Invalid constraint type: '%s'\n", token);
             return -1;
+        }
+        if (type == UNIQUE) {
+            new_table->num_of_unique += 1;
+            new_table->unique_group_sizes = (int*) realloc(new_table->unique_group_sizes, 
+                    new_table->num_of_unique * sizeof(int));
+            new_table->unique_group_sizes[new_table->num_of_unique - 1] = 0;
         }
         while ( (token = strtok(NULL, " ")) ) {
 
@@ -153,12 +162,22 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 strcpy(new_table->primary_key_attrs[new_table->p_key_len - 1], attribute->attr_name);
             }
             else if (type == UNIQUE) {
-                new_table->num_of_unique += 1;
-                new_table->unique_attrs = (char **) realloc(
-                        new_table->unique_attrs, (new_table->num_of_unique) * sizeof(char *) ); 
-                new_table->unique_attrs[new_table->num_of_unique - 1] = (char *) malloc(
+                // DO GROUPING OF UNIQUE: UNIQUE( a b c ) -> {..., {a,b,c}, ...}
+                new_table->unique_group_sizes[new_table->num_of_unique - 1] += 1;
+                new_table->unique_attrs = (char ***) realloc(
+                        new_table->unique_attrs, new_table->num_of_unique * sizeof(char **) ); 
+                new_table->unique_attrs[new_table->num_of_unique - 1] = (char**) realloc(
+                    new_table->unique_attrs[new_table->num_of_unique - 1],
+                    new_table->unique_group_sizes[new_table->num_of_unique - 1] * sizeof(char*));
+                new_table->unique_attrs[new_table->num_of_unique - 1][
+                                            new_table->unique_group_sizes[new_table->num_of_unique - 1] - 1] = 
+                    (char *) realloc(
+                        new_table->unique_attrs[new_table->num_of_unique - 1][
+                            new_table->unique_group_sizes[new_table->num_of_unique - 1] - 1],
                         strlen(attribute->attr_name) ); 
-                strcpy(new_table->unique_attrs[new_table->num_of_unique - 1], attribute->attr_name);
+                strcpy(new_table->unique_attrs[new_table->num_of_unique - 1][
+                            new_table->unique_group_sizes[new_table->num_of_unique - 1] - 1], 
+                            attribute->attr_name);
             }
 
             int is_defined = 0;
@@ -177,6 +196,19 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         }
     }    
     
+    return 0;
+}
+
+int compare_new_to_parent_attr_types(
+    struct catalog_table_data* new_table, char** new_attributes, int n_count,
+    char* parent_table_name, char** parent_attributes, int p_count) {
+    if (n_count != p_count) {
+        fprintf(stderr, "Invalid: imbalance of attributes in foreignkey constraint.\n\
+        Count of foreign keys in table being created: '%d'\n\
+        Count of keys being referenced in parent table '%s': '%d'\n", 
+                n_count, parent_table_name, p_count);
+        return -1;
+    }
     return 0;
 }
 
@@ -226,12 +258,11 @@ int foreign_parent_attr_check(char* parent_name, char* constraint_line,
         printf("Checking if attribute '%s' is defined in parent...\n", constraint_line);
 
         if ( is_keyword(constraint_line) == 0) {
-            fprintf(stderr, "Invalid attribute '%s' not defined in table '%s'.\n", 
-                    constraint_line, parent_name);
+            fprintf(stderr, "Invalid attribute name: '%s', is a keyword\n", constraint_line);
             return -1;
         }
-        // check if attribute is already defined
-        int is_defined = 0;
+
+        // check if attribute is defined in parent
         // check if parent table exists
         if (catalog_contains(parent_name) != 1) {
             fprintf(stderr, "Catalog does not contain table '%s'\n", parent_name);
@@ -241,13 +272,14 @@ int foreign_parent_attr_check(char* parent_name, char* constraint_line,
         struct catalog_table_data* parent_table = sv_ht_get( catalog_get_ht(), parent_name);
         // check for attr in parent table hashtable
         printf("Table name: '%s'\n", parent_table->table_name);
+        int parent_contains_attr = sv_ht_contains(parent_table->attr_ht, constraint_line);
         // check error code
-        if ( is_defined == 0 ) {
-            fprintf(stderr, 
-                    "Invalid constraint parameter. Attribute name undefined: '%s'\n", constraint_line);
+        if ( parent_contains_attr != 1 ) {
+            fprintf(stderr,  "Invalid constraint parameter. Attribute '%s' not defined in parent '%s'\n", 
+                    constraint_line, parent_name);
             return -1;
         }
-        printf("Foreignkey attr '%s' is defined in parent!\n", constraint_line);
+        printf("Foreignkey attr '%s' is defined in parent '%s'!\n", constraint_line, parent_name);
         *pa_count += 1;
         parent_attrs = (char**) realloc(parent_attrs, *pa_count * sizeof(char *));
         parent_attrs[ *pa_count - 1] = (char*) malloc( strlen(constraint_line) );

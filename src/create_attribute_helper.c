@@ -230,17 +230,22 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             // add attr_constraint to attribute struct
             attribute->constr[i] = unique_constraint;
 
-            //update table
+            // add a new unqiue grouping
             table->num_of_unique += 1;
+            table->unique_group_sizes = (int*) realloc(table->unique_group_sizes, 
+                        table->num_of_unique * sizeof(int));
+            table->unique_group_sizes[table->num_of_unique - 1] = 1;
             // allot space for unique attribute string
-            table->unique_attrs = (char **) realloc(
-                    table->unique_attrs, (table->num_of_unique) * sizeof(char *) ); 
-            table->unique_attrs[table->num_of_unique - 1] = (char*) malloc(
-                strlen(attribute->attr_name));
+            table->unique_attrs = (char ***) realloc(
+                    table->unique_attrs, (table->num_of_unique) * sizeof(char **) ); 
+            table->unique_attrs[table->num_of_unique - 1] = (char**) malloc(
+                    table->unique_group_sizes[table->num_of_unique - 1] * sizeof(char*));
+            table->unique_attrs[table->num_of_unique - 1][0] = (char*) malloc( 
+                    strlen(attribute->attr_name) );
 
-            strcpy(table->unique_attrs[table->num_of_unique - 1], attribute->attr_name);
+            strcpy(table->unique_attrs[table->num_of_unique - 1][0], attribute->attr_name);
             printf("Added unique constraint '%s' to table '%s' \n", 
-                    table->unique_attrs[table->num_of_unique - 1], table->table_name);
+                    table->unique_attrs[table->num_of_unique - 1][0], table->table_name);
         }
         else {
             fprintf( stderr, "Invalid constraint type '%d': '%s'\n", 
@@ -248,7 +253,6 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
             return -1;
         }
     }
-    //printf("TABLE NAME: '%s'\n", table->table_name);
     return 0;
 }
 
