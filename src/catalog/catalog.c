@@ -585,7 +585,7 @@ int catalog_table_data_is_valid(struct catalog_table_data* t_data){
         return 0;
     }
 
-    if(t_data->table_name[0] = '\0' || t_data->table_name == NULL || catalog_contains(t_data->table_name)){
+    if(t_data->table_name[0] == '\0' || t_data->table_name == NULL || catalog_contains(t_data->table_name)){
         printf("Error: Invalid table name: %s\n", t_data->table_name);
         return 0;
     }
