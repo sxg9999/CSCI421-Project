@@ -22,6 +22,7 @@ int sm_add_table(struct catalog_table_data* t_data){
         printf("Table meta data struct is valid\n");
     }else{
         printf("Table meta data is invalid\n");
+        exit(0);
     }
 
     /* check if the table already exist */
@@ -118,11 +119,11 @@ int sm_insert_records(char* table_name, union record_item** records, int num_of_
     int table_id = catalog_get_table_num(table_name);
     int insert_error = 0;
 
-    for(int record_index = 0; record_index <= num_of_records; record_index++){
-        printf("Inserting record_%d. %s", record_index, func_loc_str);
+    for(int record_index = 0; record_index < num_of_records; record_index++){
+        printf("Inserting record_%d. %s\n", record_index, func_loc_str);
         insert_error = insert_record(table_id, records[record_index]);
         if(insert_error == -1){
-            printf("Error: Cannot insert record_%d. %s", record_index,  func_loc_str);
+            printf("Error: Cannot insert record_%d. %s\n", record_index,  func_loc_str);
             return -1;
         }
     }

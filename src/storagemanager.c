@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "../include/storagemanager.h"
+#include "../include/db_types.h"
 //struct to hold metadata about a table
 struct table_data{
     int table_num;
@@ -573,33 +574,34 @@ static int compare_record(struct table_data * t_data,
 	for(int j = 0; j < t_data->num_key_attr; j++){
 		int i = t_data->key_indices[j];
 		int rs1, rs2;
+		int attr_type_val = t_data->attr_types[i];
         switch(t_data->attr_types[i]){
-            case 0: //int
+            case INT: //int
                 if(r1[i].i < r2[i].i)
                     return -1;
 				else if(r1[i].i > r2[i].i)
 					return 1;
 				break;
-            case 1: //double
+            case DOUBLE: //double
                 if(r1[i].d < r2[i].d)
                     return -1;
 				else if(r1[i].d > r2[i].d)
 					return 1;
 				break;
-            case 2: //boolean
+            case BOOL: //boolean
                 if(r1[i].b < r2[i].b)
                     return -1;
 				else if(r1[i].b > r2[i].b)
 					return 1;
 				break;
-            case 3: // char
+            case CHAR: // char
                 rs1 = strcmp(r1[i].c, r2[i].c);
                 if (rs1 < 0)
                     return -1;
 				else if(rs1 > 0)
 					return 1;
 				break;
-            case 4: // varchar
+            case VARCHAR: // varchar
                 rs2 = strcmp(r1[i].v, r2[i].v);
                 if (rs2 < 0)
                     return -1;
@@ -995,7 +997,7 @@ static void read_table_metadata(FILE * meta_file){
 }
 
 static int read_metadata(){ 
-	int length = snprintf(NULL, 0, "%smetadata.dat", db_db_loc);
+	int length = snprintf(NULL, 0, "%smetadata.data", db_db_loc);
 	char * meta_loc = malloc(length+1);
 	snprintf(meta_loc, length+1, "%smetadata.data", db_db_loc);
 	
@@ -1007,6 +1009,7 @@ static int read_metadata(){
 	
 	//read number of tables
 	fread(&num_tables, sizeof(int), 1, meta_file);
+
 	
 	//read in table metadata
 	table_data = malloc(sizeof(struct table_data *) * num_tables);
