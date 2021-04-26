@@ -44,13 +44,10 @@ int parse_create_table_stmt( char* input_statement ) {
     int attrCount = 0;
     int name_count = 0;
     
-    // catalog hashtable
-    struct hashtable* catalog_ht = catalog_get_ht();
     // new table struct
     struct catalog_table_data* new_table = 
             (struct catalog_table_data*) malloc(sizeof(struct catalog_table_data));
     // initialize the table
-    new_table->table_num = catalog_ht->size;
     new_table->table_name = NULL;
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
@@ -135,6 +132,7 @@ int parse_create_table_stmt( char* input_statement ) {
         return -1;
     }
     printf("Successfully created table '%s'!\n", input_statement);
+    catalog_print_tables();
 
     free(attributes);
     return 0;
