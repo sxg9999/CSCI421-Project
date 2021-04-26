@@ -39,6 +39,7 @@ int execute_non_query(char * statement){
 
     if(stmt_type == DDL){
         printf("%s %s\n", func_loc_str, "Statement is of type DDL");
+        error = parse_ddl_statement(statement);
     }else if(stmt_type == DML){
         printf("%s %s\n", func_loc_str, "Statement is of type DML");
         error = parse_dml_statement(statement);

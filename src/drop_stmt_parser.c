@@ -67,7 +67,7 @@ int execute_drop_stmt(char* table_name) {
     printf("\nDropping table: '%s'\n", table_name);
     // table is not a keyword
     // check if a table with name exists
-    int drop_success = catalog_remove_table(table_name);
+    int drop_success = sm_drop_table(table_name);
 
     // drop table with name
     if ( drop_success ) {
