@@ -74,13 +74,19 @@ int parse_ddl_statement( char* input_statement ) {
     }
 
     // make second word all lower case
-    char* second_word = (char *)malloc(strlen(token));
+//    char* second_word = (char *)malloc(strlen(token));
+    char* second_word = malloc(6);
     char b;
     for (int i = 0; token[i] != '\0'; i++) {
         b = tolower(token[i]);
         second_word[i] = b;
     }
     // check if second word=="table"
+    second_word[5] = '\0';
+
+    int second_word_len = strlen(second_word);
+
+
     int valid_second = strncmp(second_word, TABLE, 
         strlen(second_word));
     if (valid_second != 0) {
