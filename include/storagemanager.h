@@ -187,4 +187,5 @@ int storage_get_num_of_tables();
  */
 void storage_print_t_datas();
 
+
 #endif

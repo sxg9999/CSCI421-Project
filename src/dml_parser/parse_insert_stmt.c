@@ -20,6 +20,16 @@ int parse_insert_stmt_kw_into(char* func_loc_str, char* stmt);
 int parse_insert_stmt_kw_value(char* func_loc_str);
 int parse_insert_stmt_table_name(char* func_loc_str, char** table_name);
 int parse_insert_stmt_tuple(char* func_loc_str, int* num_of_tuple, char*** tuple_str_arr);
+void parse_insert_stmt_free(char* table_name, char** tuple_str_arr, int num_of_tuple);
+/**
+ * Build a the record union using the tuple string and attempt to insert it to database
+ * - Stops insertion at the first error (building error, verifying constraints error, insertion error)
+ * @param table_name : name of the table
+ * @param tuple_str_arr : an array of tuple strings
+ * @param num_of_tuple : number of tuple strings
+ * @return 0 for success and -1 for fail
+ */
+int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple);
 
 
 int parse_insert_stmt(char* insert_stmt) {
@@ -45,21 +55,46 @@ int parse_insert_stmt(char* insert_stmt) {
 
     }
 
-    union record_item** records = NULL;
-    int num_of_records = 0;
-    int build_rec_err = build_records(table_name, tuple_str_arr, num_of_tuple,
-                       &records, &num_of_records);
+    int err = 0;
+    for(int i = 0; i < num_of_tuple; i++){
+        union record_item* record = NULL;
+        int build_rec_err = build_record(table_name, tuple_str_arr[i], &record);
+        if(build_rec_err == -1){
+            printf("Error: Cannot create record item for \'%s\'. %s\n", tuple_str_arr[i],
+                   func_loc_str);
+            err = -1;
+            break;
+        }
 
-    if(build_rec_err != 0){
-        printf("%s %s\n", func_loc_str, "Failed to convert tuples to records");
-        return -1;
+        int insert_err = sm_insert_record(table_name, record);
+        if(insert_err == -1){
+            printf("Error: Cannot insert record_%d. %s\n", i,  func_loc_str);
+            err = -1;
+            free(record);
+            break;
+        }
+        free(record);
     }
 
-    sm_insert_records(table_name, records, num_of_records);
+    /* Free everything that was used */
+    parse_insert_stmt_free(table_name, tuple_str_arr, num_of_tuple);
 
-    //got to free everything used for inserting
+    return err;
+}
 
-    return 0;
+void parse_insert_stmt_free(char* table_name, char** tuple_str_arr, int num_of_tuple){
+    if(table_name != NULL){
+        free(table_name);
+    }
+
+    if(tuple_str_arr != NULL){
+        for(int i = 0; i < num_of_tuple; i++){
+            if(tuple_str_arr[i] != NULL){
+                free(tuple_str_arr[i]);
+            }
+        }
+    }
+
 }
 
 int parse_insert_stmt_kw_into(char* func_loc_str, char* stmt){
@@ -100,6 +135,12 @@ int parse_insert_stmt_table_name(char* func_loc_str, char** table_name){
         printf("%s (%s)\n", "Error: Failed to parsing table name", func_loc_str);
         return -1;
     }
+
+    if(!catalog_contains(t_name)){
+        printf("Error: Table \"%s\" does not exist in the database\n", t_name);
+        return -1;
+    }
+
     printf("...Obtained table \"%s\"\n", t_name);
     *table_name = strdup(t_name);
     return 0;
@@ -131,35 +172,32 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
     *tuple_str_arr = malloc(sizeof(char*) * tuple_str_arr_size);
     *num_of_tuple = 0;
 
-    /* Check if there is only one tuple */
-    char* ptr = strchr(str_of_tuple, ')');
-    if(ptr == NULL){
+    char* open_paren_ptr = strchr(str_of_tuple, '(');
+    char* close_paren_ptr = strchr(str_of_tuple, ')');
+    if(open_paren_ptr == NULL || close_paren_ptr == NULL){
         printf("%s %s \"%s\"\n", func_loc_str,
                "Cannot parse str_of_tuple:", str_of_tuple);
         return -1;
     }
-
-    int close_param_index = ptr - str_of_tuple;
-    ptr = ptr + 1;
-    int open_param_index = 0;
-    if(str_of_tuple[open_param_index] != '('){
-        printf("%s %s \"%s\"\n", func_loc_str, "Error: Expected '(' but got none :", str_of_tuple);
+    int open_paren_index = open_paren_ptr - str_of_tuple;
+    int close_paren_index = close_paren_ptr - str_of_tuple;
+    if(open_paren_index > close_paren_index){
+        printf("%s %s \"%s\"\n", func_loc_str, "Error: Missing a '(' :", str_of_tuple);
         return -1;
     }
 
-    if(close_param_index + 1 == strlen(str_of_tuple)){
+    if(close_paren_index + 1 == strlen(str_of_tuple)){
         printf("...There is only one tuple\n");
-        char* tuple_str = substring(str_of_tuple, open_param_index, close_param_index);
+        char* tuple_str = substring(str_of_tuple, open_paren_index, close_paren_index);
         (*tuple_str_arr)[0] = tuple_str;
         *num_of_tuple = 1;
         printf("...Parsed tuple \"%s\"\n", tuple_str);
         return 0;
     }
 
-    char* prev_ptr;
-    /* Else parse all the tuple in a loop */
+    char* ptr = str_of_tuple;
+    char* tuple_str;
     while(1){
-//        printf("%s %s %d\n", func_loc_str, "Current number of tuple:", *num_of_tuple);
         /*Resize tuple_str_arr if needed*/
         if(*num_of_tuple == tuple_str_arr_size){
             printf("!Resizing tuple_str_arr\n");
@@ -169,16 +207,23 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
             printf("!Resized tuple_str_arr from size of %d to size %d\n", old_tuple_str_arr_size, tuple_str_arr_size);
         }
 
-        if(close_param_index + 1 == strlen(str_of_tuple)){
-            char* tuple_str = substring(str_of_tuple, open_param_index, close_param_index);
+        if(close_paren_index + 1 == strlen(ptr)){
+            tuple_str = substring(ptr, open_paren_index, close_paren_index);
             (*tuple_str_arr)[*num_of_tuple] = tuple_str;
             *num_of_tuple = (*num_of_tuple) + 1;
-            str_of_tuple = NULL;
             printf("...Parsed tuple \"%s\"\n", tuple_str);
+            str_of_tuple = NULL;
             break;
         }
 
+        tuple_str = substring(ptr, open_paren_index, close_paren_index);
 
+        (*tuple_str_arr)[*num_of_tuple] = tuple_str;
+        *num_of_tuple = (*num_of_tuple) + 1;
+        printf("...Parsed tuple \"%s\"\n", tuple_str);
+
+
+        ptr = close_paren_ptr + 1;
         /*Remove leading spaces from the string ptr*/
         remove_leading_spaces(ptr);
 
@@ -196,38 +241,25 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
                 printf("%s %s\n", func_loc_str, "Freed empty tuple_str_arr");
             }
             return -1;
-        }
+        }else if(ptr[0] == ','){
+            ptr = ptr + 1;
+            open_paren_ptr = strchr(ptr, '(');
+            close_paren_ptr = strchr(ptr, ')');
 
-        char* tuple_str = substring(str_of_tuple, open_param_index, close_param_index);
-        (*tuple_str_arr)[*num_of_tuple] = tuple_str;
-        *num_of_tuple = (*num_of_tuple) + 1;
-
-        printf("...Parsed tuple \'%s\'\n", tuple_str);
-
-        prev_ptr = ptr + 1;
-        ptr = strchr(ptr + 1, '(');
-        //check if it is an open param index
-        if(ptr == NULL){
-            printf("%s %s \'%s\'\n", func_loc_str, "Error: Expected '(' but got none :", prev_ptr);
-            if(*num_of_tuple != 0){
-                free_2d_char(tuple_str_arr, *num_of_tuple);
-            }else{
-                free(tuple_str_arr);
+            if(open_paren_ptr == NULL || close_paren_ptr == NULL){
+                printf("%s %s \"%s\"\n", func_loc_str,
+                       "Cannot parse tuple string:", ptr);
+                return -1;
             }
-            return -1;
-        }
-        open_param_index = ptr - str_of_tuple;
-        ptr = ptr + 1;
+            open_paren_index = open_paren_ptr - ptr;
+            close_paren_index = close_paren_ptr - ptr;
 
-        ptr = strchr(ptr + 1, ')');
-
-        if(ptr == NULL){
-            printf("%s %s \"%s\"\n", func_loc_str,
-                   "Cannot parse str_of_tuple:", str_of_tuple);
-            return -1;
+            if(open_paren_index > close_paren_index){
+                printf("%s %s \"%s\"\n", func_loc_str, "Error: Missing a '(' :", str_of_tuple);
+                return -1;
+            }
         }
-        close_param_index = ptr - str_of_tuple;
-        ptr = ptr + 1;
+
 
     }
     printf("%s %s(%d tuples)\n", func_loc_str, "Successfully parsed all tuples", *num_of_tuple);
@@ -235,7 +267,22 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
     return 0;
 }
 
+int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple){
+    char func_loc_str[] = "(parse_insert_stmt.c/build_and_insert)";
+    if(tuple_str_arr == NULL || num_of_tuple < 1){
+        printf("Critical Error: Either tuple_str_arr is NULL or num_of_tuple is invalid\n");
+        exit(0);
+    }
 
+    for(int i = 0; i < num_of_tuple; i++){
+        union record_item* record = NULL;
+        int build_err = build_record(table_name, tuple_str_arr[i], &record);
+        if(build_err == -1){
+            printf("Error: ");
+        }
+    }
+    return 0;
+}
 
 
 

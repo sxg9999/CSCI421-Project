@@ -12,8 +12,10 @@
 #include "../../include/catalog/catalog.h"
 #include "../../include/catalog/catalog_structs.h"
 #include "../../include/storagemanager.h"
+#include "../../include/stringify_record.h"
 
 #include "../../include/storage_mediator/storage_mediator_printer.h"
+
 
 //struct to hold metadata about a table
 struct table_data{
@@ -213,6 +215,32 @@ void sm_print_catalog_f_keys(int f_key_count, struct foreign_key_data** f_keys){
 
             printf(" )\n");
 
+        }
+    }
+
+}
+
+
+
+void sm_print_table_records(char* table_name){
+    int table_id = catalog_get_table_num(table_name);
+    union record_item** records = NULL;
+
+    int num_of_records = get_records(table_id, &records);
+    printf("There is a total of %d records\n", num_of_records);
+
+    struct attr_data** attr_data_arr = NULL;
+    int num_of_attributes = catalog_get_attr_data(table_name, &attr_data_arr);
+
+    char* table_header_str = catalog_get_table_header(table_name);
+    printf("%s\n", table_header_str);
+
+    if(num_of_records == 0){
+        printf("( <no record> )\n");
+    }else{
+        char** record_str_arr = record_to_str_n(attr_data_arr, records, num_of_attributes, num_of_records);
+        for(int i = 0; i < num_of_records; i++){
+            printf("%d : %s\n",i, record_str_arr[i]);
         }
     }
 

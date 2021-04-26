@@ -208,7 +208,15 @@ int get_records( int table_id, union record_item *** table ){
     }
 
 	fflush(NULL);
-	*table = malloc(sizeof(union record_item**) * t_data->table_size);
+
+//  old:  *table = malloc(sizeof(union record_item**) * t_data->table_size);
+    *table = malloc(sizeof(union record_item*) * t_data->table_size);
+
+	/*Additional code start*/
+	for(int i = 0; i < t_data->table_size; i++){
+        (*table)[i] = NULL;
+	}
+	/*Additional code end */
 	
     int index = 0;
     for(int i = 0; i < t_data->num_pages; i++){

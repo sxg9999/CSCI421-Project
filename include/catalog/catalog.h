@@ -75,6 +75,34 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
  */
 int catalog_get_attr_types(char* table_name, enum db_type** attr_types);
 
+/**
+ * Returns an array of all the attribute's meta data in the table
+ * @param table_name : the name of the table
+ * @param attr_data_arr : an array that stores the attribute meta data
+ * @param num_of_attr : the number of attributes
+ * @return size of the array that stores the attribute or for error -1.
+ */
+int catalog_get_attr_data(char* table_name, struct attr_data*** attr_data_arr);
+
+
+/**
+ * Get all the foreign key indices of the table
+ * @param table_name : name of the table
+ * @param foreign_key_indices : a 2d array that stores the all the foreign keys
+ * @param foreign_key_lens: an array of foreign key lens (corresponds with the foreign key indices array).
+ * @return the number of foreign keys
+ */
+int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices, int** foreign_key_lens);
+
+/**
+ * Return the header for the table.
+ *
+ * i.e., Table 0 : department ( <id>, <dept_name> )
+ * @param table_name
+ * @return
+ */
+char* catalog_get_table_header(char* table_name);
+
 
 /**
  * Checks if the catalog's table metadata is valid

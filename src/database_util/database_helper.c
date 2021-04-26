@@ -9,6 +9,7 @@
 #include "../../include/storage_mediator/storage_mediator_printer.h"
 
 #include "../../include/database_util/database_helper.h"
+#include "../../include/database_util/db_example_enum.h"
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/file_sys/file_sys.h"
 #include "../../include/storagemanager.h"
@@ -138,9 +139,14 @@ int db_exist(char* db_loc){
 
 }
 
+
 void print_tables(){
 //    catalog_print_tables();
     sm_print_all_table_meta_datas();
+}
+
+void print_records(char* table_name){
+    sm_print_table_records(table_name);
 }
 
 void free_db_params(){
@@ -149,6 +155,8 @@ void free_db_params(){
 }
 
 void db_close(){
+    free_input();       //multiline input
     free_db_params();
     catalog_close();
+    terminate_database();
 }

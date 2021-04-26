@@ -19,11 +19,7 @@ struct database_params{
  */
 void get_cl_args(int argc, char* argv[]);
 
-/**
- *
- * @param stmt
- */
-void process_non_statements(char* stmt);
+
 
 /**
  * Initiates the database
@@ -33,6 +29,12 @@ void init_db();
 
 
 void print_tables();
+
+/**
+ * print the records of the table
+ * @param table_name : the name of the table
+ */
+void print_records(char* table_name);
 
 /**
  * Terminates the database (free, save, everything included)

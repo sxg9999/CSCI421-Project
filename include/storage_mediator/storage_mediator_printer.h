@@ -7,4 +7,11 @@
 
 void sm_print_all_table_meta_datas();
 
+/**
+ * Prints all the records for the table with the given table name
+ * @param table_name : the name of the table
+ * @return
+ */
+void sm_print_table_records(char* table_name);
+
 #endif
