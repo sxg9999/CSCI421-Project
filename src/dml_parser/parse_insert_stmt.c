@@ -174,7 +174,7 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
 
     char* open_paren_ptr = strchr(str_of_tuple, '(');
     char* close_paren_ptr = strchr(str_of_tuple, ')');
-    if(open_paren_ptr == NULL || close_paren_ptr == NULL){
+    if(open_paren_ptr == NULL || close_paren_ptr == NULL || str_of_tuple[0] != '('){
         printf("%s %s \"%s\"\n", func_loc_str,
                "Cannot parse str_of_tuple:", str_of_tuple);
         return -1;
@@ -228,7 +228,7 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
         remove_leading_spaces(ptr);
 
         if(ptr[0] != ','){
-            printf("%s %s\n", func_loc_str, "Error: Expected a comma after the closing paren but got none");
+            printf("%s %s\n", func_loc_str, "Error: Expected a comma after the closing paren");
 
             if(*num_of_tuple != 0){
                 printf("%s %s\n", func_loc_str, "Freeing non empty tuple_str_arr");
@@ -243,10 +243,11 @@ int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple
             return -1;
         }else if(ptr[0] == ','){
             ptr = ptr + 1;
+            remove_leading_spaces(ptr);
             open_paren_ptr = strchr(ptr, '(');
             close_paren_ptr = strchr(ptr, ')');
 
-            if(open_paren_ptr == NULL || close_paren_ptr == NULL){
+            if(open_paren_ptr == NULL || close_paren_ptr == NULL || ptr[0] != '('){
                 printf("%s %s \"%s\"\n", func_loc_str,
                        "Cannot parse tuple string:", ptr);
                 return -1;
