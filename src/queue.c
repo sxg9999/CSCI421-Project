@@ -10,13 +10,13 @@ struct queue_str* init_queue() {
     new_queue->capacity = 0;
     new_queue->front = 0;
     new_queue->end = 0;
-    resize(new_queue);
+    resize_queue(new_queue);
     return new_queue;
 }
 
-void push(struct queue_str* queue, char* element) {
-    if (size(queue) < 2) {
-        resize(queue);
+void push_queue(struct queue_str* queue, char* element) {
+    if (size_queue(queue) < 2) {
+        resize_queue(queue);
     }
     queue->elements[queue->end] = (char*) malloc( strlen(element) );
     strcpy(queue->elements[queue->end], element);
@@ -24,28 +24,28 @@ void push(struct queue_str* queue, char* element) {
     return;
 }
 
-char* pop(struct queue_str* queue) {
+char* pop_queue(struct queue_str* queue) {
     queue->front += 1;
     return queue->elements[(queue->front) - 1];
 }
 
-char* peek(struct queue_str* queue) {
+char* peek_queue(struct queue_str* queue) {
     return queue->elements[(queue->front)];
 }
 
 
-void resize(struct queue_str* queue) {
+void resize_queue(struct queue_str* queue) {
     queue->capacity += 5;
     queue->elements = (char**) realloc(queue->elements, (queue->capacity+1) * sizeof(char*));
     return;
 }
 
-int size(struct queue_str* queue) {
+int size_queue(struct queue_str* queue) {
     return queue->end - queue->front;
 }
 
-int is_empty(struct queue_str* queue) {
-    return (size(queue) == 0);
+int is_empty_queue(struct queue_str* queue) {
+    return (size_queue(queue) == 0);
 }
 
 
@@ -56,3 +56,13 @@ void print_queue(struct queue_str* queue) {
     }  
     return;
 }
+
+void print_array(struct queue_str* queue) {
+    printf("Queue: ");
+    for (int i = queue->front; i < queue->end; i++ ) {
+        printf("%s ", queue->elements[i]);
+    }  
+    printf("\n");
+    return;
+}
+

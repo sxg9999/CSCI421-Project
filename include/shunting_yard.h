@@ -10,7 +10,7 @@ enum where_op {
 
     // LOGICAL OPS
     OR_OP = 1, // OR
-    AND_OP = 2, //
+    AND_OP = 12, //
 
 
     // CONDITIONAL OPS
@@ -48,6 +48,9 @@ int is_op(char* op);
 int is_logic_op(char* op);
 int is_math_op(char* op);
 int a_higher_than_b(char* op_a, char* op_b);
+
+void op_test();
+void presedence_test();
 
 int eval_tuple();
 

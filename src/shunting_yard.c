@@ -5,10 +5,11 @@
 
 #include "../include/shunting_yard.h"
 #include "../include/queue.h"
+#include "../include/stack.h"
 
 
 struct op_pair{
-    char type_name[15];
+    char* type_name;
     enum db_type type;
 };
 
@@ -26,13 +27,18 @@ static struct op_pair op_pairs[] = {
         {.type_name = "/", .type = DIV_OP},
 };
 
-static int OP_COUNT = 9;
+static int OP_COUNT = 11;
 
 enum where_op typeof_op(char* op){
+    if (op == NULL) {
+        return UNDEFINED_OP;
+    }
 
     for(int i = 0; i < OP_COUNT; i++){
         char* t_name = op_pairs[i].type_name;
-        if(strncmp(t_name, op, strlen(op)) == 0 ){
+        // get length of string that's longer
+        int max_length = ( strlen(t_name) > strlen(op) ) ? strlen(t_name) : strlen(op);
+        if(strncmp(t_name, op, max_length) == 0 ){
             return op_pairs[i].type;
         }
     }
@@ -41,6 +47,10 @@ enum where_op typeof_op(char* op){
 }
 
 enum where_op typeof_cond_op(char* op){
+    if (op == NULL) {
+        return UNDEFINED_OP;
+    }
+
     enum where_op result = typeof_op(op);
     if (AND_OP < result && result > ADD_OP) {
         return result; 
@@ -49,6 +59,9 @@ enum where_op typeof_cond_op(char* op){
 }
 
 enum where_op typeof_logical_op(char* op) {
+    if (op == NULL) {
+        return UNDEFINED_OP;
+    }
     enum where_op result = typeof_op(op);
     if (0 < result && result < EQUAL_OP ) {
         return UNDEFINED_OP; 
@@ -58,6 +71,9 @@ enum where_op typeof_logical_op(char* op) {
 
 
 enum where_op typeof_math_op(char* op){
+    if (op == NULL) {
+        return UNDEFINED_OP;
+    }
     enum where_op result = typeof_op(op);
     if (result > GREATER_EQ_OP) {
         return result; 
@@ -73,7 +89,8 @@ int is_op(char* op) {
 int a_higher_than_b(char* op_a, char* op_b) {
     enum where_op a = typeof_op(op_a);
     enum where_op b = typeof_op(op_b);
-    return (a - b) > 10;
+    int diff = (a-b);
+    return diff > 10 || ( -10 < diff && diff < 10);
 }
 
 
@@ -91,6 +108,40 @@ int is_math_op(char* op) {
     int op_type = typeof_math_op(op);
     return (0 < op_type);
 }
+
+void op_test() {
+    printf("Char: 'or' type: '%d'\n", typeof_op("or"));
+    printf("Char: 'and' type: '%d'\n", typeof_op("and"));
+    printf("Char: '=' type: '%d'\n", typeof_op("="));
+    printf("Char: '<' type: '%d'\n", typeof_op("<"));
+    printf("Char: '<=' type: '%d'\n", typeof_op("<="));
+    printf("Char: '>' type: '%d'\n", typeof_op(">"));
+    printf("Char: '>=' type: '%d'\n", typeof_op(">="));
+    printf("Char: '+' type: '%d'\n", typeof_op("+"));
+    printf("Char: '-' type: '%d'\n", typeof_op("-"));
+    printf("Char: '*' type: '%d'\n", typeof_op("*"));
+    printf("Char: '/' type: '%d'\n", typeof_op("/"));
+
+    return;
+}
+
+void presedence_test() {
+    printf("Char: 'or', 'and': '%d'\n", a_higher_than_b("or", "and"));
+    printf("Char: 'and', 'or': '%d'\n", a_higher_than_b("and", "or"));
+    printf("Char: '=', 'or': '%d'\n", a_higher_than_b("=", "or"));
+    printf("Char: '<', '*': '%d'\n", a_higher_than_b("<", "*"));
+    printf("Char: '<=', '>': '%d'\n", a_higher_than_b("<=", ">"));
+    printf("Char: '>', '=': '%d'\n", a_higher_than_b(">", "="));
+    printf("Char: '>=', 'and': '%d'\n", a_higher_than_b(">=", "and"));
+    printf("Char: '+', '-': '%d'\n", a_higher_than_b("+", "-"));
+    printf("Char: '-', 'and': '%d'\n", a_higher_than_b("-", "and"));
+    printf("Char: '*', '/': '%d'\n", a_higher_than_b("*", "/"));
+    printf("Char: '/', 'or': '%d'\n", a_higher_than_b("/", "or"));
+
+    return;
+}
+
+
 
 
 int build_tree(char* input, struct catalog_table_data* table) {
@@ -112,36 +163,28 @@ int build_tree(char* input, struct catalog_table_data* table) {
 
     // build op tree
     struct queue_str* output_queue = init_queue();
-    struct queue_str* op_queue = init_queue();
+    struct stack_str* op_stack = init_stack();
     while( (token = strtok(NULL, " ")) ) {
         for (int i = 0; token[i] != '\0'; i++) {
             if ( isalpha(token[i]) ) {
                 token[i] = tolower(token[i]);
             }
         }
-        printf("Token: '%s'\n", token);
-        printf("type: '%d'\n", typeof_op(token));
         if (!is_op(token)) { // not op
-            push(output_queue, token);
+            push_queue(output_queue, token);
         } 
         else { // token is operator
-            while ( !is_empty(op_queue) &&  a_higher_than_b(peek(op_queue), token) > 0) {
-                push(output_queue, pop(op_queue));
+            while ( !is_empty_stack(op_stack) &&  a_higher_than_b(peek_stack(op_stack), token) > 0) {
+                push_queue(output_queue, pop_stack(op_stack));
             }
-            push(op_queue, token);
+            push_stack(op_stack, token);
         }
-        print_queue(output_queue);
-        print_queue(op_queue);
     }
-    printf("Ordering remaining ops...\n");
-    print_queue(output_queue);
-    print_queue(op_queue);
-    printf("------\n");
-    while (!is_empty(op_queue)) {
-        push(output_queue, pop(op_queue));
-        print_queue(output_queue);
-        print_queue(op_queue);
+    while (!is_empty_stack(op_stack)) {
+        push_queue(output_queue, pop_stack(op_stack));
     }
+    print_array(output_queue);
+
     return 0;
 }
 

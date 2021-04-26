@@ -9,11 +9,11 @@ struct queue_str
     int end;
 };
 struct queue_str* init_queue();
-void push(struct queue_str* queue, char* element);
-char* pop(struct queue_str* queue);
-char* peek(struct queue_str* queue);
-void resize(struct queue_str* queue);
-int size(struct queue_str* queue);
+void push_queue(struct queue_str* queue, char* element);
+char* pop_queue(struct queue_str* queue);
+char* peek_queue(struct queue_str* queue);
+void resize_queue(struct queue_str* queue);
+int size_queue(struct queue_str* queue);
 void print_queue(struct queue_str* queue);
-int is_empty(struct queue_str* queue);
+int is_empty_queue(struct queue_str* queue);
 #endif
