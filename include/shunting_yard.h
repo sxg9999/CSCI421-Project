@@ -3,6 +3,7 @@
 #define SHUNTING_YARD_H
 #include "db_types.h"
 #include "catalog/catalog_structs.h"
+#include "queue.h"
 
 
 enum where_op {
@@ -28,6 +29,16 @@ enum where_op {
     DIV_OP, // /
 };
 
+union shunt_value {
+    struct shunt_node* expr;
+    int i;
+	double d;
+	bool b;
+	char c[255];
+	char v[255];
+} shunt_value;
+
+
 /**
  * <left_child> <op> <right_child> = result
  */
@@ -38,7 +49,7 @@ struct shunt_node {
     enum db_type right_type;    // type of the right attribute
     enum where_op node_op;      // operation done at node
 
-}shunt_node;
+};
 
 enum where_op typeof_op(char* op);
 enum where_op typeof_cond_op(char* op);
@@ -54,8 +65,11 @@ void presedence_test();
 
 int eval_tuple();
 
-int build_tree(char* where_clause, struct catalog_table_data* table );
+int where_tree(char* input, struct catalog_table_data* table);
+int get_rpn(char* input, struct queue_str** output);
+int build_tree(struct queue_str* output, struct catalog_table_data* table);
 
+struct shunt_node* init_shunt_node();
 int build_node(struct shunt_node* left_child, enum db_type left_type, 
             struct shunt_node* right_child, enum db_type right_type, enum where_op node_op);
 

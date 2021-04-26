@@ -85,6 +85,13 @@ int parse_create_table_stmt( char* input_statement ) {
     // set table name 
     new_table->table_name = (char *)malloc( strlen(table_name) + 1 );
     strcpy(new_table->table_name, table_name); 
+
+    // check if table exists
+    /*
+    if (catalog_contains(new_table->table_name)) {
+        fprintf(stderr, "Table '%s' already exists!\n");
+        return -1;
+    }*/
     printf("Table '%s' doesn't already exists!\n", new_table->table_name);
 
 

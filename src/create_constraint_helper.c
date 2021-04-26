@@ -200,7 +200,6 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 return -1;
             }
         }
-        printf("Constraint '%s' is a valid  primary key/unique constraint!\n", currentAttr);
 
     }    
     

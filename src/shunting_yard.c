@@ -141,10 +141,28 @@ void presedence_test() {
     return;
 }
 
+int where_tree(char* where_clause, struct catalog_table_data* table) {
+    printf("Constructing operation tree from where clause '%s'...\n", where_clause);
+    struct queue_str* output_queue;
+    int rpn_success = get_rpn(where_clause, &output_queue);
+    if (rpn_success != 0 || output_queue == NULL) {
+        fprintf(stderr, "Invalid where clause '%s': failed to get rpn form\n", where_clause);
+        return -1;
+    }
+    print_array(output_queue);
+    int tree_success = build_tree(output_queue, table);
+    if (tree_success != 0) {
+        fprintf(stderr, "Invalid where clause syntax: '%s'\n", where_clause);
+        return -1;
+    }
 
 
+    return 0;
+}
 
-int build_tree(char* input, struct catalog_table_data* table) {
+
+int get_rpn(char* input, struct queue_str** output) {
+    printf("Getting RPN form of where clause...\n");
     char* where_clause = (char*) malloc( strlen(input) );
     strcpy(where_clause, input);
     printf("Where clause: '%s'\n", where_clause);
@@ -183,10 +201,22 @@ int build_tree(char* input, struct catalog_table_data* table) {
     while (!is_empty_stack(op_stack)) {
         push_queue(output_queue, pop_stack(op_stack));
     }
-    print_array(output_queue);
+    *output = output_queue;
+
+    return 0;
+}
+ 
+int build_tree(struct queue_str* output, struct catalog_table_data* table) {
+    printf("Building operation tree from RPN form...\n");
+    struct shunt_node* root_node = init_shunt_node();
+    print_queue(output);
 
     return 0;
 }
 
-int build_node(struct shunt_node* left_child, enum db_type left_type, 
-            struct shunt_node* right_child, enum db_type right_type, enum where_op node_op);
+struct shunt_node* init_shunt_node() {
+    struct shunt_node* new_node;
+    new_node = (struct shunt_node*) malloc( sizeof(struct shunt_node*));
+
+    return new_node;
+}

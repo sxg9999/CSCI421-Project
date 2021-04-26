@@ -20,7 +20,7 @@
 #include "../include/storage_mediator/storage_mediator.h"
 #include "../include/db_types.h"
 #include "../include/dml_parser.h"
-
+#include "../include/shunting_yard.h"
 
 
 
@@ -94,6 +94,19 @@ int shutdown_database(){
  */
 
 int main(int argc, char* argv[] ) {
+    /*
+    char* where1 = "where foo > 123";
+    char* where2 = "where foo < \"foo\"";
+    char* where3 = "where foo > 123 and baz < \"foo\"";
+    char* where4 = "where foo = true";
+    char* where5 = "where 2 + 3 * 4";
+    char* where6 = "where foo > 123 or baz < \"foo\" and bar = 2.1";
+    char* where7 = "where A + B * C - D";
+    //where_tree(where1, NULL);
+    //where_tree(where3, NULL);
+    //where_tree(where7, NULL);
+    //return 0;
+    */
     get_cl_args(argc, argv);
     init_db();
 

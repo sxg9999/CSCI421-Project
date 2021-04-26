@@ -19,7 +19,7 @@ int parse_ddl_statement( char* input_statement ) {
     enum db_type stmt_type;
     char* token;
     const char delimiter[] = " ";
-    printf("Parsing: '%s'\n", input_statement);
+    //printf("Parsing: '%s'\n", input_statement);
     
     // get first word in statement
     token = strtok(statement, delimiter);
@@ -62,7 +62,6 @@ int parse_ddl_statement( char* input_statement ) {
             "Invalid DDL statement, invalid/missing statement type", first_word, input_statement);
         return -1;
     }
-    printf("Valid statement type: '%s'\n", first_word);
 
     // check for 'table' as second word
     token = strtok(NULL, delimiter);
@@ -75,25 +74,21 @@ int parse_ddl_statement( char* input_statement ) {
 
     // make second word all lower case
     char* second_word = (char *)malloc(strlen(token));
-    char b;
-    for (int i = 0; token[i] != '\0'; i++) {
-        b = tolower(token[i]);
-        second_word[i] = b;
+    strcpy(second_word, token);
+    for (int i = 0; second_word[i] != '\0'; i++) {
+        if ( isalpha(second_word[i]) ) {
+            second_word[i] = tolower(second_word[i]);
+        }
     }
     // check if second word=="table"
-    int valid_second = strncmp(second_word, TABLE, 
-        strlen(second_word));
+    int max_length = (strlen(second_word) > strlen(TABLE)) ? (strlen(second_word)) : (strlen(TABLE));
+    int valid_second = strncmp(second_word, TABLE, max_length);
     if (valid_second != 0) {
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid DDL statement", input_statement);
         return -1;
     }
-    printf("%s\n", "Valid 'table' keyword present.");
 
-    free(first_word);
-    free(second_word);
-    free(statement);
-    
     // call one of the other parse funcs
     int result;
 
@@ -104,8 +99,6 @@ int parse_ddl_statement( char* input_statement ) {
     } else if (stmt_type == CREATE) {
         result = parse_create_table_stmt(input_statement);
     } else {
-        // printf("%s: %s\n", 
-        //    "Something went wrong. Check type", check_type);
         fprintf(stderr, "%s: '%s'\n", 
             "Invalid DDL statement", input_statement);
         return -1;

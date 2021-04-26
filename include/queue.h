@@ -15,5 +15,6 @@ char* peek_queue(struct queue_str* queue);
 void resize_queue(struct queue_str* queue);
 int size_queue(struct queue_str* queue);
 void print_queue(struct queue_str* queue);
+void print_array(struct queue_str* queue);
 int is_empty_queue(struct queue_str* queue);
 #endif
