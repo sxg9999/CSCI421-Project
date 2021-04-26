@@ -10,6 +10,7 @@
 #include "../../include/parse_insert_stmt_helpers.h"
 #include "../../include/parse_insert_stmt_verification.h"
 #include "../../include/catalog/catalog.h"
+#include "../../include/catalog/catalog_attr_helper.h"
 #include "../../include/storagemanager.h"
 #include "../../include/stringify_record.h"
 #include "../../include/helper_module/helper_function.h"
@@ -21,6 +22,197 @@ void test_print_records(union record_item** records, int num_of_records){
         printf("(%d, \"%s\") \n", records[i][0].i, records[i][1].c);
     }
 }
+
+
+int build_record(char* table_name, char* tuple_str, union record_item** record){
+    char func_loc_str[] = "(parse_insert_stmt.c/build_record)";
+
+    struct catalog_table_data* t_data = catalog_get_table_metadata(table_name);
+    struct attr_data** attr_data_arr = NULL;
+    int num_of_attr = catalog_get_attr_data(table_name, &attr_data_arr);
+
+    return convert_to_record_new(t_data, attr_data_arr, num_of_attr, tuple_str, record);
+
+}
+
+int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** attr_data_arr,
+                          int num_of_attr, char* tuple_str, union record_item** record){
+    char func_loc_str[] = "(parse_insert_stmt_helpers.c/convert_to_record)";
+
+    char* tuple_str_copy = strdup(tuple_str);
+    /*Removed the parenthesis for the tuple_str*/
+    tuple_str_copy[strlen(tuple_str_copy)-1] = 0;
+    tuple_str_copy = tuple_str_copy + 1;
+
+    /*Removing leading and trailing spaces*/
+    remove_leading_spaces(tuple_str_copy);
+    remove_ending_spaces(tuple_str_copy);
+
+    /*Allocate memory to record*/
+    *record = malloc(sizeof(union record_item) * num_of_attr);
+
+    char* ptr = tuple_str_copy;
+    char** value_arr = NULL;
+    int num_of_values = 0;
+    int get_tuple_val_err = get_tuple_values(ptr, &value_arr, &num_of_values);
+
+    if(get_tuple_val_err == -1){
+        return -1;
+    }
+
+    int err = 0;
+    for(int i = 0; i < num_of_attr; i++){
+        struct attr_data* a_data = attr_data_arr[i];
+        if(a_data == NULL){
+            fprintf(stderr, "%s %s\n", func_loc_str, "Error: a_data is NULL");
+            exit(0);
+        }
+
+        char* value_copy = strdup(value_arr[i]);
+        str_lower(value_copy, value_copy, strlen(value_copy));
+        if(strncmp(value_copy, "null", 4) == 0 && attr_has_notnull(a_data)){
+            err = -1;
+            printf("Error: Attribute \"%s\" cannot be null. %s\n", a_data->attr_name,
+                   func_loc_str);
+            break;
+            free_2d_char(value_arr, num_of_values);
+            free(tuple_str_copy);
+            free(value_copy);
+
+        }else if(strncmp(value_copy, "null", 4) == 0 && !attr_has_notnull(a_data)){
+            err = get_record_value_null(&((*record)[i]), a_data->type);
+
+        }else{
+            err = get_record_value_notnull(value_arr[i], &((*record)[i]),
+                                           a_data->type);
+        }
+        free(value_copy);
+        if(err == -1){
+            break;
+        }
+    }
+    free_2d_char(value_arr, num_of_values);
+    free(tuple_str_copy);
+
+
+    return err;
+
+
+}
+
+int get_record_value_notnull(char* record_value_str, union record_item* record_value,
+                             enum db_type attr_type){
+    char func_loc_str[] = "(parse_insert_stmt.c/get_record_value_notnull)";
+    char* value_copy = NULL;
+    char* ptr = NULL;
+
+    int int_tmp;
+    double double_tmp;
+    switch(attr_type){
+        case INT:
+            if(is_int(record_value_str)){
+                sscanf(record_value_str, "%d", &int_tmp);
+                (*record_value).i = int_tmp;
+                printf("...converted str to int (%d)\n", (*record_value).i);
+            }else{
+                printf("Error: Expected a integer value. %s\n", func_loc_str);
+                return -1;
+            }
+            break;
+        case DOUBLE:
+            if(is_num(record_value_str)){
+                sscanf(record_value_str, "%lf", &double_tmp);
+                (*record_value).d = double_tmp;
+                printf("...converted str to double\n");
+            }else{
+                printf("Error: Expected a double value. %s\n", func_loc_str);
+                return -1;
+            }
+            break;
+        case BOOL:
+            value_copy = strdup(record_value_str);
+            str_lower(value_copy, value_copy, strlen(value_copy));
+            if(strncmp(value_copy, "true", 4) == 0){
+                (*record_value).b = true;
+                printf("...converted str to bool true\n");
+            }else if(strncmp(value_copy, "false", 5) == 0){
+                (*record_value).b = false;
+                printf("...converted str to bool false\n");
+            }else{
+                printf("Error: %s is not a valid bool value %s\n", value_copy, func_loc_str);
+                free(value_copy);
+                return -1;
+            }
+            free(value_copy);
+            break;
+        case CHAR:
+            if(record_value_str[0] != '"' || record_value_str[strlen(record_value_str)-1] != '"'){
+                printf("Error: Expected a string value. %s\n", func_loc_str);
+                return -1;
+            }
+            value_copy = strdup(record_value_str);
+            ptr = value_copy;
+            ptr[strlen(value_copy) - 1] = '\0';
+            ptr = ptr + 1;
+
+
+            (*record_value).c[0] = 0;
+            strncpy((*record_value).c, ptr, strlen(ptr) + 1);
+            printf("...converted str to chars (%s)\n", (*record_value).c);
+            free(value_copy);
+            break;
+        case VARCHAR:
+            if(record_value_str[0] != '"' || record_value_str[strlen(record_value_str)-1] != '"'){
+                printf("Error: Expected a string value. %s\n", func_loc_str);
+                return -1;
+            }
+
+            value_copy = strdup(record_value_str);
+            ptr = value_copy;
+            ptr[strlen(value_copy) - 1] = '\0';
+            ptr = ptr + 1;
+
+            (*record_value).v[0] = 0;
+            strncpy((*record_value).v, ptr, strlen(ptr) + 1);
+            printf("...converted str to varchars\n");
+            free(value_copy);
+            break;
+        default:
+            printf("%s %s\n", func_loc_str, "Irrecoverable Error: Attribute data type is not valid");
+            exit(0);
+    }
+    return 0;
+}
+
+int get_record_value_null(union record_item* record_value,
+                          enum db_type attr_type){
+    switch(attr_type){
+        case INT:
+            (*record_value).i = 0;
+            break;
+        case DOUBLE:
+            (*record_value).d = 0.0;
+            break;
+        case BOOL:
+            (*record_value).b = false;
+            break;
+        case CHAR:
+            (*record_value).c[0] = 0;
+            strncpy((*record_value).c, "null", 5);
+            break;
+        case VARCHAR:
+            (*record_value).v[0] = 0;
+            strncpy((*record_value).v, "null", 5);
+            break;
+        default:
+            printf("Critical Error: Attribute data type is not valid. %s\n",
+                   "(parse_insert_stmt_helpers.c/get_record_value_null)");
+            exit(0);
+    }
+    return 0;
+}
+
+
 
 int build_records(char* table_name, char** tuple_str_arr, int num_of_tuple,
                   union record_item*** record_arr, int* num_of_records){
@@ -40,14 +232,15 @@ int build_records(char* table_name, char** tuple_str_arr, int num_of_tuple,
 
     /*Get the attribute metadata nodes*/
     struct attr_data** attr_data_arr = NULL;
-    int num_of_attr = sv_ht_values(t_data->attr_ht, &attr_data_arr);
+//    int num_of_attr = sv_ht_values(t_data->attr_ht, &attr_data_arr);
+    int num_of_attr = catalog_get_attr_data(table_name, &attr_data_arr);
 
     verify_attr_meta_data_nodes(attr_data_arr, num_of_attr);
 
     printf("%s %s\n", func_loc_str, "Converting tuple strings to records");
     for(int i = 0; i < num_of_tuple; i++){
         union record_item* record = NULL;
-        int convert_rec_err = convert_to_record(t_data, attr_data_arr, num_of_attr, tuple_str_arr[i],
+        int convert_rec_err = convert_to_record_new(t_data, attr_data_arr, num_of_attr, tuple_str_arr[i],
                                                 &record);
         if(convert_rec_err == -1){
             printf("%s Error: Failed to parse tuple string \'%s\'\n", func_loc_str, tuple_str_arr[i]);
@@ -189,6 +382,9 @@ int convert_to_record(struct catalog_table_data* t_data, struct attr_data** attr
                         sscanf(value_arr[i], "%d", &int_tmp);
                         (*record)[i].i = int_tmp;
                         printf("...converted str to int (%d)\n", (*record)[i].i);
+                    }else{
+                        printf("Error: Expected a integer value. %s\n", func_loc_str);
+                        return -1;
                     }
                     break;
                 case DOUBLE:
@@ -257,7 +453,7 @@ int get_tuple_values(char* tuple_str, char*** value_arr, int* num_of_values){
     printf("%s %s \'%s\'\n", func_loc_str, "Parsing tuple values for tuple", tuple_str);
     char* ptr = tuple_str_copy;
     char* value_str = NULL;
-    int get_val_str_err = get_next_value(&ptr, &value_str);
+    int get_val_str_err = get_next_value_new(&ptr, &value_str);
     if(get_val_str_err == -1 || value_str == NULL){
         fprintf(stderr, "%s Cannot parse tuple values for \"%s\"\n", func_loc_str, tuple_str);
         free(tuple_str_copy);
@@ -273,7 +469,7 @@ int get_tuple_values(char* tuple_str, char*** value_arr, int* num_of_values){
 
     while(ptr != NULL){
         value_str = NULL;
-        get_val_str_err = get_next_value(&ptr, &value_str);
+        get_val_str_err = get_next_value_new(&ptr, &value_str);
         if(get_val_str_err == -1 || value_str == NULL){
             printf(stderr, "%s Cannot parse tuple values for \"%s\"\n", func_loc_str, tuple_str);
             free(tuple_str_copy);
@@ -410,6 +606,92 @@ int get_next_value(char** str_ptr, char** value_str){
     fprintf(stderr, "%s %s\n", func_loc_str, "Cannot parse value string at all.");
     return -1;
 
+}
+
+int get_next_value_new(char** str_ptr, char** value_str){
+    char func_loc_str[] = "(parse_insert_stmt.c/get_next_value)";
+    if(*str_ptr == NULL){
+        fprintf(stderr,"%s %s\n", func_loc_str, "str_ptr is NULL");
+        exit(0);
+    }
+
+    char* space_ptr = strchr(*str_ptr, ' ');
+    char* quote_ptr = strchr(*str_ptr, '"');
+
+    if(space_ptr == NULL && quote_ptr == NULL){
+        // just a non string value left
+        *value_str = strdup(*str_ptr);
+        *str_ptr = NULL;
+        return 0;
+
+    }else if(space_ptr == NULL && quote_ptr != NULL){
+        return get_next_val_string(quote_ptr, str_ptr, value_str);
+
+    }else if(space_ptr != NULL && quote_ptr == NULL){
+        return get_next_val_non_string(space_ptr, str_ptr, value_str);
+
+    }else if(space_ptr != NULL && quote_ptr != NULL){
+        int space_index = space_ptr - (*str_ptr);
+        int quote_index = quote_ptr - (*str_ptr);
+
+        if(space_index < quote_index){
+            /*space comes before the quotes so you can use the space delim
+             * i.e., id_123 "Professor Bob"  can parse out id_123
+             */
+            return get_next_val_non_string(space_ptr, str_ptr, value_str);
+        }else if(space_index > quote_index){
+            /*quotes comes before space so you have to parse the content between the
+             * quotes
+             * i.e., "Professor Bob"  can parse out Professor Bob
+             */
+            return get_next_val_string(quote_ptr, str_ptr, value_str);
+        }
+    }
+
+    fprintf(stderr, "%s %s\n", func_loc_str, "Cannot parse value string at all.");
+    return -1;
+
+}
+
+int get_next_val_non_string(char* space_ptr, char** str_ptr, char** value_str){
+    int space_index = space_ptr - (*str_ptr);
+    int end_index = space_index - 1;
+    *value_str = substring(*str_ptr, 0, end_index);
+
+    if((*str_ptr)[space_index + 1] == '\0'){
+        *str_ptr = NULL;
+    }else{
+        *str_ptr = space_ptr + 1;
+        remove_leading_spaces(*str_ptr);
+    }
+
+    return 0;
+}
+
+int get_next_val_string(char* open_quote_ptr, char** str_ptr, char** value_str){
+    char func_loc_str[] = "(parse_insert_stmt_helper.c/get_next_val_string)";
+    char* closing_quote_ptr = strchr((*str_ptr) + 1, '"');
+    if(closing_quote_ptr == NULL){
+        printf("Error: Expected a closing quote but got none. Tuple is invalid. %s\n",
+               func_loc_str);
+        return -1;
+    }
+    int open_quote_index = open_quote_ptr - (*str_ptr);
+    int closing_quote_index = closing_quote_ptr - (*str_ptr);
+
+    *value_str = substring(*str_ptr, open_quote_index, closing_quote_index);
+
+    if((*str_ptr)[closing_quote_index + 1] == '\0'){
+        *str_ptr = NULL;
+    }else if((*str_ptr)[closing_quote_index + 1] != ' '){
+        printf("Error: Expected a space but there is none: \'%s\'. %s\n", *str_ptr,
+               func_loc_str);
+        return -1;
+    }else{
+        *str_ptr = closing_quote_ptr + 1;
+        remove_leading_spaces(*str_ptr);
+    }
+    return 0;
 }
 
 int convert_tuple_str(char* tuple_str, enum db_type* attr_types, int num_of_attrs){

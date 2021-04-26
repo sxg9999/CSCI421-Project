@@ -23,8 +23,4 @@ int attr_has_notnull(struct attr_data* a_data);
 int attr_has_unique(struct attr_data* a_data);
 
 
-
-
-
-
 #endif

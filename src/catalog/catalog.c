@@ -518,6 +518,48 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
     return p_key_len;
 }
 
+int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices, int** foreign_key_lens){
+    char func_loc_str[] = "(catalog.c/catalog_get_foreign_key_indices)";
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+    struct hashtable* attr_ht = t_data->attr_ht;
+
+    int foreign_key_count = t_data->num_of_f_key;
+    if(foreign_key_count == 0){
+        return 0;
+    }
+
+    struct foreign_key_data** f_keys = t_data->f_keys;
+    if(f_keys == NULL){
+        printf("Error: Expected atleast one foreign key but foreign key arr is NULL. %s\n",
+               func_loc_str);
+        exit(0);
+    }
+
+    *foreign_key_indices = malloc(sizeof(int*) * foreign_key_count);
+    *foreign_key_lens = malloc(sizeof(int) * foreign_key_count);
+
+    for(int i = 0; i < foreign_key_count; i++){
+        struct foreign_key_data* foreign_key_data = f_keys[i];
+        struct hashtable* foreign_key_ht = foreign_key_data->f_keys;
+        struct ht_node** val_nodes = foreign_key_ht->node_list;
+
+        int foreign_key_len = foreign_key_ht->size;
+        (*foreign_key_lens)[i] = foreign_key_len;
+        (*foreign_key_indices)[i] = malloc(sizeof(int) * foreign_key_len);
+
+        for(int j = 0; j < foreign_key_ht->size; j++){
+            char* foreign_attr_name = val_nodes[i]->key;
+            struct attr_data* a_data = sv_ht_get(attr_ht, foreign_attr_name);
+
+            int attr_index = a_data->index;
+            (*foreign_key_indices)[i][j] = attr_index;
+        }
+
+    }
+
+    return foreign_key_count;
+}
+
 int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
     char func_loc_str[] = "(catalog.c/catalog_get_attr_types)";
 
@@ -574,6 +616,95 @@ int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
     return arr_size;
 }
 
+int catalog_get_attr_data(char* table_name, struct attr_data*** attr_data_arr){
+    char func_loc_str[] = "(catalog.c/catalog_get_attr_data)";
+    if(catalog_contains(table_name) != 1){
+        printf("Error: Table \"%s\" does not exist. %s\n", table_name, func_loc_str);
+        return -1;
+    }
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+    int num_of_attribute = sv_ht_values(t_data->attr_ht, attr_data_arr);
+    return num_of_attribute;
+
+}
+
+
+
+char* catalog_get_table_header(char* table_name){
+    char func_loc_str[] = "(catalog.c/catalog_get_table_header)";
+    if(table_name == NULL || table_name[0] == '\0'){
+        printf("Error: table_name is NULL\n");
+        return NULL;
+    }
+
+    if(catalog_contains(table_name)!=1){
+        printf("Error: Table does not exist\n");
+        return NULL;
+    }
+
+    struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
+    struct hashtable* attr_ht = t_data->attr_ht;
+    struct ht_node** val_nodes = attr_ht->node_list;
+
+    int char_count = 0;
+    for(int i = 0; i < attr_ht->size; i++){
+        struct attr_data* a_data = val_nodes[i]->value->v_ptr;
+        enum db_type a_type = a_data->type;
+        char* a_type_str = type_to_str(a_type);
+        int a_type_str_len = strlen(a_type_str);
+        int a_name_len = strlen(a_data->attr_name);
+
+        char_count = char_count + a_name_len + a_type_str_len;
+    }
+
+    /*Add more char_count to account for spaces, comma, colon: sign, parenthesis*/
+    int num_of_angular_bracket = 2;  //per attribute
+    int total_num_of_angular_bracket = 2 * attr_ht->size;
+    int total_num_of_spaces = ((attr_ht->size) * 3) + 5;    //add 5 just in case
+    int total_num_of_colon = attr_ht->size;
+    int total_num_of_comma = (attr_ht->size) - 1;
+    int total_num_of_parenthesis = 2;
+    int len_of_table_name = strlen(table_name);
+
+    char_count = char_count + total_num_of_angular_bracket +
+            total_num_of_spaces + total_num_of_colon +
+            total_num_of_comma + total_num_of_parenthesis +
+            (len_of_table_name * 2) + 50;                   // add 50 to account for the heading intro
+
+    char* table_header_str = malloc(char_count);
+    table_header_str[0] = 0;
+
+
+    if(attr_ht->size == 1){
+        struct attr_data* a_data = val_nodes[0]->value->v_ptr;
+        enum db_type a_type = a_data->type;
+        char* a_type_str = type_to_str(a_type);
+        sprintf(table_header_str, "Table %d : %s ( <%s : %s> )", t_data->table_num,
+                t_data->table_name, a_data->attr_name, a_type_str);
+        return table_header_str;
+    }else if(attr_ht->size > 1){
+        sprintf(table_header_str, "Table %d : %s (", t_data->table_num, t_data->table_name);
+        char* ptr = table_header_str + strlen(table_header_str);
+
+        for(int i = 0; i < (attr_ht->size) - 1; i++){
+            struct attr_data* a_data = val_nodes[i]->value->v_ptr;
+            enum db_type a_type = a_data->type;
+            char* a_type_str = type_to_str(a_type);
+
+            sprintf(ptr, " <%s : %s>,", a_data->attr_name, a_type_str);
+            ptr = ptr + strlen(ptr);
+        }
+        struct attr_data* a_data = val_nodes[(attr_ht->size)-1]->value->v_ptr;
+        enum db_type a_type = a_data->type;
+        char* a_type_str = type_to_str(a_type);
+        sprintf(ptr, " <%s : %s> )", a_data->attr_name, a_type_str);
+
+        return table_header_str;
+    }
+
+    return NULL;
+}
+
 int catalog_table_data_is_valid(struct catalog_table_data* t_data){
     if(t_data == NULL){
         printf("Error: t_data is NULL\n");
@@ -585,8 +716,13 @@ int catalog_table_data_is_valid(struct catalog_table_data* t_data){
         return 0;
     }
 
-    if(t_data->table_name[0] == '\0' || t_data->table_name == NULL || catalog_contains(t_data->table_name)){
-        printf("Error: Invalid table name: %s\n", t_data->table_name);
+    if(t_data->table_name[0] == '\0' || t_data->table_name == NULL){
+        printf("Error: Invalid table name: %s. It is NULL\n", t_data->table_name);
+        return 0;
+    }
+
+    if(catalog_contains(t_data->table_name)){
+        printf("Error: Invalid table name: %s. Table already exist\n", t_data->table_name);
         return 0;
     }
 

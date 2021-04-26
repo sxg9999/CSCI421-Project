@@ -16,11 +16,11 @@
 #include "../include/ddl_parser.h"
 #include "../include/helper_module/helper_function.h"
 #include "../include/database_util/database_helper.h"
-#include "../include/example.h"
-#include "../include/storage_mediator/storage_mediator.h"
+#include "../include/database_util/db_process_non_sql_statements.h"
 #include "../include/db_types.h"
 #include "../include/dml_parser.h"
 #include "../include/shunting_yard.h"
+
 
 
 
@@ -83,8 +83,8 @@ int execute(char* statement){
  * Free up memory
  */
 int shutdown_database(){
-    free_input();
-    terminate_database();
+//    free_input();
+//    terminate_database();
     db_close();
     return 0;
 }
@@ -121,13 +121,21 @@ int main(int argc, char* argv[] ) {
         }else if(strncmp(statement, "tables", 6) == 0){
             print_tables();
             continue;
-        }else if(strncmp(statement, "add department", 14) == 0){
-            sm_add_table(get_department_table_data());
-            continue;
-        }else if(strncmp(statement, "add student", 11) == 0){
-            sm_add_table(get_student_table_data());
+        }else if(process_non_sql_statements(statement)){
             continue;
         }
+
+
+//        else if(strncmp(statement, "add department", 14) == 0){
+//            sm_add_table(get_department_table_data());
+//            continue;
+//        }else if(strncmp(statement, "add student", 11) == 0){
+//            sm_add_table(get_student_table_data());
+//            continue;
+//        }else if(strncmp(statement, "get department", 14) == 0){
+//            sm_print_table_records("department");
+//            continue;
+//        }
 //        printf("%s\n", statement);
 
         result = execute(statement);

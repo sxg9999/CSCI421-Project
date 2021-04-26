@@ -21,6 +21,10 @@ int is_int(char* str){
         return 0;
     }
 
+    if(str[0] == '-'){
+        str = str + 1;
+    }
+
     for(int i = 0; str[i]!='\0'; i++){
 //        printf("char = %c\n", str[i]);
         if(str[i] < '0' || str[i] > '9'){
@@ -39,6 +43,12 @@ int is_int(char* str){
  */
 
 int is_num(char* str){
+
+    if(str == NULL || str[0]=='\0'){
+        printf("not a int, it is null\n");
+        return 0;
+    }
+
     if(str[0] == '-'){
         str = str + 1;
     }

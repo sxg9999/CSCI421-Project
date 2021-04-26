@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "../../include/catalog/catalog_structs.h"
 #include "../../include/catalog/catalog.h"
 #include "../../include/storagemanager.h"
+#include "../../include/db_types.h"
 
 #include "../../include/storage_mediator/storage_mediator.h"
 #include "../../include/storage_mediator/storage_mediator_helper.h"
@@ -108,6 +110,18 @@ int sm_drop_table(char* table_name){
 
 int sm_alter_table();
 
+int sm_insert_record(char* table_name, union record_item* record){
+    char func_loc_str[] = "(storage_mediator.c/sm_insert_record)";
+
+    int table_id = catalog_get_table_num(table_name);
+    int insert_error = insert_record(table_id, record);
+    if(insert_error == -1){
+        return -1;
+    }
+    return 0;
+
+}
+
 int sm_insert_records(char* table_name, union record_item** records, int num_of_records){
     char func_loc_str[] = "(storage_mediator.c/sm_insert_records)";
 
@@ -151,4 +165,144 @@ int sm_record_exist(int table_id, union record_item* key_values){
     }
 
     return rec_exist;
+}
+
+int sm_record_value_exist(char* table_name, union record_item record_value,
+                          int attr_index, enum db_type attr_type){
+    char func_loc_str[] = "(storage_mediator.c/sm_record_value_exist)";
+    if(catalog_contains(table_name)!=1){
+        printf("Error: Cannot find table \"%s\". %s\n", table_name, func_loc_str);
+        exit(0);
+    }
+
+    int table_id = catalog_get_table_num(table_name);
+    union record_item** records;
+    int num_of_records = get_records(table_id, &records);
+
+    if(num_of_records < 0){
+        printf("Error: Number of records cannot be less than 0. %s\n", func_loc_str);
+    }
+
+    if(num_of_records == 0){
+        return 0;
+    }
+
+    char* str_1 = NULL;
+    char* str_2 = NULL;
+    for(int i = 0; i < num_of_records; i++){
+        switch(attr_type){
+            case INT:
+                if(records[i][attr_index].i == record_value.i){
+                    return 1;
+                }
+                break;
+            case DOUBLE:
+                if(records[i][attr_index].d == record_value.d){
+                    return 1;
+                }
+                break;
+            case BOOL:
+                if(records[i][attr_index].b == record_value.b){
+                    return 1;
+                }
+                break;
+            case CHAR:
+                str_1 = records[i][attr_index].c;
+                str_2 = record_value.c;
+                if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                    return 1;
+                }
+                break;
+            case VARCHAR:
+                str_1 = records[i][attr_index].v;
+                str_2 = record_value.v;
+                if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                    return 1;
+                }
+                break;
+            default:
+                printf("Error: Invalid attribute type. %s\n", func_loc_str);
+                exit(0);
+        }
+    }
+    return 0;
+}
+
+int sm_record_values_exist(char* table_name, union record_item* record_values,
+                           int* attr_index_arr, enum db_type* attr_type_arr, int num_of_values){
+    char func_loc_str[] = "(storage_mediator.c/sm_record_values_exist)";
+    if(catalog_contains(table_name)!=1){
+        printf("Error: Cannot find table \"%s\". %s\n", table_name, func_loc_str);
+        exit(0);
+    }
+
+    if(num_of_values <= 0){
+        printf("Error: num_of_values <= 0. %s\n", func_loc_str);
+        exit(0);
+    }
+
+    int table_id = catalog_get_table_num(table_name);
+    union record_item** records;
+    int num_of_records = get_records(table_id, &records);
+
+    if(num_of_records < 0){
+        printf("Error: Number of records cannot be less than 0. %s\n", func_loc_str);
+    }
+
+    if(num_of_records == 0){
+        return 0;
+    }
+
+    char* str_1 = NULL;
+    char* str_2 = NULL;
+
+    for(int i = 0; i < num_of_records; i++){
+        int equal_count = 0;
+
+        for(int j = 0; j < num_of_values; j++){
+            enum db_type attr_type = attr_index_arr[j];
+            int attr_index = attr_index_arr[j];
+
+            switch(attr_type){
+                case INT:
+                    if(records[i][attr_index].i == record_values[j].i){
+                        equal_count += 1;
+                    }
+                    break;
+                case DOUBLE:
+                    if(records[i][attr_index].d == record_values[j].d){
+                        equal_count += 1;
+                    }
+                    break;
+                case BOOL:
+                    if(records[i][attr_index].b == record_values[j].b){
+                        equal_count += 1;
+                    }
+                    break;
+                case CHAR:
+                    str_1 = records[i][attr_index].c;
+                    str_2 = record_values[j].c;
+                    if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                        equal_count += 1;
+                    }
+                    break;
+                case VARCHAR:
+                    str_1 = records[i][attr_index].v;
+                    str_2 = record_values[j].v;
+                    if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                        equal_count += 1;
+                    }
+                    break;
+                default:
+                    printf("Error: Invalid attribute type. %s\n", func_loc_str);
+                    exit(0);
+            }
+        }
+
+        if(equal_count == num_of_values){
+            return 1;
+        }
+    }
+
+    return 0;
 }
