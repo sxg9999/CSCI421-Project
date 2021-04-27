@@ -8,6 +8,7 @@
 #include "../../include/parse_insert_stmt_helpers.h"
 #include "../../include/catalog/catalog.h"
 #include "../../include/catalog/catalog_attr_helper.h"
+#include "../../include/catalog/catalog_unique_constraint.h"
 #include "../../include/storagemanager.h"
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/storage_mediator/storage_mediator.h"
@@ -30,6 +31,16 @@ void parse_insert_stmt_free(char* table_name, char** tuple_str_arr, int num_of_t
  * @return 0 for success and -1 for fail
  */
 int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple);
+
+/**
+ * Checks all the attribute to see if it has a self unique constraint and
+ * return 1 if all unique constraints are meet (meaning no duplicates)
+ * else 0
+ * @param table_name : name of the table
+ * @param record : the record
+ * @return 1 if no existing value are found, 0 if there is already an existing value
+ */
+int satisfy_single_unique_if_single_unique(char* table_name, union record_item* record);
 
 
 int parse_insert_stmt(char* insert_stmt) {
@@ -55,6 +66,17 @@ int parse_insert_stmt(char* insert_stmt) {
 
     }
 
+    int** foreign_key_indices = NULL;
+    int* foreign_key_lens = NULL;
+    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &foreign_key_indices, &foreign_key_lens);
+
+
+//    int** unique_group_attr_indices_arr = NULL;
+//    int* unique_group_size_arr = NULL;
+//    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
+//                                                             &unique_group_size_arr);
+
+
     int err = 0;
     for(int i = 0; i < num_of_tuple; i++){
         union record_item* record = NULL;
@@ -65,6 +87,14 @@ int parse_insert_stmt(char* insert_stmt) {
             err = -1;
             break;
         }
+
+//        if(!satisfy_single_unique_if_single_unique(table_name, record)){
+//            printf("Error: record_%d does not satisfy the single attribute unique constraints. %s\n");
+//            err = -1;
+//            free(record);
+//            break;
+//        }
+
 
         int insert_err = sm_insert_record(table_name, record);
         if(insert_err == -1){
@@ -283,6 +313,36 @@ int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple){
         }
     }
     return 0;
+}
+
+int satisfy_single_unique_if_single_unique(char* table_name, union record_item* record){
+    char func_loc_str[] = "(parse_insert_stmt.c/check_for_single_uniques)";
+
+    struct attr_data** attr_data_arr = NULL;
+    int num_of_attr = catalog_get_attr_data(table_name, &attr_data_arr);
+
+    for(int i = 0; i < num_of_attr; i++){
+        struct attr_data* attr_data = attr_data_arr[i];
+        if(attr_data == NULL){
+            printf("Error: attr_data is NULL. %s\n", func_loc_str);
+            exit(0);
+        }
+        if(attr_has_unique(attr_data)){
+            if(sm_record_value_exist(table_name, record[i], attr_data->index, attr_data->type)){
+
+                if(attr_data_arr){
+                    free(attr_data_arr);
+                }
+
+                return 0;
+            }
+        }
+    }
+    if(attr_data_arr){
+        free(attr_data_arr);
+    }
+
+    return 1;
 }
 
 

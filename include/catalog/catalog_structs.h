@@ -92,6 +92,7 @@ struct catalog_table_data{
     struct hashtable* attr_ht;             //A hashtable that stores the attributes data (attr_data struct) of the table
 
     int num_of_unique;                     // the total number of attributes with unique constraint
+    int unique_group_arr_size;            // the size of arrays that how to do with unique groups
     int* unique_group_sizes;               // size of each grouping of unique attributes
     char*** unique_attrs;                  // list of groups of names of attributes that have unique constraint on them
 

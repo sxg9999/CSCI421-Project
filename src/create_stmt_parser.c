@@ -56,6 +56,7 @@ int parse_create_table_stmt( char* input_statement ) {
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
     new_table->num_of_unique = 0;
+    new_table->unique_group_arr_size = 0;
     new_table->unique_group_sizes = NULL;
     // notnull constraint fields
     new_table->num_of_notnull = 0;

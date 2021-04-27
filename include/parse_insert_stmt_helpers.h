@@ -35,6 +35,17 @@ int build_records(char* table_name, char** tuple_str_arr, int num_of_tuple,
 int build_record(char* table_name, char* tuple_str, union record_item** record);
 
 /**
+ * Build a record of only the attributes in a unique attribute group
+ * @param table_name : name of the table
+ * @param record : a row of record in the table
+ * @param unique_group_attr_indices : an array of the unique group attribute's indices
+ * @param unique_group_size : the size of the unique group
+ * @param unique_record : a record to store all the unique group attribute values
+ * @return 0 for success and -1 for fail
+ */
+int build_unique_record(char* table_name, union record_item* record, int* unique_group_attr_indices,
+        int unique_group_size, union record_item** unique_record);
+/**
  * Print all the records that was parsed
  * @param record_arr : records that was parsed and build
  * @param num_of_records : number of records
