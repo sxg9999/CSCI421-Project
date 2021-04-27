@@ -24,6 +24,7 @@ void test_print_records(union record_item** records, int num_of_records){
 }
 
 
+
 int build_record(char* table_name, char* tuple_str, union record_item** record){
     char func_loc_str[] = "(parse_insert_stmt.c/build_record)";
 

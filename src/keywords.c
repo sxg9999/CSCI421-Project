@@ -23,6 +23,10 @@ const int ATTR_TYPE_COUNT = 5;
 
 int is_keyword(char* word) {
         int result;
+//        char unique_kw[] = "unique";
+//        if(strncmp(unique_kw, word, strlen(unique_kw)) == 0){
+//            return 0;
+//        }
         for (int i = 0; i < KEYWORD_COUNT; i++) {
                 result = strncmp(KEYWORDS[i], word, strlen(KEYWORDS[i]) );
                 if (result == 0) {

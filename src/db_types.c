@@ -44,17 +44,17 @@ static int num_of_types = 18;
 
 
 enum db_type typeof_kw(char* key_word){
-
     char* kw_lower = malloc(strlen(key_word) + 1);
     str_lower(kw_lower, key_word, strlen(key_word));
     kw_lower[strlen(key_word)] = 0;
 
     for(int i = 0; i < num_of_types; i++){
         char* t_name = type_pairs[i].type_name;
-        if(strncmp(t_name, kw_lower, strlen(kw_lower)) == 0){
+        if(strncmp(t_name, kw_lower, strlen(t_name)) == 0){
             return type_pairs[i].type;
         }
     }
+
 
     return UNKNOWN;
 }

@@ -55,9 +55,10 @@ int parse_create_table_stmt( char* input_statement ) {
     new_table->table_name = NULL;
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
-    new_table->num_of_unique = 0;
-    new_table->unique_group_arr_size = 0;
-    new_table->unique_group_sizes = NULL;
+    new_table->unique_group_count = 0;
+    new_table->unique_group_arr_size = 12;      //default
+    new_table->unique_group_arr = malloc(sizeof(struct unique_group*) * new_table->unique_group_arr_size);
+
     // notnull constraint fields
     new_table->num_of_notnull = 0;
     new_table->notnull_attrs = NULL;

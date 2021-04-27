@@ -545,7 +545,6 @@ int terminate_database(){
 }
 
 //Helper functions
-
 static int key_match(int * key_attr_types, union record_item * key, 
                      union record_item * key_values, int key_indices_size){
     for(int i = 0; i < key_indices_size; i++){
