@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "../../include/hash_collection/hash_collection.h"
 #include "../../include/hash_collection/hash_table.h"
@@ -15,6 +16,7 @@
 #include "../../include/stringify_record.h"
 
 #include "../../include/storage_mediator/storage_mediator_printer.h"
+#include "../../include/helper_module/helper_function.h"
 
 
 //struct to hold metadata about a table
@@ -35,6 +37,7 @@ void sm_print_catalog_attr_data(struct hashtable* attr_ht);
 void sm_print_catalog_constr(int constr_count, struct attr_constraint** constr);
 void sm_print_catalog_p_keys(int p_key_len, char** p_key_attrs);
 void sm_print_catalog_f_keys(int f_key_count, struct foreign_key_data** f_keys);
+void sm_print_catalog_unique_groups(int unique_group_count, struct unique_group** unique_group_arr);
 int sm_print_storage_manager_t_data(struct table_data* t_data);
 void sm_print_storage_manager_attr_types(int num_attr, int* attr_types);
 void sm_print_key_attrs_indices(int num_key_attr, int* key_indices);
@@ -86,6 +89,7 @@ void sm_print_all_table_meta_datas(){
         sm_print_catalog_attr_data(c_t_data->attr_ht);
         sm_print_catalog_p_keys(c_t_data->p_key_len, c_t_data->primary_key_attrs);
         sm_print_catalog_f_keys(c_t_data->num_of_f_key, c_t_data->f_keys);
+        sm_print_catalog_unique_groups(c_t_data->unique_group_count, c_t_data->unique_group_arr);
 //        printf("\n");
 //        printf("Table num is : %d\n", c_t_data->table_num);
 
@@ -218,6 +222,28 @@ void sm_print_catalog_f_keys(int f_key_count, struct foreign_key_data** f_keys){
         }
     }
 
+}
+
+void sm_print_catalog_unique_groups(int unique_group_count, struct unique_group** unique_group_arr){
+    if(unique_group_count == 0){
+        printf("unique group: <none>\n");
+    }else{
+        printf("unique group: %d\n", unique_group_count);
+        for(int i = 0; i < unique_group_count; i++){
+            struct unique_group* unique_group = unique_group_arr[i] ;
+            char** unique_attrs_names = unique_group->unique_attr_names;
+
+            int num_of_unique_attr = unique_group->size;
+            char* result_str = str_concat(unique_attrs_names, num_of_unique_attr, ',');
+            char* buffer = malloc(strlen(result_str) + 50);
+            buffer[0] = 0;
+
+            sprintf(buffer, "- unique_%d( %s )", i, result_str);
+            printf("%s\n", buffer);
+            free(buffer);
+            free(result_str);
+        }
+    }
 }
 
 

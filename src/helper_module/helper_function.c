@@ -247,6 +247,65 @@ void free_2d_char(char** char_2d, int length){
 
 }
 
+int count_num_of_chars(char** str_arr, int num_of_str){
+    int char_count = 0;
+    for(int i = 0; i < num_of_str; i++){
+        char* str = str_arr[i];
+        char_count += strlen(str);
+    }
+    return char_count;
+}
+
+char* str_concat(char** str_arr, int num_of_str, char sep){
+    char func_loc_str[] = "(helper_function.c/str_concat)";
+    if(str_arr == NULL){
+        printf("Error: Cannot concat a NULL array. %s\n", func_loc_str);
+        exit(0);
+    }
+
+    if(num_of_str == 0 && str_arr != NULL){
+        printf("Error: str_arr is not NULL but num_of_str == 0. %s\n", func_loc_str);
+        exit(0);
+    }
+
+    if(num_of_str == 1){
+        return strdup(str_arr[0]);
+    }
+
+    int num_of_sep = 0;
+    if(sep != '\0'){
+        num_of_sep = 2 * num_of_str;
+    }else{
+        num_of_sep = num_of_str;
+    }
+
+
+    int char_count = count_num_of_chars(str_arr, num_of_str);
+    char* result_str = malloc(char_count + num_of_sep + 1);
+    char* ptr = result_str;
+
+    for(int i = 0; i < num_of_str - 1; i++){
+        if(str_arr[i] != NULL){
+            char* str = str_arr[i];
+            strncpy(ptr, str, strlen(str) + 1);
+            if(sep != '\0'){
+                ptr[strlen(str)] = sep;
+                ptr[strlen(str) + 1] = ' ';
+                ptr = ptr + strlen(str) + 2;
+            }else{
+                ptr[strlen(str)] = ' ';
+                ptr = ptr + strlen(str) + 1;
+            }
+
+        }
+
+    }
+    char* str = str_arr[num_of_str - 1];
+    strncpy(ptr, str, strlen(str) + 1);
+    ptr[strlen(str)] = '\0';
+    return result_str;
+}
+
 
 
 

@@ -17,4 +17,5 @@ int split(char*** dest, char* str, char delim);
 int split_n(char*** dest, char* str, char delim, int n);
 void free_2d_char(char** char_2d, int length);
 
+char* str_concat(char** str_arr, int num_of_str, char sep);
 #endif

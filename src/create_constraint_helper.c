@@ -211,7 +211,7 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
                 }
 
                 char* attr_name = strdup(attribute->attr_name);
-                unique_group->unique_attr_names[unique_group_index] = attr_name;
+                unique_group->unique_attr_names[unique_group_size] = attr_name;
                 unique_group->size = unique_group->size + 1;
                 /* new code */
 
