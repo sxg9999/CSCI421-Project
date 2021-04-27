@@ -232,12 +232,19 @@ int split_n(char*** dest, char* str, char delim, int n){
 }
 
 void free_2d_char(char** char_2d, int length){
-    for(int i = 0; i < length; i++){
-        if(char_2d[i]!=NULL){
-            free(char_2d[i]);
-        }
+    if(length < 0){
+        return;
     }
-    free(char_2d);
+
+    if(char_2d){
+        for(int i = 0; i < length; i++){
+            if(char_2d[i]!=NULL){
+                free(char_2d[i]);
+            }
+        }
+        free(char_2d);
+    }
+
 }
 
 
