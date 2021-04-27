@@ -30,6 +30,9 @@ int catalog_write_table(FILE* catalog_file, struct catalog_table_data* t_data){
     /* write the child tables*/
     catalog_write_childs(catalog_file, t_data->num_of_childs,  t_data->child_arr_size, t_data->childs);
 
+    /* write the unique groups */
+    catalog_write_unique_groups(catalog_file, t_data->unique_group_count, t_data->unique_group_arr_size, t_data->unique_group_arr);
+
     return 0;
 }
 
@@ -152,6 +155,33 @@ int catalog_write_foreign_keys(FILE* catalog_file, int num_of_keys, int f_key_ar
     return 0;
 }
 
+int catalog_write_unique_groups(FILE* catalog_file, int unique_group_count, int unique_group_arr_size, struct unique_group** unique_group_arr){
+    fwrite(&unique_group_count, sizeof(int), 1, catalog_file);
+    fwrite(&unique_group_arr_size, sizeof(int), 1, catalog_file);
+
+    if(unique_group_count == 0){
+        return 0;
+    }
+
+    for(int i = 0; i < unique_group_count; i++){
+        struct unique_group* unique_group = unique_group_arr[i];
+        int num_of_attr = unique_group->size;
+        int arr_size = unique_group->arr_size;
+        fwrite(&num_of_attr, sizeof(int), 1, catalog_file);
+        fwrite(&arr_size, sizeof(int), 1, catalog_file);
+
+        char** unique_attr_name_arr = unique_group->unique_attr_names;
+        for(int j = 0; j < num_of_attr; j++){
+            char* unique_attr_name = unique_attr_name_arr[j];
+            int length = strlen(unique_attr_name);
+            fwrite(&length, sizeof(int), 1, catalog_file);
+            fwrite(unique_attr_name, sizeof(char), strlen(unique_attr_name), catalog_file);
+        }
+    }
+    return 0;
+}
+
+
 int catalog_write_childs(FILE* catalog_file, int num_of_childs, int child_arr_size, char** childs){
     fwrite(&num_of_childs, sizeof(int), 1, catalog_file);
     fwrite(&child_arr_size, sizeof(int), 1, catalog_file);
@@ -203,6 +233,13 @@ int catalog_read_table(FILE* catalog_file, struct catalog_table_data** t_data){
     char** childs;
     result = catalog_read_childs(catalog_file, &num_of_childs, &child_arr_size, &childs);
 
+    int unique_group_count;
+    int unique_group_arr_size;
+    struct unique_group** unique_group_arr;
+    result = catalog_read_unique_groups(catalog_file, &unique_group_count, &unique_group_arr_size, &unique_group_arr);
+
+
+
     (*t_data)->table_num = table_num;
     (*t_data)->table_name = table_name;
 
@@ -215,6 +252,9 @@ int catalog_read_table(FILE* catalog_file, struct catalog_table_data** t_data){
     (*t_data)->num_of_childs = num_of_childs;
     (*t_data)->child_arr_size = child_arr_size;
     (*t_data)->childs = childs;
+    (*t_data)->unique_group_count = unique_group_count;
+    (*t_data)->unique_group_arr_size = unique_group_arr_size;
+    (*t_data)->unique_group_arr = unique_group_arr;
 
     return result;
 
@@ -399,6 +439,44 @@ int catalog_read_foreign_keys(FILE* catalog_file, int* num_of_keys, int* f_key_a
 
     return 0;
 
+}
+
+int catalog_read_unique_groups(FILE* catalog_file, int* unique_group_count, int* unique_group_arr_size, struct unique_group*** unique_group_arr){
+    fread(&(*unique_group_count), sizeof(int), 1, catalog_file);
+    fread(&(*unique_group_arr_size), sizeof(int), 1, catalog_file);
+
+    *unique_group_arr = malloc(sizeof(struct unique_group*) * (*unique_group_arr_size));
+
+    if(*unique_group_count == 0){
+        return 0;
+    }
+
+    for(int i = 0; i < *unique_group_count; i++){
+        struct unique_group* unique_group = malloc(sizeof(struct unique_group));
+        int num_of_attr;
+        int arr_size;
+        fread(&num_of_attr, sizeof(int), 1, catalog_file);
+        fread(&arr_size, sizeof(int), 1, catalog_file);
+
+        char** unique_attr_names = malloc(sizeof(char*) * arr_size);
+        for(int j = 0; j < num_of_attr; j++){
+            int unique_attr_name_len;
+            fread(&unique_attr_name_len, sizeof(int), 1, catalog_file);
+
+            char* unique_attr_name = malloc(unique_attr_name_len + 1);
+            fread(unique_attr_name, sizeof(char), unique_attr_name_len, catalog_file);
+            unique_attr_name[unique_attr_name_len] = 0;
+
+            unique_attr_names[j] = unique_attr_name;
+        }
+
+        unique_group->size = num_of_attr;
+        unique_group->arr_size = arr_size;
+        unique_group->unique_attr_names = unique_attr_names;
+
+        (*unique_group_arr)[i] = unique_group;
+    }
+    return 0;
 }
 
 int catalog_read_childs(FILE* catalog_file, int* num_of_childs, int* child_arr_size, char*** childs){
