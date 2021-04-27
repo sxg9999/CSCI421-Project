@@ -80,6 +80,12 @@ struct foreign_key_data{
 };
 
 
+struct unique_group{
+    int size;
+    int arr_size;
+    char** unique_attr_names;
+};
+
 /**
  * A struct that holds the table information
  *
@@ -91,9 +97,9 @@ struct catalog_table_data{
     char* table_name;                      // The name of the table
     struct hashtable* attr_ht;             //A hashtable that stores the attributes data (attr_data struct) of the table
 
-    int num_of_unique;                     // the total number of attributes with unique constraint
-    int* unique_group_sizes;               // size of each grouping of unique attributes
-    char*** unique_attrs;                  // list of groups of names of attributes that have unique constraint on them
+    int unique_group_count;                // number of unique group constraints
+    int unique_group_arr_size;             // size of the array that stores unique group
+    struct unique_group** unique_group_arr;  // an array of unique groups
 
     int num_of_notnull;                     // the total number of attributes with notnull constraint
     char** notnull_attrs;                   // list of names of attributes that have notnull constraint on them

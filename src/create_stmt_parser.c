@@ -45,15 +45,20 @@ int parse_create_table_stmt( char* input_statement ) {
     int attrCount = 0;
     int name_count = 0;
     
+    // catalog hashtable
+    struct hashtable* catalog_ht = catalog_get_ht();
     // new table struct
     struct catalog_table_data* new_table = 
             (struct catalog_table_data*) malloc(sizeof(struct catalog_table_data));
     // initialize the table
+    new_table->table_num = catalog_ht->size;
     new_table->table_name = NULL;
     new_table->attr_ht = ht_create(12, 0.75);
     // unique constraint fields
-    new_table->num_of_unique = 0;
-    new_table->unique_group_sizes = NULL;
+    new_table->unique_group_count = 0;
+    new_table->unique_group_arr_size = 12;      //default
+    new_table->unique_group_arr = malloc(sizeof(struct unique_group*) * new_table->unique_group_arr_size);
+
     // notnull constraint fields
     new_table->num_of_notnull = 0;
     new_table->notnull_attrs = NULL;
@@ -83,13 +88,6 @@ int parse_create_table_stmt( char* input_statement ) {
     // set table name 
     new_table->table_name = (char *)malloc( strlen(table_name) + 1 );
     strcpy(new_table->table_name, table_name); 
-
-    // check if table exists
-    /*
-    if (catalog_contains(new_table->table_name)) {
-        fprintf(stderr, "Table '%s' already exists!\n");
-        return -1;
-    }*/
     printf("Table '%s' doesn't already exists!\n", new_table->table_name);
 
 
@@ -134,7 +132,6 @@ int parse_create_table_stmt( char* input_statement ) {
         return -1;
     }
     printf("Successfully created table '%s'!\n", input_statement);
-    catalog_print_tables();
 
     free(attributes);
     return 0;

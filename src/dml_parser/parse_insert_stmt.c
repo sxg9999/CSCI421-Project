@@ -8,10 +8,11 @@
 #include "../../include/parse_insert_stmt_helpers.h"
 #include "../../include/catalog/catalog.h"
 #include "../../include/catalog/catalog_attr_helper.h"
+#include "../../include/catalog/catalog_unique_constraint.h"
 #include "../../include/storagemanager.h"
 #include "../../include/helper_module/helper_function.h"
 #include "../../include/storage_mediator/storage_mediator.h"
-
+#include "../../include/check_constraints.h"
 
 
 int parse_tuple_str(char* str_of_tuple, char*** tuple_str_arr, int* num_of_tuple);
@@ -30,6 +31,7 @@ void parse_insert_stmt_free(char* table_name, char** tuple_str_arr, int num_of_t
  * @return 0 for success and -1 for fail
  */
 int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple);
+
 
 
 int parse_insert_stmt(char* insert_stmt) {
@@ -55,6 +57,17 @@ int parse_insert_stmt(char* insert_stmt) {
 
     }
 
+    int** foreign_key_indices = NULL;
+    int* foreign_key_lens = NULL;
+    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &foreign_key_indices, &foreign_key_lens);
+
+
+//    int** unique_group_attr_indices_arr = NULL;
+//    int* unique_group_size_arr = NULL;
+//    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
+//                                                             &unique_group_size_arr);
+
+
     int err = 0;
     for(int i = 0; i < num_of_tuple; i++){
         union record_item* record = NULL;
@@ -65,6 +78,14 @@ int parse_insert_stmt(char* insert_stmt) {
             err = -1;
             break;
         }
+
+        if(!single_unique_constraint_met(table_name, record)){
+            printf("Error: record_%d does not satisfy the single attribute unique constraints. %s\n", i, func_loc_str);
+            err = -1;
+            free(record);
+            break;
+        }
+
 
         int insert_err = sm_insert_record(table_name, record);
         if(insert_err == -1){
@@ -284,6 +305,8 @@ int build_and_insert(char* table_name, char** tuple_str_arr, int num_of_tuple){
     }
     return 0;
 }
+
+
 
 
 

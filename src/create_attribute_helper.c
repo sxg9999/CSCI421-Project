@@ -19,6 +19,7 @@
 int attribute_check(char* currentAttr, char* token, char** attr_names, int* name_count, 
         struct catalog_table_data* new_table) 
 {
+    char func_loc_str[] = "(create_attribute_helper.c/attribute_check)";
     //printf("Checking if '%s' is a valid attribute...\n", currentAttr);
     attr_names[*name_count] = (char*)malloc( strlen( token ) + 1);
     strcpy(attr_names[*name_count], token);
@@ -51,13 +52,16 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
     //printf("Checking if attribute type '%s' is valid...\n", token);
     if ( is_attr_type(token) == -1 ) {
         fprintf(stderr, "%s: '%s'\n", 
-            "Invalid attribute definition. Attribute type is invalid", token);
+            "Invalid attribute definition. Attribute type is invalid. %s\n", token, func_loc_str);
+        printf("%s: '%s' %s\n",
+                "Invalid attribute definition. Attribute type is invalid.", token, func_loc_str);
+        exit(0);
         return -1;
     } 
     //printf("'%s' is a valid attribute type.\n", token);
     // get attribute type of attribute
     char* a_type_str = strdup(token);
-    a_type_str[4] = '\0';
+//    a_type_str[4] = '\0';
     enum db_type attribute_type = typeof_kw(a_type_str);
     int attribute_size = attribute_type_size(attribute_type, token, currentAttr);
     if (attribute_size == -1) {
@@ -176,7 +180,9 @@ int attribute_constraint_check(char* token, char* attribute,
  */
 int add_attr_constraints(char** constraints, enum db_type* constraint_types, 
             struct attr_data* attribute, struct catalog_table_data* table) {
+    char func_loc_str[] = "(create_attribute_helper.c/add_attr_constraints)";
     printf("Adding constraints to attribute '%s'...\n", attribute->attr_name);
+
     for (int i = 0; i < attribute->num_of_constr; i++) {
         //printf("Adding constraint '%s' '%d'...\n", constraints[i], constraint_types[i]);
 
@@ -224,30 +230,11 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
                     table->primary_key_attrs[table->p_key_len - 1], table->table_name);
         }
         else if (constraint_types[i] == UNIQUE) { // unique
-            // create attr_constraint struct
-            struct attr_constraint* unique_constraint = (struct attr_constraint*)malloc(
-                sizeof(struct attr_constraint)
-            );
+            struct attr_constraint* unique_constraint = malloc(sizeof(struct attr_constraint));
             unique_constraint->type = UNIQUE;
-            // add attr_constraint to attribute struct
             attribute->constr[i] = unique_constraint;
-
-            // add a new unqiue grouping
-            table->num_of_unique += 1;
-            table->unique_group_sizes = (int*) realloc(table->unique_group_sizes, 
-                        table->num_of_unique * sizeof(int));
-            table->unique_group_sizes[table->num_of_unique - 1] = 1;
-            // allot space for unique attribute string
-            table->unique_attrs = (char ***) realloc(
-                    table->unique_attrs, (table->num_of_unique) * sizeof(char **) ); 
-            table->unique_attrs[table->num_of_unique - 1] = (char**) malloc(
-                    table->unique_group_sizes[table->num_of_unique - 1] * sizeof(char*));
-            table->unique_attrs[table->num_of_unique - 1][0] = (char*) malloc( 
-                    strlen(attribute->attr_name) );
-
-            strcpy(table->unique_attrs[table->num_of_unique - 1][0], attribute->attr_name);
-            printf("Added unique constraint '%s' to table '%s' \n", 
-                    table->unique_attrs[table->num_of_unique - 1][0], table->table_name);
+//            printf("Added unique constraint '%s' to table '%s' \n",
+//                    table->unique_attrs[curr_unique_group_index][0], table->table_name);
         }
         else {
             fprintf( stderr, "Invalid constraint type '%d': '%s'\n", 
@@ -267,6 +254,7 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
  * @return the size of the attribute if successful, else -1 for failure
  */
 int attribute_type_size(enum db_type attribute_type, char* token, char* currentAttr) {
+    char func_loc_str[] = "(create_attribute_helper.c/attribute_type_size)";
     int attribute_size = -1;
     if (attribute_type == INT) 
     {
@@ -290,7 +278,9 @@ int attribute_type_size(enum db_type attribute_type, char* token, char* currentA
         attribute_size = sizeof(char) * char_length;
     }
     else {
-        fprintf( stderr, "Invalid attribute type: '%d' from '%s'! \n", attribute_type, token);
+        fprintf( stderr, "Invalid attribute type: '%d' from '%s'! %s \n", attribute_type, token, func_loc_str);
+        printf( "Error: Invalid attribute type: '%d' from '%s'! %s \n", attribute_type, token, func_loc_str);
+        exit(0);
         return -1;
     }
 

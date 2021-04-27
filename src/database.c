@@ -114,22 +114,8 @@ int main(int argc, char* argv[] ) {
     get_cl_args(argc, argv);
     init_db();
 
-    char* insert_test1 = "insert into bazzle values (1.0);";
-    char* create_table = "CREATE TABLE BAZZLE( baz double PRIMARYKEY );";
-    char* create_table2 = "CREATE TABLE FREEZE( baz double PRIMARYKEY );";
-    char* get_bazzle_tuples = "get bazzle;";
-    char* select_test = "select baz \
-from bazzle \
-where baz > 5.0 \
-order by baz;";
-    //execute(create_table);
-    //execute(insert_test1);
-    //print_tables();
-    //printf("BAZZLE:\n");
-    //process_non_sql_statements(get_bazzle_tuples);
-    //execute(select_test);
-    
-    //return 0;
+    unique_tests();
+    return 0;
 
     char* statement;
     int result;                                     // the result of processing the statement (parsing, execution, etc)
