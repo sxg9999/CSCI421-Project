@@ -7,6 +7,7 @@
 #include <ctype.h>
 
 #include "../../include/database.h"
+#include "../../include/parse_select_stmt.h"
 #include "../../include/parse_insert_stmt.h"
 #include "../../include/parse_insert_stmt_helpers.h"
 #include "../../include/catalog/catalog.h"
@@ -16,30 +17,6 @@
 #include "../../include/storage_mediator/storage_mediator.h"
 #include "../../include/shunting_yard.h"
 
-int parse_select_ids(char** token, char** column_names, int* column_count, int* star_select);
-int parse_select_tables(char** token, char** table_names, int* table_count);
-int parse_select_where(char** token, char** where_clause, int* order_clause_present);
-int parse_select_order_by();
-int test_select_example();
-
-int test_select_example() {
-    char* create_table = "CREATE TABLE BAZZLE( baz integer PRIMARYKEY );";
-    char* insert_tuple = "insert into bazzle values (1);";
-    char* get_bazzle_tuples = "get bazzle;";
-    char* select_test = "select baz \
-from bazzle \
-where baz > 5 \
-order by baz;";
-    char* select_test1 = "select baz \
-from bazzle \
-where baz > 5;";
-
-    execute(create_table);
-    execute(insert_tuple);
-    execute(get_bazzle_tuples);
-    execute(select_test1);
-    return 0;
-}
 
 int parse_select_stmt(char* select_stmt) {
     printf("Parsing select statement '%s'\n", select_stmt);
@@ -116,8 +93,13 @@ int parse_select_stmt(char* select_stmt) {
         }
         printf("exists\n");
     }
-    
-    // TODO: check if ids exist in their table
+    struct table_columns* tc = malloc( sizeof(struct table_columns) );
+    int tc_success = get_table_columns(column_names, column_count, table_names, table_count, tc);
+    if (tc_success != 0) {
+        fprintf(stderr, "Invalid: id, table name conflict: '%s'\n", select_stmt);
+        return -1;
+    }
+
     // TODO: check for multiple tables
 
     // check for 'where' key word
@@ -249,13 +231,14 @@ int parse_select_tables(char** token, char** table_names, int* table_count) {
  */
 int parse_select_where(char** token, char** where_clause, int* order_clause_present) {
     char* temp_where;
-    while ( ((*token) = strtok(NULL, " ")) ) {
+    (*token) = strtok((*token), " ");
+    while ( (*token) ) {
         for (int i = 0; (*token)[i] != '\0'; i++) {
             if ( isalpha((*token)[i]) ) { // lower token
                 (*token)[i] = tolower((*token)[i]);
             }
         }
-        //printf("Where Token: '%s'\n", (*token));
+        printf("Where Token: '%s'\n", (*token));
         if (strcmp((*token), "order") == 0) { // check if 'order' keyword
             *order_clause_present = 1;
             return 0;
@@ -267,11 +250,71 @@ int parse_select_where(char** token, char** where_clause, int* order_clause_pres
         strcat(temp_where, " ");                // add a space
         strcat(temp_where, (*token));           // add new token
         *where_clause = temp_where;             // set where clause to temp
-        //printf("WHERE CLAUSE: '%s'\n", *where_clause);
+        printf("WHERE CLAUSE: '%s'\n", *where_clause);
+        (*token) = strtok(NULL, " ");
     }
     return 0;
 }
 
 int parse_select_order_by() {
+    return 0;
+}
+
+/**
+ * Check if a column name has a '.' in it
+ * @param column_name string being looked at
+ * @return 1 if name has '.', else 0 if it doesn't
+ */
+int column_has_dot(char* column_name) {
+    for (int i = 0; column_name[i] != '\0'; i++) {
+        //printf("Char: '%c'", column_name[i]);
+        if( column_name[i] == '.') { // column name contains a '.'
+            return 1;
+        }
+    }
+    //printf("\n");
+
+    return 0;      // no '.'
+}
+
+
+/**
+ * 
+ */
+int get_table_columns(char** column_names, int column_count, char** table_names, int table_count, 
+        struct table_columns* tc) {
+    // TODO: check if ids exist in their table
+    // for each column
+    char* temp_col = calloc(1, sizeof(char));
+    char* sub_table_name = calloc(1, sizeof(char));
+    char* sub_column_name = calloc(1, sizeof(char));
+
+    for ( int i = 0; i < column_count; i++) {
+        printf("Column: '%s'\n", column_names[i]);
+        // for each table
+        temp_col = strdup(column_names[i]);
+        printf("Has dot: %d\n", column_has_dot( column_names[i] ));
+        if ( column_has_dot( column_names[i]) == 1 ) {
+            sub_table_name = strtok(temp_col, ".");
+            sub_column_name = strtok(NULL, " ");
+            // check if table is in stmt
+            // check if column is in table
+            // add pair to tc
+        }
+        else {
+            sub_table_name = NULL;
+            sub_column_name = temp_col;
+            // find which table column is from
+                // for each table
+                    // is attribute in it
+                    // if in multiple error
+            // add pair to tc
+        }
+        printf("Column name: '%s'\n", sub_column_name);
+        printf("Table name: '%s'\n", sub_table_name);
+
+
+
+    }
     return 0;
 }
