@@ -42,8 +42,8 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         char** foreign_attr = (char **) malloc( sizeof(char*));
         int fa_count = 0;
         // track attrs in <r name>( <r 1> ... <r N> ) - <r N>
-        char** parent_attr = (char **) malloc( sizeof(char*));
-        int pa_count = 0; 
+//        char** parent_attr = (char **) malloc( sizeof(char*));
+//        int pa_count = 0;
         // initialize a new foreign_key struct
         struct foreign_key_data* new_foreign_key = (struct foreign_key_data*) malloc( 
             sizeof(struct foreign_key_data));
@@ -86,9 +86,15 @@ int constraint_check(char* currentAttr, char* token, char** attr_names, int* nam
         strcpy(new_foreign_key->parent_table_name, token);
         //printf("Foreign table '%s' being referenced exists!\n", new_foreign_key->parent_table_name);
 
+//        old :
+//        char** parent_attr = (char **) malloc( sizeof(char*));
+//        int pa_count = 0;
+
+        char** parent_attr = NULL;
+        int pa_count = 0;
         // <r_1> ... <r_n>
         int valid_parent_attr = foreign_parent_attr_check(new_foreign_key->parent_table_name, token, 
-                parent_attr, &pa_count);
+                &parent_attr, &pa_count);
         if (valid_parent_attr == -1) {
             fprintf(stderr, "Invalid attribute names for parent table '%s': '%s'\n", 
                     new_foreign_key->parent_table_name, currentAttr);
@@ -258,8 +264,8 @@ int compare_new_to_parent_attr_types(
     new_f_key->f_keys = ht_create(12, 0.75);
 
     for( int i = 0; i < n_count; i++ ) {
-        char* n_attr = new_attributes[0];
-        char* p_attr = parent_attributes[0];
+        char* n_attr = new_attributes[i];
+        char* p_attr = parent_attributes[i];
         /*printf("Checking if attribute '%s' in table '%s' is same type as \
 attribute '%s' in table '%s'\n", 
             n_attr, new_table->table_name, p_attr, parent_table_name);*/
@@ -331,7 +337,14 @@ int foreign_contraint_name_check(char** attr_names, int attr_count, char* constr
 }
 
 int foreign_parent_attr_check(char* parent_name, char* constraint_line, 
-            char** parent_attrs, int* pa_count) {
+            char*** parent_attrs, int* pa_count) {
+    char func_loc_str[] = "(create_constraint_helper.c/foreign_parent_attr_check)";
+    /* new code */
+    int arr_size = 12;
+    *pa_count = 0;
+    *parent_attrs = malloc(sizeof(char*) * arr_size);
+    /* new code end */
+
     while ( (constraint_line = strtok(NULL, " ")) ) {
         if (constraint_line[0] == ')') {
             break;
@@ -360,10 +373,21 @@ int foreign_parent_attr_check(char* parent_name, char* constraint_line,
             return -1;
         }
         printf("Foreignkey attr '%s' is defined in parent '%s'!\n", constraint_line, parent_name);
-        *pa_count += 1;
-        parent_attrs = (char**) realloc(parent_attrs, *pa_count * sizeof(char *));
-        parent_attrs[ *pa_count - 1] = (char*) malloc( strlen(constraint_line) );
-        strcpy(parent_attrs[ *pa_count - 1], constraint_line);
+        char* parent_attr_name = strdup(constraint_line);
+        (*parent_attrs)[*pa_count] = parent_attr_name;
+        *pa_count = (*pa_count) + 1;
+
+
+//        *pa_count += 1;
+//        *parent_attrs = (char**) realloc(*parent_attrs, *pa_count * sizeof(char *));
+//        printf("end of %s\n", func_loc_str);
+//        (*parent_attrs)[ (*pa_count) - 1] = (char*) malloc( strlen(constraint_line) );
+//        printf("maybe here\n");
+
+//        char* tmp_constraint_line = constraint_line;
+//        strcpy(parent_attrs[ *pa_count - 1], constraint_line);
+
+        printf("end of %s\n", func_loc_str);
 
     }
 
