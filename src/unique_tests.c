@@ -22,6 +22,10 @@ int test2();
 int test3();
 int test4();
 int test5();
+int test6();
+int test7();
+int test8();
+
 
 
 int unique_tests() {
@@ -34,6 +38,8 @@ int unique_tests() {
     test3();
     test4();
     test5();
+    test6();
+    test7();
 
     shutdown_database();                         // a function that handles cleaning and frees up memory
     return 0;
@@ -125,5 +131,37 @@ int test5() {
     execute(dup_insert);
     printf("RESULTS T5:\n");
     process_non_sql_statements("get cat;");
+    return 0;
+}
+
+int test6() {
+    printf("-------------------------------------\n");
+    printf("ONE UNIQUE NOT GROUP, MULTIPLE TUPLE 0 ATTR DIFFER DUPLICATES TEST 6\n");
+    char* unique_table2 = "CREATE table mouse( A CHAR(10) PRIMARYKEY, B INTEGER UNIQUE, C integer );";
+    execute(unique_table2);
+    char* insert_test1 = "insert into mouse values (\"yellow\" 1 2);";
+    printf("FIRST INSERT T6:\n");
+    execute(insert_test1);
+    char* dup_insert = "insert into mouse values (\"blue\" 1 2), (\"purple\" 2 2), (\"white\" 2 5);";
+    printf("SECOND INSERT T6:\n");
+    execute(dup_insert);
+    printf("RESULTS T6:\n");
+    process_non_sql_statements("get mouse;");
+    return 0;
+}
+
+int test7() {
+    printf("-------------------------------------\n");
+    printf("ONE UNIQUE NOT GROUP, MULTIPLE TUPLE  1 TUPLE WITH 0 ATTR DIFFER DUPLICATES TEST 7\n");
+    char* unique_table2 = "CREATE table dog( A CHAR(10) PRIMARYKEY, B INTEGER UNIQUE, C integer );";
+    execute(unique_table2);
+    char* insert_test1 = "insert into dog values (\"yellow\" 1 2);";
+    printf("FIRST INSERT T7:\n");
+    execute(insert_test1);
+    char* dup_insert = "insert into dog values (\"blue\" 2 2), (\"purple\" 3 2), (\"white\" 1 5);";
+    printf("SECOND INSERT T7:\n");
+    execute(dup_insert);
+    printf("RESULTS T7:\n");
+    process_non_sql_statements("get dog;");
     return 0;
 }
