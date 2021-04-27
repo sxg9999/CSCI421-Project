@@ -45,7 +45,7 @@ int foreign_contraint_name_check(char** attr_names, int attr_count, char* constr
  * @param pa_count count of attributes belonging to the parent
  */
 int foreign_parent_attr_check(char* parent_name, char* constraint_line, 
-            char** parent_attrs, int* pa_count);
+            char*** parent_attrs, int* pa_count);
 
 /**
  * Get the attributes/contraints from a create stmt.
