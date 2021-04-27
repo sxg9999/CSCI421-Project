@@ -607,7 +607,7 @@ int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
             printf("%s Unexpected Error: Cannot retrieve attribute data from attribute node for table \"%s\"\n", func_loc_str, table_name);
 
             /* Free the array that was allocated */
-            free(attr_types);
+            free(*attr_types);
             return -1;
         }
         (*attr_types)[i] = a_data->type;

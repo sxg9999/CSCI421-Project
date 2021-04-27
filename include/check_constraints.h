@@ -20,4 +20,29 @@
  */
 int single_unique_constraint_met(char* table_name, union record_item* record);
 
+
+/**
+ * Checks to see if the record satisfies all the unique group constraints
+ * @param table_name : name of the table
+ * @param record : the record
+ * @param unique_attr_indices_arr : array of unique attribute indices array
+ * @param unique_group_size_arr : array of unique group sizes
+ * @param unique_group_count : number of unique group constraints
+ * @return 1 if true, 0 if false
+ */
+int group_unique_constraint_met(char* table_name, union record_item* record,
+        int** unique_attr_indices_arr, int* unique_group_size_arr, int unique_group_count);
+
+
+/**
+ * Build a record of only the attributes in a unique attribute group
+ * @param table_name : name of the table
+ * @param record : a row of record in the table
+ * @param unique_attr_indices : an array of the unique group attribute's indices
+ * @param unique_group_size : the size of the unique group
+ * @param unique_record : a record to store all the unique group attribute values
+ * @return 0 for success and -1 for fail
+ */
+int build_unique_record(char* table_name, union record_item* record, int* unique_attr_indices,
+                        int unique_group_size, union record_item** unique_record);
 #endif
