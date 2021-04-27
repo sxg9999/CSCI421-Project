@@ -58,7 +58,7 @@ int parse_select_stmt(char* select_stmt) {
     }
 
     // parse the select attributes (or the *)
-    char** column_names = (char**) malloc(sizeof(char*));
+    char** column_names = (char**) calloc(1, sizeof(char*));
     int column_count = 0;
     int star_select = 0;
     int select_success = parse_select_ids(&token, column_names, &column_count, &star_select);
@@ -91,7 +91,7 @@ int parse_select_stmt(char* select_stmt) {
     }
     
     // parse the table name (verify it exists)
-    char** table_names = (char**) malloc(sizeof(char*));
+    char** table_names = (char**) calloc(1, sizeof(char*));
     int table_count = 0;
     int from_success = parse_select_tables(&token, table_names, &table_count);
     if (from_success != 0) {
@@ -156,19 +156,22 @@ int parse_select_stmt(char* select_stmt) {
     }
     printf("Where clause: '%s'\n", where_clause);
 
-    // get order by clause
-    // check if order by empty
+    // TODO: get order by clause
+    if ( order_clause_present == 1) {
+        int order_success = parse_select_order_by();
+    }
+    // TODO: check if order by empty
 
-    // parse the where clause and make the tree
+    // TODO: parse the where clause and make the tree
     
-    // get records for table
-    // for each record for the table
-        // if true place in output
-        // if false ignore it
+    // TODO: get records for table
+    // TODO: for each record for the table
+        // TODO: if true place in output
+        // TODO: if false ignore it
 
-    // in the output remove the attributes not in the select
-    // create a temp copy of table
-    // drop some of the columns
+    // TODO: in the output remove the attributes not in the select
+    // TODO: create a temp copy of table
+    // TODO: drop some of the columns
 
     printf("Select stmt '%s' was successful!\n", select_stmt);
     return 0;
@@ -201,7 +204,7 @@ int parse_select_ids(char** token, char** column_names, int* column_count, int* 
         //printf("column name: '%s'\n", *token);
         *column_count += 1;
         column_names = (char**) realloc(column_names, (*column_count) * sizeof(char*));
-        column_names[(*column_count)-1] = (char*) malloc( strlen((*token)) );
+        column_names[(*column_count)-1] = (char*) calloc(strlen((*token)), sizeof(char) );
         strcpy(column_names[(*column_count)-1], (*token));
     }
     
@@ -230,7 +233,7 @@ int parse_select_tables(char** token, char** table_names, int* table_count) {
         // add table name to table_names
         (*table_count) += 1;        // incr table count
         table_names = (char**) realloc(table_names, (*table_count) * sizeof(char*)); // allot space for 1 more char*
-        table_names[(*table_count)-1] = (char*) malloc( strlen((*token)) );     // allot space of token
+        table_names[(*table_count)-1] = (char*) calloc( strlen( (*token)), sizeof(char) );     // allot space of token
         strcpy(table_names[(*table_count)-1], (*token));                        // copy token to table_names
     }
 
