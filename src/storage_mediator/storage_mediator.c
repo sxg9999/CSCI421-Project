@@ -193,11 +193,13 @@ int sm_record_value_exist(char* table_name, union record_item record_value,
         switch(attr_type){
             case INT:
                 if(records[i][attr_index].i == record_value.i){
+                    printf("Value %d already exist\n", record_value.i);
                     return 1;
                 }
                 break;
             case DOUBLE:
                 if(records[i][attr_index].d == record_value.d){
+                    printf("Value %lf already exist\n", record_value.d);
                     return 1;
                 }
                 break;
@@ -210,6 +212,7 @@ int sm_record_value_exist(char* table_name, union record_item record_value,
                 str_1 = records[i][attr_index].c;
                 str_2 = record_value.c;
                 if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                    printf("Value %s already exist\n", record_value.c);
                     return 1;
                 }
                 break;
@@ -217,6 +220,7 @@ int sm_record_value_exist(char* table_name, union record_item record_value,
                 str_1 = records[i][attr_index].v;
                 str_2 = record_value.v;
                 if(strncmp(str_1, str_2, strlen(str_2)) == 0){
+                    printf("Value %s already exist\n", record_value.v);
                     return 1;
                 }
                 break;
@@ -260,7 +264,7 @@ int sm_record_values_exist(char* table_name, union record_item* record_values,
         int equal_count = 0;
 
         for(int j = 0; j < num_of_values; j++){
-            enum db_type attr_type = attr_index_arr[j];
+            enum db_type attr_type = attr_type_arr[j];
             int attr_index = attr_index_arr[j];
 
             switch(attr_type){

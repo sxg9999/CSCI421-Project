@@ -518,7 +518,8 @@ int catalog_get_p_key_indices(struct catalog_table_data* t_data, int** p_key_ind
     return p_key_len;
 }
 
-int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices, int** foreign_key_lens){
+int catalog_get_foreign_key_indices(char* table_name, char*** parent_names, int*** foreign_key_indices,
+                                    int** foreign_key_lens){
     char func_loc_str[] = "(catalog.c/catalog_get_foreign_key_indices)";
     struct catalog_table_data* t_data = sv_ht_get(table_ht, table_name);
     struct hashtable* attr_ht = t_data->attr_ht;
@@ -534,7 +535,7 @@ int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices
                func_loc_str);
         exit(0);
     }
-
+    *parent_names = malloc(sizeof(char*) * foreign_key_count);
     *foreign_key_indices = malloc(sizeof(int*) * foreign_key_count);
     *foreign_key_lens = malloc(sizeof(int) * foreign_key_count);
 
@@ -542,6 +543,9 @@ int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices
         struct foreign_key_data* foreign_key_data = f_keys[i];
         struct hashtable* foreign_key_ht = foreign_key_data->f_keys;
         struct ht_node** val_nodes = foreign_key_ht->node_list;
+
+        char* parent_name = strdup(foreign_key_data->parent_table_name);
+        (*parent_names)[i] = parent_name;
 
         int foreign_key_len = foreign_key_ht->size;
         (*foreign_key_lens)[i] = foreign_key_len;
@@ -607,7 +611,7 @@ int catalog_get_attr_types(char* table_name, enum db_type** attr_types){
             printf("%s Unexpected Error: Cannot retrieve attribute data from attribute node for table \"%s\"\n", func_loc_str, table_name);
 
             /* Free the array that was allocated */
-            free(attr_types);
+            free(*attr_types);
             return -1;
         }
         (*attr_types)[i] = a_data->type;

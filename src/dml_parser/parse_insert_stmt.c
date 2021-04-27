@@ -44,7 +44,6 @@ int parse_insert_stmt(char* insert_stmt) {
     char** tuple_str_arr = NULL;
     int num_of_tuple = 0;
 
-
     if(parse_insert_stmt_kw_into(func_loc_str, stmt_ptr) != 0 ||
        parse_insert_stmt_table_name(func_loc_str, &table_name) != 0 ||
        parse_insert_stmt_kw_value(func_loc_str) != 0 ||
@@ -57,16 +56,16 @@ int parse_insert_stmt(char* insert_stmt) {
 
     }
 
-    int** foreign_key_indices = NULL;
+    char** parent_names = NULL;
+    int** foreign_key_indices_arr = NULL;
     int* foreign_key_lens = NULL;
-    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &foreign_key_indices, &foreign_key_lens);
+    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &parent_names, &foreign_key_indices_arr,
+                                                            &foreign_key_lens);
 
-
-    int** unique_group_attr_indices_arr = NULL;
+    int** unique_attr_indices_arr = NULL;
     int* unique_group_size_arr = NULL;
-    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
+    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_attr_indices_arr,
                                                              &unique_group_size_arr);
-
 
     int err = 0;
     for(int i = 0; i < num_of_tuple; i++){
@@ -86,6 +85,13 @@ int parse_insert_stmt(char* insert_stmt) {
             break;
         }
 
+        if(!group_unique_constraint_met(table_name, record, unique_attr_indices_arr, unique_group_size_arr,
+                                        unique_group_count)){
+            printf("Error: record_%d does not satisfy the unique group constraints. %s\n", i, func_loc_str);
+            err = -1;
+            free(record);
+            break;
+        }
 
         int insert_err = sm_insert_record(table_name, record);
         if(insert_err == -1){

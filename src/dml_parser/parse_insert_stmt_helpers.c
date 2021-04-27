@@ -36,53 +36,7 @@ int build_record(char* table_name, char* tuple_str, union record_item** record){
 
 }
 
-int build_unique_record(char* table_name, union record_item* record, int* unique_group_attr_indices,
-                        int unique_group_size, union record_item** unique_record){
-    char func_loc_str[] = "(parse_insert_stmt_helpers.c/build_unique_record)";
-    if(unique_group_attr_indices == NULL){
-        printf("Error: unique_group_attr_indices is NULL. %s\n", func_loc_str);
-        exit(0);
-    }
-    if(record == NULL){
-        printf("Error: record is NULL. %s\n", func_loc_str);
-        exit(0);
-    }
-    if(unique_group_size <= 0){
-        printf("Error: unique_group_size <= 0. %s\n", func_loc_str);
-        exit(0);
-    }
-    enum db_type* attr_types = NULL;
-    int num_of_attr = catalog_get_attr_types(table_name, &attr_types);
 
-    *unique_record = malloc(sizeof(union record_item) * unique_group_size);
-    for(int i = 0; i < unique_group_size; i++){
-        int unique_attr_index = unique_group_attr_indices[i];
-        enum db_type attr_type = attr_types[unique_attr_index];
-        switch(attr_type){
-            case INT:
-                (*unique_record)[i].i = record[unique_attr_index].i;
-                break;
-            case DOUBLE:
-                (*unique_record)[i].d = record[unique_attr_index].d;
-                break;
-            case BOOL:
-                (*unique_record)[i].b = record[unique_attr_index].b;
-                break;
-            case CHAR:
-                (*unique_record)[i].c[0] = 0;
-                strncpy((*unique_record)[i].c, record[unique_attr_index].c, strlen(record[unique_attr_index].c) + 1);
-                break;
-            case VARCHAR:
-                (*unique_record)[i].v[0] = 0;
-                strncpy((*unique_record)[i].v, record[unique_attr_index].v, strlen(record[unique_attr_index].v) + 1);
-                break;
-            default:
-                printf("Error: Attribute data type is invalid. %s\n", func_loc_str);
-                exit(0);
-        }
-    }
-
-}
 
 int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** attr_data_arr,
                           int num_of_attr, char* tuple_str, union record_item** record){
