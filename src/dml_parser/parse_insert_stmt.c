@@ -62,11 +62,11 @@ int parse_insert_stmt(char* insert_stmt) {
     int foreign_key_count = catalog_get_foreign_key_indices(table_name, &foreign_key_indices, &foreign_key_lens);
 
 
-//    int** unique_group_attr_indices_arr = NULL;
-//    int* unique_group_size_arr = NULL;
-//    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
-//                                                             &unique_group_size_arr);
-//
+    int** unique_group_attr_indices_arr = NULL;
+    int* unique_group_size_arr = NULL;
+    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
+                                                             &unique_group_size_arr);
+
 
     int err = 0;
     for(int i = 0; i < num_of_tuple; i++){

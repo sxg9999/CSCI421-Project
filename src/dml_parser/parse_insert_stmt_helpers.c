@@ -111,7 +111,7 @@ int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** 
     }
 
     if(num_of_attr != num_of_values){
-        printf("Error: Number of values does not match number of attributes. %s\n");
+        printf("Error: Number of values does not match number of attributes. %s\n", func_loc_str);
         free(tmp_ptr);
         free_2d_char(value_arr, num_of_values);
         return -1;
