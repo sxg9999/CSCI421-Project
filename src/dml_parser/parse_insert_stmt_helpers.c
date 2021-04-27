@@ -110,6 +110,13 @@ int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** 
         return -1;
     }
 
+    if(num_of_attr != num_of_values){
+        printf("Error: Number of values does not match number of attributes. %s\n");
+        free(tmp_ptr);
+        free_2d_char(value_arr, num_of_values);
+        return -1;
+    }
+
     int err = 0;
     for(int i = 0; i < num_of_attr; i++){
         struct attr_data* a_data = attr_data_arr[i];

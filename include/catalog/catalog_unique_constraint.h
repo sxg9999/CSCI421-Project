@@ -13,7 +13,7 @@
  * @param unique_group_size_arr : an array that stores each unique group's size
  * @return number of unique groups of attributes
  */
-int get_unique_group_constr_indices(char* table_name, int*** unique_group_attr_indices,
+int get_unique_group_constr_indices(char* table_name, int*** unique_attr_indices_arr,
                                     int** unique_group_size_arr);
 
 

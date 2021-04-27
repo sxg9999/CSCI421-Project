@@ -66,7 +66,7 @@ int parse_insert_stmt(char* insert_stmt) {
 //    int* unique_group_size_arr = NULL;
 //    int unique_group_count = get_unique_group_constr_indices(table_name, &unique_group_attr_indices_arr,
 //                                                             &unique_group_size_arr);
-
+//
 
     int err = 0;
     for(int i = 0; i < num_of_tuple; i++){
