@@ -56,9 +56,11 @@ int parse_insert_stmt(char* insert_stmt) {
 
     }
 
-    int** foreign_key_indices = NULL;
+    char** parent_names = NULL;
+    int** foreign_key_indices_arr = NULL;
     int* foreign_key_lens = NULL;
-    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &foreign_key_indices, &foreign_key_lens);
+    int foreign_key_count = catalog_get_foreign_key_indices(table_name, &parent_names, &foreign_key_indices_arr,
+                                                            &foreign_key_lens);
 
     int** unique_attr_indices_arr = NULL;
     int* unique_group_size_arr = NULL;

@@ -66,7 +66,7 @@ int group_unique_constraint_met(char* table_name, union record_item* record,
 
     for(int i = 0; i < unique_group_count; i++){
         union record_item* unique_record = NULL;
-        int build_unique_err = build_unique_record(table_name, record, unique_attr_indices_arr[i],
+        int build_unique_err = build_sub_record(table_name, record, unique_attr_indices_arr[i],
                                                    unique_group_size_arr[i], &unique_record);
 
         if(build_unique_err == -1 || unique_record == NULL){
@@ -92,10 +92,63 @@ int group_unique_constraint_met(char* table_name, union record_item* record,
 
 }
 
-int build_unique_record(char* table_name, union record_item* record, int* unique_attr_indices,
-                        int unique_group_size, union record_item** unique_record){
+int foreign_key_constraint_met(char* table_name, union record_item* record,
+                               char** parent_names, int** foreign_key_indices_arr, int* foreign_key_lens,
+                               int f_key_count){
+    char func_loc_str[] = "(check_constraint.c/foreign_key_constraint_met)";
+
+    if(f_key_count == 0){
+        return 1;
+    }
+
+
+    if(foreign_key_indices_arr == NULL || foreign_key_lens == NULL || f_key_count < 0){
+        printf("Error: Incorrect parameters. %s\n", func_loc_str);
+        exit(0);
+    }
+
+    enum db_type* attr_types = NULL;
+    int num_of_attr = catalog_get_attr_types(table_name, &attr_types);
+
+
+    for(int i = 0; i < f_key_count; i++){
+        union record_item* foreign_key = NULL;
+        int build_sub_err = build_sub_record(table_name, record, foreign_key_indices_arr[i],
+                                             foreign_key_lens[i], &foreign_key);
+
+        if(build_sub_err == -1 || foreign_key == NULL){
+            printf("Error: Cannot create an sub record foreign key. %s\n", func_loc_str);
+            exit(0);
+        }
+        int table_id = catalog_get_table_num(parent_names[i]);
+        if(sm_record_exist(table_id, foreign_key)){
+            if(foreign_key){
+                free(foreign_key);
+            }
+
+            if(attr_types){
+                free(attr_types);
+            }
+            return 1;
+        }
+        if(foreign_key){
+            free(foreign_key);
+        }
+    }
+
+    if(attr_types){
+        free(attr_types);
+    }
+
+    return 0;
+
+
+}
+
+int build_sub_record(char* table_name, union record_item* record, int* attr_indices,
+                        int num_of_values, union record_item** sub_record){
     char func_loc_str[] = "(parse_insert_stmt_helpers.c/build_unique_record)";
-    if(unique_attr_indices == NULL){
+    if(attr_indices == NULL){
         printf("Error: unique_group_attr_indices is NULL. %s\n", func_loc_str);
         exit(0);
     }
@@ -103,34 +156,34 @@ int build_unique_record(char* table_name, union record_item* record, int* unique
         printf("Error: record is NULL. %s\n", func_loc_str);
         exit(0);
     }
-    if(unique_group_size <= 0){
-        printf("Error: unique_group_size <= 0. %s\n", func_loc_str);
+    if(num_of_values <= 0){
+        printf("Error: number of values <= 0. %s\n", func_loc_str);
         exit(0);
     }
     enum db_type* attr_types = NULL;
     int num_of_attr = catalog_get_attr_types(table_name, &attr_types);
 
-    *unique_record = malloc(sizeof(union record_item) * unique_group_size);
-    for(int i = 0; i < unique_group_size; i++){
-        int unique_attr_index = unique_attr_indices[i];
-        enum db_type attr_type = attr_types[unique_attr_index];
+    *sub_record = malloc(sizeof(union record_item) * num_of_values);
+    for(int i = 0; i < num_of_values; i++){
+        int attr_index = attr_indices[i];
+        enum db_type attr_type = attr_types[attr_index];
         switch(attr_type){
             case INT:
-                (*unique_record)[i].i = record[unique_attr_index].i;
+                (*sub_record)[i].i = record[attr_index].i;
                 break;
             case DOUBLE:
-                (*unique_record)[i].d = record[unique_attr_index].d;
+                (*sub_record)[i].d = record[attr_index].d;
                 break;
             case BOOL:
-                (*unique_record)[i].b = record[unique_attr_index].b;
+                (*sub_record)[i].b = record[attr_index].b;
                 break;
             case CHAR:
-                (*unique_record)[i].c[0] = 0;
-                strncpy((*unique_record)[i].c, record[unique_attr_index].c, strlen(record[unique_attr_index].c) + 1);
+                (*sub_record)[i].c[0] = 0;
+                strncpy((*sub_record)[i].c, record[attr_index].c, strlen(record[attr_index].c) + 1);
                 break;
             case VARCHAR:
-                (*unique_record)[i].v[0] = 0;
-                strncpy((*unique_record)[i].v, record[unique_attr_index].v, strlen(record[unique_attr_index].v) + 1);
+                (*sub_record)[i].v[0] = 0;
+                strncpy((*sub_record)[i].v, record[attr_index].v, strlen(record[attr_index].v) + 1);
                 break;
             default:
                 printf("Error: Attribute data type is invalid. %s\n", func_loc_str);

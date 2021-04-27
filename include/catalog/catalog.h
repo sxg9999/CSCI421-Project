@@ -88,11 +88,13 @@ int catalog_get_attr_data(char* table_name, struct attr_data*** attr_data_arr);
 /**
  * Get all the foreign key indices of the table
  * @param table_name : name of the table
+ * @param parent_names : name of the parent tables
  * @param foreign_key_indices : a 2d array that stores the all the foreign keys
  * @param foreign_key_lens: an array of foreign key lens (corresponds with the foreign key indices array).
  * @return the number of foreign keys
  */
-int catalog_get_foreign_key_indices(char* table_name, int*** foreign_key_indices, int** foreign_key_lens);
+int catalog_get_foreign_key_indices(char* table_name, char*** parent_names,  int*** foreign_key_indices,
+                                    int** foreign_key_lens);
 
 /**
  * Return the header for the table.
