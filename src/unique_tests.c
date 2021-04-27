@@ -29,10 +29,6 @@ int test8();
 
 
 int unique_tests() {
-    char* unique_table0 = "CREATE TABLE MALL( A CHAR(10) PRIMARYKEY, B INTEGER UNIQUE );";
-    char* unique_table1 = "CREATE TABLE DESERT( A CHAR(10) PRIMARYKEY, B INTEGER, UNIQUE( B ) );";
-    char* unique_table2 = "CREATE TABLE JOKER( A CHAR(10) PRIMARYKEY, B INTEGER, C BOOLEAN, UNIQUE( B C ) );";
-    
     test1();
     test2();
     test3();
