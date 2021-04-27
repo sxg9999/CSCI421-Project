@@ -75,9 +75,6 @@ int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** 
             printf("Error: Attribute \"%s\" cannot be null. %s\n", a_data->attr_name,
                    func_loc_str);
             break;
-            free_2d_char(value_arr, num_of_values);
-            free(tuple_str_copy);
-            free(value_copy);
 
         }else if(strncmp(value_copy, "null", 4) == 0 && !attr_has_notnull(a_data)){
             err = get_record_value_null(&((*record)[i]), a_data->type);
