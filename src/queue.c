@@ -65,4 +65,3 @@ void print_array(struct queue_str* queue) {
     printf("\n");
     return;
 }
-

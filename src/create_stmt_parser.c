@@ -19,6 +19,7 @@
 #include "../include/db_types.h"
 #include "../include/catalog/catalog_printer.h"
 #include "../include/storage_mediator/storage_mediator.h"
+#include "../include/helper_module/helper_function.h"
 
 
 
@@ -103,6 +104,7 @@ int parse_create_table_stmt( char* input_statement ) {
     printf("Checking attributes and constraints validity...\n");
     for (int i = 0; i < attrCount; i++) {
         char* currentAttr = attributes[i];
+//        remove_leading_spaces(currentAttr);
         // check if attribute is a valid attribute/constraint
         int valid_attr = attr_form_check(currentAttr, attr_names, &name_count, i, new_table);
         if (valid_attr == -1) {

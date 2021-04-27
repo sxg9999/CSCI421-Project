@@ -209,8 +209,17 @@ int get_rpn(char* input, struct queue_str** output) {
 int build_tree(struct queue_str* output, struct catalog_table_data* table) {
     printf("Building operation tree from RPN form...\n");
     struct shunt_node* root_node = init_shunt_node();
+    printf("Top: '%s'\n", peek_queue(output));
+    char* top = strdup(pop_queue(output));
+    enum where_op node_op = typeof_op(top);
+    printf("OP at node: '%s' '%d' \n", top, node_op);
     print_queue(output);
 
+    if (!is_empty_queue(output)) {
+        fprintf(stderr, "Queue not empty: ");
+        print_array(output);
+        return -1;
+    }
     return 0;
 }
 

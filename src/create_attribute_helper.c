@@ -56,9 +56,9 @@ int attribute_check(char* currentAttr, char* token, char** attr_names, int* name
     } 
     //printf("'%s' is a valid attribute type.\n", token);
     // get attribute type of attribute
-    printf("TOKEN CHECK: '%s'\n", token);
-    enum db_type attribute_type = typeof_kw(token);
-    //printf("Token: '%s' type: '%d'\n", token, attribute_type);
+    char* a_type_str = strdup(token);
+    a_type_str[4] = '\0';
+    enum db_type attribute_type = typeof_kw(a_type_str);
     int attribute_size = attribute_type_size(attribute_type, token, currentAttr);
     if (attribute_size == -1) {
         fprintf(stderr, "Invalid attribute size '%d' for type '%d' '%s' in '%s'\n",

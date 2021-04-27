@@ -27,6 +27,9 @@ enum where_op {
     SUB_OP, // -
     MULT_OP = 301, // *
     DIV_OP, // /
+
+    // EXPRESSION
+    EXPR, // expression
 };
 
 union shunt_value {

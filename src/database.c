@@ -126,18 +126,6 @@ int main(int argc, char* argv[] ) {
         }
 
 
-//        else if(strncmp(statement, "add department", 14) == 0){
-//            sm_add_table(get_department_table_data());
-//            continue;
-//        }else if(strncmp(statement, "add student", 11) == 0){
-//            sm_add_table(get_student_table_data());
-//            continue;
-//        }else if(strncmp(statement, "get department", 14) == 0){
-//            sm_print_table_records("department");
-//            continue;
-//        }
-//        printf("%s\n", statement);
-
         result = execute(statement);
 
         if(result == 0){
