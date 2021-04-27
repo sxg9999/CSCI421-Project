@@ -40,6 +40,7 @@ int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** 
     char func_loc_str[] = "(parse_insert_stmt_helpers.c/convert_to_record)";
 
     char* tuple_str_copy = strdup(tuple_str);
+    char* tmp_ptr = tuple_str_copy;
     /*Removed the parenthesis for the tuple_str*/
     tuple_str_copy[strlen(tuple_str_copy)-1] = 0;
     tuple_str_copy = tuple_str_copy + 1;
@@ -89,7 +90,7 @@ int convert_to_record_new(struct catalog_table_data* t_data, struct attr_data** 
         }
     }
     free_2d_char(value_arr, num_of_values);
-    free(tuple_str_copy);
+    free(tmp_ptr);
 
 
     return err;
