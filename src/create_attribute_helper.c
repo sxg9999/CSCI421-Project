@@ -247,6 +247,8 @@ int add_attr_constraints(char** constraints, enum db_type* constraint_types,
 
                 char*** unique_attrs = table->unique_attrs;
                 table->unique_attrs = realloc(unique_attrs, sizeof(char**) * unique_group_arr_size);
+
+                table->unique_group_arr_size = unique_group_arr_size;
             }
 
 
