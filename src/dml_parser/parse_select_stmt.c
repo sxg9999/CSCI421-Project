@@ -32,7 +32,7 @@ int parse_select_stmt(char* select_stmt) {
     }
     printf("first token: '%s'\n", token);
     if (strcmp(token, "select") != 0) {
-        fprintf("Invalid: missing 'select' keyword: '%s'\n", select_stmt);
+        fprintf(stderr, "Invalid: missing 'select' keyword: '%s'\n", select_stmt);
         return -1;
     }
 
@@ -104,7 +104,7 @@ int parse_select_stmt(char* select_stmt) {
     // check if the columns are in the table
 
     // get the where keyword (if there)
-    char* where_clause = (char**) malloc(sizeof(char*));
+    char* where_clause = (char*) malloc(sizeof(char));
     if (where_clause_present == 0 ) {
         where_clause = "where true";
     } 
@@ -137,7 +137,7 @@ int parse_select_ids(char* token, char** column_names, int* column_count, int* s
             break;
         }
         if (strcmp(token, "*") == 0) {
-            star_select = 1;
+            *star_select = 1;
         }
         // check if name is valid
 
