@@ -20,6 +20,8 @@
 #include "../include/db_types.h"
 #include "../include/dml_parser.h"
 #include "../include/shunting_yard.h"
+#include "../include/parse_select_stmt.h"
+
 
 
 
@@ -66,6 +68,7 @@ int execute(char* statement){
 
     if(query_type == QUERY){
         printf("it is an query statement\n");
+        parse_select_stmt(statement);
 //        union record_item** result;
 //        exec_result = execute_query(statement, &result);
 
@@ -92,7 +95,6 @@ int shutdown_database(){
 /**
  *  Program ran as ./database <db_loc> <page_size> <buffer_size>
  */
-
 int main(int argc, char* argv[] ) {
     /*
     char* where1 = "where foo > 123";
@@ -105,10 +107,29 @@ int main(int argc, char* argv[] ) {
     //where_tree(where1, NULL);
     //where_tree(where3, NULL);
     //where_tree(where7, NULL);
-    //return 0;
+    return 0;
     */
+    
+    
     get_cl_args(argc, argv);
     init_db();
+
+    char* insert_test1 = "insert into bazzle values (1.0);";
+    char* create_table = "CREATE TABLE BAZZLE( baz double PRIMARYKEY );";
+    char* create_table2 = "CREATE TABLE FREEZE( baz double PRIMARYKEY );";
+    char* get_bazzle_tuples = "get bazzle;";
+    char* select_test = "select baz \
+from bazzle \
+where baz > 5.0 \
+order by baz;";
+    //execute(create_table);
+    //execute(insert_test1);
+    //print_tables();
+    //printf("BAZZLE:\n");
+    //process_non_sql_statements(get_bazzle_tuples);
+    //execute(select_test);
+    
+    //return 0;
 
     char* statement;
     int result;                                     // the result of processing the statement (parsing, execution, etc)

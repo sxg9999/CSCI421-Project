@@ -150,6 +150,10 @@ int where_tree(char* where_clause, struct catalog_table_data* table) {
         return -1;
     }
     print_array(output_queue);
+    struct queue_str* reverse_output = init_queue();
+    reverse_queue(output_queue, reverse_output);
+    print_queue(reverse_output);
+    output_queue = reverse_output;
     int tree_success = build_tree(output_queue, table);
     if (tree_success != 0) {
         fprintf(stderr, "Invalid where clause syntax: '%s'\n", where_clause);
@@ -212,8 +216,16 @@ int build_tree(struct queue_str* output, struct catalog_table_data* table) {
     printf("Top: '%s'\n", peek_queue(output));
     char* top = strdup(pop_queue(output));
     enum where_op node_op = typeof_op(top);
-    printf("OP at node: '%s' '%d' \n", top, node_op);
-    print_queue(output);
+    root_node->node_op = node_op;
+
+
+    root_node->left_child = init_shunt_node();
+    root_node->right_child = init_shunt_node();
+
+    continue_tree(root_node->right_child, output, table);
+    continue_tree(root_node->left_child, output, table);
+    print_shunt_tree(root_node);
+
 
     if (!is_empty_queue(output)) {
         fprintf(stderr, "Queue not empty: ");
@@ -223,9 +235,40 @@ int build_tree(struct queue_str* output, struct catalog_table_data* table) {
     return 0;
 }
 
+int continue_tree(struct shunt_node* node, struct queue_str* output, struct catalog_table_data* table) {
+    printf("Top: '%s'\n", peek_queue(output));
+    char* top = strdup(pop_queue(output));
+    enum where_op node_op = typeof_op(top);
+    // check if leaf node or expressions
+    if (!is_op(top)) {
+        node->node_op = LEAF;
+        return 1;
+    }
+    node->node_op = node_op;
+    strcpy(node->node_value->c, top);
+
+    node->left_child = init_shunt_node();
+    node->right_child = init_shunt_node();
+
+    continue_tree(node->right_child, output, table);
+    continue_tree(node->left_child, output, table);
+
+    return 0;
+}
+
 struct shunt_node* init_shunt_node() {
     struct shunt_node* new_node;
     new_node = (struct shunt_node*) malloc( sizeof(struct shunt_node*));
 
     return new_node;
+}
+
+void print_shunt_tree(struct shunt_node* node) {
+    if (node->node_op != LEAF) {
+        print_shunt_tree(node->left_child);
+    }
+    printf("(%d), ", node->node_op);
+    if (node->node_op != LEAF) {
+        print_shunt_tree(node->right_child);
+    }
 }

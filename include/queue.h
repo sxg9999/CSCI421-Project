@@ -17,4 +17,6 @@ int size_queue(struct queue_str* queue);
 void print_queue(struct queue_str* queue);
 void print_array(struct queue_str* queue);
 int is_empty_queue(struct queue_str* queue);
+char* end_pop(struct queue_str* queue);
+void reverse_queue(struct queue_str* queue, struct queue_str* reverse);
 #endif

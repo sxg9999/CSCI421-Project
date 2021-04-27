@@ -28,29 +28,30 @@ enum where_op {
     MULT_OP = 301, // *
     DIV_OP, // /
 
-    // EXPRESSION
+    // SHUNT NODES
     EXPR, // expression
+    LEAF, // leaf node with a value
 };
 
 union shunt_value {
-    struct shunt_node* expr;
     int i;
 	double d;
 	bool b;
 	char c[255];
 	char v[255];
-} shunt_value;
+};
 
 
 /**
  * <left_child> <op> <right_child> = result
  */
 struct shunt_node {
-    struct shunt_node* left_child;     // left expression
-    struct shunt_node* right_child;    // right expression
-    enum db_type left_type;     // type of the left attribute
-    enum db_type right_type;    // type of the right attribute
-    enum where_op node_op;      // operation done at node
+    struct shunt_node* left_child;      // left expression
+    struct shunt_node* right_child;     // right expression
+    union shunt_value* node_value;       // only has value if leaf
+    enum db_type left_type;             // type of the left attribute
+    enum db_type right_type;            // type of the right attribute
+    enum where_op node_op;              // operation done at node
 
 };
 
@@ -73,7 +74,8 @@ int get_rpn(char* input, struct queue_str** output);
 int build_tree(struct queue_str* output, struct catalog_table_data* table);
 
 struct shunt_node* init_shunt_node();
-int build_node(struct shunt_node* left_child, enum db_type left_type, 
-            struct shunt_node* right_child, enum db_type right_type, enum where_op node_op);
+void print_shunt_tree(struct shunt_node* node);
+int continue_tree(struct shunt_node* node, struct queue_str* output, 
+        struct catalog_table_data* table);
 
 #endif

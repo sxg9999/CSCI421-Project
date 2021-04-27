@@ -29,6 +29,11 @@ char* pop_queue(struct queue_str* queue) {
     return queue->elements[(queue->front) - 1];
 }
 
+char* end_pop(struct queue_str* queue) {
+    queue->end -= 1;
+    return queue->elements[(queue->end)];
+}
+
 char* peek_queue(struct queue_str* queue) {
     return queue->elements[(queue->front)];
 }
@@ -46,6 +51,14 @@ int size_queue(struct queue_str* queue) {
 
 int is_empty_queue(struct queue_str* queue) {
     return (size_queue(queue) == 0);
+}
+
+void reverse_queue(struct queue_str* queue, struct queue_str* reverse) {
+    int q_size = size_queue(queue);
+    for (int i = 0; i < q_size; i++) {
+        push_queue(reverse, end_pop(queue));
+    }
+    return;
 }
 
 
