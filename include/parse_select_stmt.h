@@ -1,11 +1,17 @@
 #ifndef PARSE_SELECT_STMT_H
 #define PARSE_SELECT_STMT_H
 
+struct column_table_pair {
+    char* column;
+    char* table;
+};
+
+
 struct table_columns {
     // (column_name, table) pairs
-    struct hashtable* col_ht;
-    char** column_names;
-    int column_count;
+    struct column_table_pair** pairs;
+    // number of pairs
+    int pair_count;
 
 };
 
