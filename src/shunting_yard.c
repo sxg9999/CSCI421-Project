@@ -245,6 +245,7 @@ int continue_tree(struct shunt_node* node, struct queue_str* output, struct cata
         return 1;
     }
     node->node_op = node_op;
+    node->node_value = (union shunt_value*) malloc(sizeof(union shunt_value));
     strcpy(node->node_value->c, top);
 
     node->left_child = init_shunt_node();
@@ -258,7 +259,7 @@ int continue_tree(struct shunt_node* node, struct queue_str* output, struct cata
 
 struct shunt_node* init_shunt_node() {
     struct shunt_node* new_node;
-    new_node = (struct shunt_node*) malloc( sizeof(struct shunt_node*));
+    new_node = (struct shunt_node*) calloc(1, sizeof(struct shunt_node));
 
     return new_node;
 }
