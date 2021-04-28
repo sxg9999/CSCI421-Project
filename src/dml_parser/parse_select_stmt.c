@@ -298,6 +298,14 @@ int get_table_columns(char** column_names, int column_count, char** table_names,
             sub_table_name = strtok(temp_col, ".");
             sub_column_name = strtok(NULL, " ");
             // check if table is in stmt
+            int valid_table_name = 0;
+            for (int j = 0; j < table_count; j++) {
+                
+            }
+             if (valid_table_name == 1) {
+                fprintf("Invalid table name '%s': not used in 'from' clause\n", column_names[i]);
+                return -1;
+             }
             // check if column is in table
             // add pair to tc
         }
