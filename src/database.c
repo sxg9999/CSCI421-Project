@@ -104,17 +104,60 @@ int main(int argc, char* argv[] ) {
     char* where5 = "where 2 + 3 * 4";
     char* where6 = "where foo > 123 or baz < \"foo\" and bar = 2.1";
     char* where7 = "where A + B * C - D";
-    //where_tree(where1, NULL);
-    //where_tree(where3, NULL);
-    //where_tree(where7, NULL);
+    where_tree(where1, NULL);
+    where_tree(where3, NULL);
+    where_tree(where7, NULL);
     return 0;
     */
-    
     
     get_cl_args(argc, argv);
     init_db();
 
-    unique_tests();
+    char* create_table = "CREATE TABLE BAZZLE( baz integer PRIMARYKEY );";
+    char* create_table1 = "CREATE TABLE froze( baz integer PRIMARYKEY );";
+    char* create_table2 = "create table department( \
+    id integer notnull unique, \
+    dept_name char(20) notnull unique, \
+    dept_prof_name char(20) notnull, \
+    primarykey( id ) \
+);";
+    char* create_table3 = "create table student( \
+    id integer notnull unique, \
+    name char(20) notnull, \
+    s_dept_id integer notnull unique, \
+    s_dept_name char(20) notnull unique, \
+    s_dept_prof_name char(20) notnull, \
+    primarykey( id name ), \
+    foreignkey( s_dept_id s_dept_name ) references department( id dept_name ) \
+);";
+
+    char* insert_tuple = "insert into bazzle values (1);";
+    char* insert_tuple1 = "insert into froze values (1);";
+    char* insert_tuple2 = "insert into department values (1 \"science\" \"Johnson\")";
+    char* insert_tuple3 = "insert into student values (2 \"Dylan\" 1 \"cs\" \"Johnson\")";
+
+
+    char* get_froze_tuples = "get froze;";
+    char* get_department_tuples = "get department;";
+    char* get_student_tuples = "get student;";
+    char* get_bazzle_tuples = "get bazzle;";
+    
+    char* select_test = "select bazzle.baz, froze.baz \
+from bazzle, froze \
+where bazzle.baz > 5 \
+order by bazzle.baz;";
+    char* select_test2 = "select student.name, department.dept_name \
+from student, department \
+where student.id < 10 \
+order by student.name;";
+    
+    execute(create_table2);
+    execute(create_table3);
+    execute(insert_tuple2);
+    execute(insert_tuple3);
+    execute(get_department_tuples);
+    execute(get_student_tuples);
+    execute(select_test2);
     return 0;
 
     char* statement;
