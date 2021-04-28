@@ -112,7 +112,7 @@ int main(int argc, char* argv[] ) {
     
     get_cl_args(argc, argv);
     init_db();
-
+    /*
     char* create_table = "CREATE TABLE BAZZLE( baz integer PRIMARYKEY );";
     char* create_table1 = "CREATE TABLE froze( baz integer PRIMARYKEY );";
     char* create_table2 = "create table department( \
@@ -159,7 +159,7 @@ order by student.name;";
     execute(get_student_tuples);
     execute(select_test2);
     return 0;
-
+    */
     char* statement;
     int result;                                     // the result of processing the statement (parsing, execution, etc)
     while(true){
